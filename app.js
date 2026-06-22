@@ -164,6 +164,168 @@ const EXERCISE_LIBRARY = [
   { id: 'fn-tgu', name: 'Turkish get-up', type: 'loaded', primary: 'Full body', secondary: [], equipment: 'Kettlebell / Haltère' },
 ];
 
+/* === EXERCISE DESCRIPTIONS ===
+   Format court : position, mouvement, point technique clé. */
+const EXERCISE_DESCRIPTIONS = {
+  // PECTORAUX
+  'pec-dc-barre': "Allongé sur banc plat, pieds au sol. Descends la barre au bas du sternum, coudes ~45°. Remonte en poussant, sans verrouiller les coudes.",
+  'pec-dc-halt': "Allongé sur banc plat, haltères au-dessus des épaules paumes vers les pieds. Descends en gardant les coudes ~45°, ressens l'étirement, remonte sans tendre.",
+  'pec-di-barre': "Banc incliné 30-45°. Descends la barre haut du sternum / clavicule. Cible le haut des pecs.",
+  'pec-di-halt': "Banc incliné 30-45°. Haltères au-dessus des épaules. Mouvement contrôlé, ne bloque pas en haut.",
+  'pec-dd-barre': "Banc décliné. Descends la barre bas du sternum. Cible le bas des pecs. Attention à la descente vers le visage.",
+  'pec-dd-halt': "Banc décliné. Haltères au-dessus du bas des pecs. Contrôle la descente.",
+  'pec-ecart-plat': "Allongé sur banc plat, haltères au-dessus de la poitrine paumes face à face, coudes légèrement fléchis et fixes. Ouvre les bras en arc de cercle jusqu'à étirement des pecs, remonte sans plier les coudes.",
+  'pec-ecart-inc': "Pareil que l'écarté plat mais sur banc incliné 30°. Cible le haut des pecs.",
+  'pec-poulie-haute': "Debout entre deux poulies hautes, un pas en avant. Bras en arc de cercle, ramène les mains devant toi à hauteur poitrine. Contracte au point de croisement.",
+  'pec-poulie-basse': "Debout entre deux poulies basses. Bras en arc de cercle vers le haut et le centre. Cible le haut des pecs.",
+  'pec-pec-deck': "Assis machine, dos collé au dossier. Ramène les bras devant toi en arc de cercle. Garde une tension sur tout le mouvement.",
+  'pec-pullover': "Allongé en travers d'un banc, haltère tenu à deux mains au-dessus de la poitrine. Descends derrière la tête bras légèrement fléchis, remonte. Étire bien les pecs et le grand dorsal.",
+  'pec-pompes': "Mains largeur épaules, corps gainé en planche. Descends jusqu'à frôler le sol, coudes ~45°. Remonte en poussant.",
+  'pec-pompes-inc': "Pieds surélevés sur banc/box. Plus difficile que la pompe classique, accent sur le haut des pecs.",
+  'pec-pompes-dec': "Mains surélevées sur banc/box. Plus facile, accent sur le bas des pecs.",
+  'pec-pompes-dia': "Mains rapprochées formant un diamant avec les pouces et index. Cible fortement les triceps et les pecs internes.",
+  'pec-pompes-lest': "Pompes classiques avec un disque sur le dos ou un gilet lesté. Le poids appliqué se note en kg.",
+  'pec-dips-pec': "Aux barres parallèles, buste penché vers l'avant, coudes légèrement écartés. Descends profondément pour étirer les pecs.",
+  'pec-dips-pec-lest': "Dips orientés pectoraux avec ceinture lestée. Buste penché en avant pour cibler pecs.",
+
+  // DOS
+  'dos-rowing-barre': "Buste penché ~45°, dos droit, barre en pronation. Tire la barre vers le bas du sternum / nombril. Contracte les omoplates.",
+  'dos-rowing-tbar': "Barre coincée dans un coin, lest à l'extrémité. Buste penché, tire avec une poignée ou les deux mains. Bonne stabilité, gros gabarit de charge.",
+  'dos-rowing-halt': "Genou et main sur banc, dos parallèle au sol. Tire l'haltère vers la hanche, coude qui frôle le corps. Travaille un côté à la fois.",
+  'dos-rowing-yates': "Buste plus relevé (~60°), prise supination. Tire la barre vers le bas du ventre. Plus de biceps, moins de stress lombaire.",
+  'dos-rowing-machine': "Assis machine, pieds calés. Tire les poignées vers le sternum, contracte les omoplates. Position fixe = plus sûr pour le dos.",
+  'dos-tirage-h': "Assis à la poulie basse, jambes légèrement fléchies. Tire la poignée vers le bas du sternum. Dos droit, ne bascule pas le tronc.",
+  'dos-tirage-v-large': "Assis, prise large pronation. Tire la barre devant toi vers le haut de la poitrine. Cible le grand dorsal en largeur.",
+  'dos-tirage-v-serre': "Prise serrée (poignée triangle ou barre courte). Tire vers la poitrine. Plus d'épaisseur du dos, plus de biceps.",
+  'dos-tirage-v-sup': "Prise supination largeur épaules. Tire vers la poitrine. Très bon recrutement des biceps + dorsaux.",
+  'dos-tirage-v-neutre': "Prise neutre paumes face à face. Épargne épaules et coudes. Tire vers la poitrine.",
+  'dos-sdt': "Barre au sol, pieds largeur hanches, sous la barre. Saisis la barre, dos plat. Pousse le sol avec les jambes pour lever, puis dépile le dos. Hanches et épaules montent ensemble.",
+  'dos-sdt-sumo': "Pieds très écartés, pointes ouvertes 45°. Prise étroite à l'intérieur des genoux. Plus de fessiers et adducteurs, moins de lombaires.",
+  'dos-sdt-roumain': "Barre debout en haut. Jambes très légèrement fléchies et fixes. Charnière de hanche : la barre glisse le long des cuisses. Étirement des ischios en bas, remonte par les hanches.",
+  'dos-sdt-jt': "Comme le roumain mais jambes complètement tendues. Plus exigeant pour la souplesse des ischios. Limite la charge.",
+  'dos-sdt-trap': "Avec trap bar (cadre hexagonal). Position plus naturelle entre squat et SDT. Préserve le dos, charge facilement.",
+  'dos-shrugs-barre': "Barre devant toi bras tendus. Hausse les épaules vers les oreilles, pause en haut, redescends contrôlé. Pas de rotation circulaire.",
+  'dos-shrugs-halt': "Haltères le long des hanches. Hausse les épaules. Plus d'amplitude que la barre, paumes face au corps.",
+  'dos-pullover-p': "Debout devant poulie haute, barre droite bras tendus. Tire la barre vers les cuisses en gardant les bras tendus. Cible le grand dorsal.",
+  'dos-tractions': "Barre fixe, prise pronation largeur épaules. Tire-toi jusqu'à passer le menton au-dessus de la barre. Descente contrôlée.",
+  'dos-tractions-sup': "Prise supination (paumes vers soi), largeur épaules. Plus facile que la pronation pour beaucoup. Gros recrutement biceps.",
+  'dos-tractions-neutre': "Prise paumes face à face. Préserve les épaules. Idéal en transition vers la pronation pure.",
+  'dos-tractions-large': "Prise large pronation. Plus dur, cible la largeur du dos. Amplitude souvent réduite.",
+  'dos-tractions-lest': "Tractions avec ceinture lestée. Une fois 8-10 reps strictes sans lest, ajoute du poids.",
+  'dos-tractions-ass': "Machine à contrepoids : tu choisis l'assistance. Plus le poids affiché est élevé, plus la machine t'aide.",
+  'dos-tirage-v-ass': "Tirage vertical à la poulie quand tu ne peux pas faire de tractions. Choisis une charge qui te permet 8-10 reps propres.",
+  'dos-rowing-aus': "Allongé sous une barre horizontale, corps gainé. Tire la poitrine vers la barre. Plus c'est horizontal, plus c'est dur.",
+  'dos-hyperext': "Banc à lombaires. Buste vers le bas, mains derrière la nuque. Remonte jusqu'à l'alignement, ne creuse pas en hyperextension.",
+  'dos-hyperext-lest': "Hyperextensions avec disque tenu contre la poitrine.",
+
+  // ÉPAULES
+  'ep-dm-barre': "Debout, barre devant à hauteur clavicules. Pousse au-dessus de la tête sans cambrer. Gainage abdo + fessiers serrés.",
+  'ep-dm-assis': "Assis dossier vertical. Élimine la triche du bas du dos. Charge légèrement plus limitée mais plus sûr.",
+  'ep-dm-halt': "Haltères à hauteur des épaules, paumes vers l'avant. Pousse au-dessus de la tête. Plus d'amplitude qu'à la barre.",
+  'ep-arnold': "Assis, haltères devant les épaules paumes vers soi. Pousse en tournant : en haut, paumes vers l'avant. Active toutes les parties du deltoïde.",
+  'ep-elev-lat': "Debout, haltères le long du corps. Lève les bras sur les côtés jusqu'à l'horizontale, coudes légèrement fléchis. Petite pause, redescends contrôlé.",
+  'ep-elev-lat-poulie': "Debout de côté à une poulie basse. Lève le bras vers l'extérieur. Tension constante.",
+  'ep-elev-front': "Haltères devant les cuisses. Lève bras tendus jusqu'à hauteur des yeux. Cible le faisceau antérieur.",
+  'ep-elev-front-barre': "Barre devant les cuisses, prise pronation. Lève bras tendus jusqu'à hauteur des yeux.",
+  'ep-oiseau': "Buste penché à ~80°, haltères pendants. Ouvre les bras sur les côtés en arc de cercle. Cible épaules postérieures.",
+  'ep-oiseau-machine': "Machine pec deck en sens inverse. Ouvre les bras vers l'arrière, contracte les omoplates.",
+  'ep-face-pull': "Poulie haute, prise corde paumes vers soi. Tire les cordes vers le visage, mains qui partent vers l'extérieur. Contracte les rhomboïdes.",
+  'ep-rowing-menton': "Barre devant les cuisses, prise serrée pronation. Tire vers le menton, coudes hauts. Attention aux épaules — n'amène pas la barre trop haut.",
+  'ep-pike': "Position pompes mais fesses en l'air (V inversé). Descends la tête vers le sol. Mimique du DM aux poids du corps.",
+  'ep-handstand': "Équilibre tête en bas contre un mur. Descends la tête vers le sol et remonte. Niveau avancé.",
+
+  // BICEPS
+  'bi-curl-barre': "Debout, barre prise supination largeur épaules. Monte par flexion des coudes, sans bouger les épaules. Contracte en haut, descente contrôlée.",
+  'bi-curl-ez': "Barre EZ (poignées en zigzag), plus confortable pour les poignets. Même mouvement que la barre droite.",
+  'bi-curl-halt-alt': "Haltères le long du corps. Curl un bras après l'autre. Tourne le poignet en supination en montant.",
+  'bi-curl-halt-sim': "Les deux haltères en même temps. Plus d'intensité, moins de temps sous tension par bras.",
+  'bi-curl-marteau': "Haltères prise neutre (paumes face à face). Cible les biceps + brachial + avant-bras. Préserve les poignets.",
+  'bi-curl-pupitre': "Banc Larry Scott, bras posés. Élimine la triche de l'épaule. Étirement maximal en bas.",
+  'bi-curl-incline': "Assis sur banc incliné, haltères pendants. Étire les biceps au point bas. Mouvement lent contrôlé.",
+  'bi-curl-poulie': "Debout face à poulie basse, barre droite. Tension constante sur toute la rep. Idéal en finition.",
+  'bi-curl-poulie-corde': "Avec corde, paumes neutres. Peut écarter les mains en haut pour intensifier la contraction.",
+  'bi-curl-conc': "Assis, coude calé contre l'intérieur de la cuisse. Curl strict. Très bon pour le pic du biceps.",
+  'bi-curl-zottman': "Haltères. Curl en supination, en haut tourne en pronation, descente en pronation. Travaille biceps + avant-bras.",
+  'bi-curl-inv': "Barre prise pronation (paumes vers le sol). Cible brachial + avant-bras. Charge inférieure au curl classique.",
+
+  // TRICEPS
+  'tri-ext-poulie-barre': "Debout face poulie haute, barre droite. Coudes le long du corps, fixes. Pousse vers le bas par extension des avant-bras.",
+  'tri-ext-poulie-corde': "Comme la barre mais avec corde, paumes neutres. Écarte les mains en bas pour contracter à fond.",
+  'tri-ext-halt-tete': "Assis ou debout, haltère tenu à 2 mains au-dessus de la tête. Descends derrière la tête par flexion des coudes. Étire les triceps.",
+  'tri-skull': "Allongé sur banc, barre EZ au-dessus du front. Descends en pliant juste les coudes, jusqu'à frôler le front. Remonte sans bouger les épaules.",
+  'tri-kickback': "Buste penché, coude collé au flanc, haltère pendant. Tends le bras vers l'arrière. Contracte au point haut.",
+  'tri-ext-uni-poulie': "Une seule poignée, prise neutre ou supination. Permet de travailler chaque triceps séparément, corrige les déséquilibres.",
+  'tri-dc-serre': "Développé couché avec prise serrée (mains largeur épaules), coudes près du corps. Accent triceps + faisceau interne pectoral.",
+  'tri-dips': "Aux barres parallèles, corps droit (un peu penché si on veut plus de pec). Descends jusqu'à coudes ~90°, remonte.",
+  'tri-dips-banc': "Mains sur banc derrière toi, pieds devant. Descends en pliant les coudes. Variante facile mais agressive pour les épaules.",
+  'tri-dips-lest': "Dips avec ceinture lestée. Une fois les dips au poids du corps maîtrisés (8+ reps strictes), ajoute du lest.",
+  'tri-dips-ass': "Machine assistée. Tu choisis le contrepoids selon ta capacité.",
+
+  // QUADRICEPS
+  'q-squat': "Barre sur le haut du dos. Pieds largeur épaules, pointes très légèrement ouvertes. Descends fesses en arrière, dos droit, cuisses au moins parallèles. Pousse le sol pour remonter.",
+  'q-squat-front': "Barre sur les deltoïdes antérieurs, coudes hauts. Buste plus vertical, cible quadriceps. Demande mobilité poignets/épaules.",
+  'q-squat-gob': "Haltère ou kettlebell tenu verticalement contre la poitrine. Excellent pour apprendre le squat. Cible quadriceps.",
+  'q-hack': "Machine hack squat, dos contre le dossier. Descends contrôlé, cible les quadriceps en isolation relative.",
+  'q-presse': "Presse à cuisses, pieds largeur épaules sur la plateforme. Descends jusqu'à ~90° aux genoux. Pousse sans bloquer les genoux en haut.",
+  'q-presse-h': "Presse horizontale. Variante avec moins de cisaillement lombaire.",
+  'q-sissy': "Debout, descends en pliant les genoux en arrière, buste tiré vers l'arrière en alignement avec les cuisses. Étire les quadriceps en charge.",
+  'q-leg-ext': "Assis machine, chevilles sous le rouleau. Tends les jambes par extension des genoux. Contracte en haut, descente contrôlée.",
+  'q-fentes-halt': "Haltères le long du corps. Pas en avant, descends genou arrière vers le sol. Tronc droit, genou avant aligné au pied.",
+  'q-fentes-barre': "Barre sur le haut du dos. Fente avant. Plus exigeant en équilibre que les haltères.",
+  'q-fentes-march': "Haltères. Enchaîne les pas en avant en alternant les jambes. Très exigeant cardio + jambes.",
+  'q-fentes-bulg': "Pied arrière surélevé sur banc, haltères. Descends jusqu'à genou arrière proche du sol. Travaille un côté à la fois.",
+  'q-stepup': "Haltères, monte sur banc/box d'un seul pied. Pousse fort. Cible quadriceps + fessiers.",
+  'q-squat-sumo': "Pieds très écartés pointes ouvertes 45°. Cible adducteurs + fessiers + quadriceps. Buste plus vertical.",
+  'q-box': "Squat sur une boîte/banc derrière toi. Touche brièvement la boîte, remonte. Bon pour contrôler la profondeur.",
+
+  // ISCHIOS / FESSIERS
+  'is-leg-curl-a': "Allongé face contre machine. Tend les jambes, chevilles sous le rouleau. Plie les genoux pour amener les talons aux fesses.",
+  'is-leg-curl-as': "Assis machine, jambes tendues sous le rouleau. Plie les genoux vers le sol.",
+  'is-leg-curl-d': "Debout machine, une jambe à la fois. Travaille un côté, isole bien chaque ischio.",
+  'fess-hip-thrust': "Dos contre un banc, barre sur les hanches (avec coussin). Pieds au sol. Pousse les hanches vers le ciel, contracte les fessiers en haut, descends contrôlé.",
+  'fess-glute-bridge': "Allongé sur le dos, genoux fléchis, pieds au sol. Lève le bassin en contractant les fessiers. Variante au sol du hip thrust.",
+  'fess-good-morning': "Barre sur le haut du dos. Jambes légèrement fléchies, charnière de hanche : penche le buste en avant jusqu'à parallèle au sol, remonte. Charge légère, technique avant tout.",
+  'is-nordic': "À genoux sur un tapis, chevilles bloquées. Descends le buste vers le sol en gardant le corps gainé. Remonte avec les ischios. Niveau avancé.",
+  'fess-kickback-p': "Debout face à poulie basse, cheville attachée. Tend la jambe vers l'arrière en contractant les fessiers.",
+  'fess-abd': "Machine, jambes écartées. Pousse vers l'extérieur. Cible le moyen fessier.",
+  'fess-add': "Machine, jambes écartées. Ramène les jambes vers le centre. Cible les adducteurs.",
+
+  // MOLLETS
+  'mol-debout': "Machine mollets debout, épaules sous les coussinets. Monte sur la pointe des pieds, contracte en haut, descends contrôlé en étirant.",
+  'mol-assis': "Assis machine, genoux fléchis. Cible plus le soléaire (mollet profond).",
+  'mol-presse': "Sur la presse à cuisses, place les pieds en bas de la plateforme. Pousse avec les orteils. Variante sans charge axiale sur la colonne.",
+  'mol-uni-halt': "Debout sur une marche, un haltère dans une main, un pied à la fois. Cible chaque mollet séparément.",
+  'mol-ane': "Buste penché, charge sur les hanches. Mollets debout en position penchée, étirement maximal.",
+
+  // ABDOS
+  'ab-plank': "En appui sur les avant-bras et la pointe des pieds. Corps gainé, droit comme une planche. Ne creuse pas, ne fais pas le pont.",
+  'ab-side-plank': "Sur un avant-bras, corps de profil. Hanche en l'air. Travaille les obliques.",
+  'ab-hollow': "Allongé sur le dos, bras et jambes tendus relevés. Bas du dos plaqué au sol. Position de gymnastique.",
+  'ab-crunch': "Allongé sur le dos, genoux fléchis, mains derrière la nuque sans tirer. Décolle juste les omoplates, contracte les abdos.",
+  'ab-crunch-inv': "Allongé, jambes en l'air. Ramène les genoux vers la poitrine en décollant le bassin du sol.",
+  'ab-leg-raise-susp': "Suspendu à une barre fixe. Monte les jambes tendues ou fléchies. Tendues = plus dur.",
+  'ab-leg-raise': "Allongé sur le dos, mains sous les fesses. Monte les jambes tendues à la verticale, redescends sans toucher le sol.",
+  'ab-russian': "Assis, pieds décollés du sol, buste incliné en arrière. Tourne le tronc d'un côté à l'autre. Travaille les obliques.",
+  'ab-russian-lest': "Même mouvement avec disque ou haltère tenu à 2 mains.",
+  'ab-mountain': "Position pompes. Ramène alternativement les genoux vers la poitrine, rapidement. Cardio + abdos.",
+  'ab-wheel': "À genoux avec la roue. Roule vers l'avant en allongeant le corps, reviens en utilisant les abdos. Très exigeant pour le gainage.",
+  'ab-dragon': "Allongé sur banc, mains agrippées derrière la tête. Décolle le corps droit comme une planche, descends contrôlé. Niveau avancé.",
+  'ab-crunch-poulie': "À genoux dos à la poulie haute, corde tenue derrière la nuque. Crunch en arrondissant le dos sous la tension.",
+  'ab-side-bend': "Debout, un haltère dans une main. Penche-toi sur le côté chargé, remonte. Travaille les obliques.",
+  'ab-wood-chop': "Poulie haute d'un côté. Tire en diagonale de haut vers bas opposé, bras tendus. Mouvement de rotation du tronc.",
+  'ab-pallof': "Poulie côté hanche, mains au sternum. Pousse droit devant et reviens. Anti-rotation, gainage profond.",
+  'ab-toes-bar': "Suspendu à une barre. Amène les pointes des pieds toucher la barre. Niveau avancé.",
+
+  // FONCTIONNEL
+  'fn-burpees': "Debout → squat → planche → pompe → squat → saut. Cardio + full body intense.",
+  'fn-kb-swing': "Kettlebell entre les jambes, hanches en arrière. Élance la KB en propulsant les hanches en avant, jusqu'à hauteur poitrine. Ce sont les hanches qui propulsent, pas les bras.",
+  'fn-clean': "Mouvement olympique. Tire la barre du sol jusqu'aux épaules en un mouvement explosif, réception en quart de squat. Technique complexe.",
+  'fn-snatch': "Mouvement olympique. Tire la barre du sol au-dessus de la tête en un seul mouvement explosif. Demande mobilité + technique.",
+  'fn-thruster': "Front squat enchaîné avec un développé épaules. Descends en squat, remonte en poussant la barre au-dessus de la tête. Très cardio.",
+  'fn-farmer': "Haltères ou kettlebells lourds dans chaque main. Marche sur une distance ou un temps. Gainage + trapèzes + avant-bras + cardio.",
+  'fn-tgu': "Allongé, KB à bout de bras. Lève-toi étape par étape (coude, main, hanche, pied) tout en gardant le poids en l'air. Redescends étape par étape.",
+};
+
 /* === MUSCLE GROUPS for filters === */
 const MUSCLE_GROUPS = [
   'Pectoraux', 'Dorsaux', 'Épaules', 'Épaules postérieures', 'Biceps', 'Triceps',
@@ -182,18 +344,42 @@ const EQUIPMENT = [
 ];
 
 /* === DEFAULT TEMPLATES === */
+/* === Échauffements & étirements communs === */
+const WARMUP_GENERAL = [
+  'Vélo / rameur 5 min',
+  'Cercles d\'épaules avant/arrière — 10 de chaque',
+  'Rotations de hanches — 10 par côté',
+  'Squats à vide lents — 10 reps',
+  'Band pull-apart ou rotations bras tendus — 15 reps',
+];
+
 const DEFAULT_TEMPLATES = [
   {
     id: 'tpl-a',
     name: 'Séance A',
     letter: 'A',
     exercises: [
-      { exerciseId: 'q-squat', sets: 4, reps: '8', notes: '' },
-      { exerciseId: 'pec-dc-barre', sets: 4, reps: '8', notes: '' },
-      { exerciseId: 'dos-tirage-h', sets: 4, reps: '10', notes: '' },
-      { exerciseId: 'ep-elev-lat', sets: 3, reps: '12-15', notes: '' },
-      { exerciseId: 'bi-curl-halt-alt', sets: 3, reps: '10-12', notes: '' },
-      { exerciseId: 'ab-plank', sets: 3, reps: '60s', notes: '' },
+      { exerciseId: 'q-squat', sets: 4, reps: '8', notes: '', restSec: 120 },
+      { exerciseId: 'pec-dc-barre', sets: 4, reps: '8', notes: '', restSec: 120 },
+      { exerciseId: 'dos-tirage-h', sets: 4, reps: '10', notes: '', restSec: 90 },
+      { exerciseId: 'ep-elev-lat', sets: 3, reps: '12-15', notes: '', restSec: 90 },
+      { exerciseId: 'bi-curl-halt-alt', sets: 3, reps: '10-12', notes: '', restSec: 90 },
+      { exerciseId: 'ab-plank', sets: 3, reps: '60s', notes: '', restSec: 60 },
+    ],
+    warmup: [
+      ...WARMUP_GENERAL,
+      'Squat : 1×10 barre à vide, 1×5 à ~50%, 1×3 à ~75%',
+      'DC : 1×10 barre à vide, 1×5 à ~60%',
+      'Tirage : 1×12 très léger',
+    ],
+    cooldown: [
+      { name: 'Quadriceps', durationSec: 30, perSide: true },
+      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
+      { name: 'Fessiers', durationSec: 30, perSide: true },
+      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
+      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
+      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
+      { name: 'Biceps / avant-bras', durationSec: 30, perSide: true },
     ],
   },
   {
@@ -201,12 +387,31 @@ const DEFAULT_TEMPLATES = [
     name: 'Séance B',
     letter: 'B',
     exercises: [
-      { exerciseId: 'dos-sdt-roumain', sets: 3, reps: '10', notes: '' },
-      { exerciseId: 'ep-dm-halt', sets: 4, reps: '8-10', notes: '' },
-      { exerciseId: 'dos-tractions', sets: 4, reps: '8-10', notes: '' },
-      { exerciseId: 'q-fentes-halt', sets: 3, reps: '10/jambe', notes: '' },
-      { exerciseId: 'pec-pompes', sets: 3, reps: 'max', notes: '' },
-      { exerciseId: 'mol-debout', sets: 4, reps: '15', notes: '' },
+      { exerciseId: 'dos-sdt-roumain', sets: 3, reps: '10', notes: '', restSec: 120 },
+      { exerciseId: 'ep-dm-halt', sets: 4, reps: '8-10', notes: '', restSec: 90 },
+      { exerciseId: 'dos-tractions', sets: 4, reps: '8-10', notes: '', restSec: 180 },
+      { exerciseId: 'q-fentes-halt', sets: 3, reps: '10/jambe', notes: '', restSec: 90 },
+      { exerciseId: 'pec-pompes', sets: 3, reps: 'max', notes: '', restSec: 180 },
+      { exerciseId: 'mol-debout', sets: 4, reps: '15', notes: '', restSec: 60 },
+    ],
+    warmup: [
+      'Vélo / rameur 5 min',
+      'Cercles d\'épaules avant/arrière — 10 de chaque',
+      'Rotations de hanches — 10 par côté',
+      'Good morning à vide (mains nuque) — 10 reps',
+      'Band pull-apart ou rotations bras tendus — 15 reps',
+      'SDT roumain : 1×10 barre à vide (charnière de hanche), 1×5 à ~50%',
+      'DM haltères : 1×12 très léger',
+      'Tractions / tirage : 1×8 mouvement contrôlé, charge légère',
+    ],
+    cooldown: [
+      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
+      { name: 'Fessiers', durationSec: 30, perSide: true },
+      { name: 'Fléchisseurs de hanche', durationSec: 30, perSide: true },
+      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
+      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
+      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
+      { name: 'Mollets (jambe arrière tendue)', durationSec: 30, perSide: true },
     ],
   },
   {
@@ -214,15 +419,45 @@ const DEFAULT_TEMPLATES = [
     name: 'Séance C',
     letter: 'C',
     exercises: [
-      { exerciseId: 'q-presse', sets: 4, reps: '10-12', notes: '' },
-      { exerciseId: 'pec-di-halt', sets: 4, reps: '10', notes: '' },
-      { exerciseId: 'dos-rowing-barre', sets: 4, reps: '8-10', notes: '' },
-      { exerciseId: 'is-leg-curl-a', sets: 3, reps: '12', notes: '' },
-      { exerciseId: 'ep-elev-lat', sets: 3, reps: '12-15', notes: '' },
-      { exerciseId: 'tri-ext-poulie-corde', sets: 3, reps: '12', notes: '' },
+      { exerciseId: 'q-presse', sets: 4, reps: '10-12', notes: '', restSec: 120 },
+      { exerciseId: 'pec-di-halt', sets: 4, reps: '10', notes: '', restSec: 90 },
+      { exerciseId: 'dos-rowing-barre', sets: 4, reps: '8-10', notes: '', restSec: 120 },
+      { exerciseId: 'is-leg-curl-a', sets: 3, reps: '12', notes: '', restSec: 90 },
+      { exerciseId: 'ep-elev-lat', sets: 3, reps: '12-15', notes: '', restSec: 90 },
+      { exerciseId: 'tri-ext-poulie-corde', sets: 3, reps: '12', notes: '', restSec: 90 },
+    ],
+    warmup: [
+      ...WARMUP_GENERAL,
+      'Presse : 1×15 charge légère, 1×10 à ~50%',
+      'DC incliné : 1×10 haltères légers',
+      'Rowing : 1×12 charge légère',
+    ],
+    cooldown: [
+      { name: 'Quadriceps', durationSec: 30, perSide: true },
+      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
+      { name: 'Fessiers', durationSec: 30, perSide: true },
+      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
+      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
+      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
+      { name: 'Triceps (coude au-dessus tête)', durationSec: 30, perSide: true },
     ],
   },
 ];
+
+/* === Repos par défaut selon type d'exo === */
+function defaultRestSec(exDef) {
+  // Override global a la priorité
+  if (typeof State !== 'undefined' && State.settings && State.settings.timerDefaultOverride != null) {
+    return State.settings.timerDefaultOverride;
+  }
+  if (!exDef) return 90;
+  if (exDef.type === 'time') return 60; // gainage
+  if (exDef.primary === 'Abdos' || exDef.primary === 'Obliques' || exDef.primary === 'Lombaires') return 60;
+  if (exDef.type === 'bodyweight' || exDef.type === 'weighted' || exDef.type === 'assisted') return 180;
+  // chargé : compound = 120, isolation = 90
+  if (isCompoundLift(exDef)) return 120;
+  return 90;
+}
 
 /* === STORAGE === */
 const STORAGE_KEY = 'muscu.v1';
@@ -249,12 +484,22 @@ const Storage = {
 };
 
 /* === STATE === */
+const DEFAULT_SETTINGS = {
+  theme: 'dark',
+  timerAutoStart: true,
+  timerSound: true,
+  timerVibrate: true,
+  timerDefaultOverride: null, // null = utilise la valeur par type
+};
+
 const State = {
   templates: [],
   sessions: [],
   customExercises: [],
   activeSession: null,
-  settings: { theme: 'dark' },
+  settings: { ...DEFAULT_SETTINGS },
+  restTimer: null, // { exerciseId, exerciseName, totalSec, endsAt, paused, remainingSec }
+  cooldownRun: null, // { templateId, index, perSideStep, endsAt, paused, remainingSec, totalSec }
   ui: {
     currentScreen: 'sessions',
     historyDetailId: null,
@@ -270,7 +515,7 @@ const State = {
       this.sessions = data.sessions || [];
       this.customExercises = data.customExercises || [];
       this.activeSession = data.activeSession || null;
-      this.settings = data.settings || { theme: 'dark' };
+      this.settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
     } else {
       this.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
       this.sessions = [];
@@ -278,6 +523,47 @@ const State = {
       this.activeSession = null;
       this.save();
     }
+    this.migrate();
+  },
+
+  migrate() {
+    // Migration v1 → v2 : ajouter restSec, warmup, cooldown aux templates si manquants
+    let changed = false;
+    this.templates.forEach(tpl => {
+      // restSec sur chaque exo
+      tpl.exercises.forEach(e => {
+        if (e.restSec === undefined) {
+          const exDef = this.exerciseById(e.exerciseId);
+          e.restSec = defaultRestSec(exDef);
+          changed = true;
+        }
+      });
+      // warmup / cooldown : copier depuis DEFAULT_TEMPLATES si match par id
+      if (!tpl.warmup || !tpl.cooldown) {
+        const def = DEFAULT_TEMPLATES.find(d => d.id === tpl.id);
+        if (def) {
+          if (!tpl.warmup) { tpl.warmup = JSON.parse(JSON.stringify(def.warmup)); changed = true; }
+          if (!tpl.cooldown) { tpl.cooldown = JSON.parse(JSON.stringify(def.cooldown)); changed = true; }
+        } else {
+          // Template custom : warmup générique + cooldown de A
+          if (!tpl.warmup) { tpl.warmup = [...WARMUP_GENERAL]; changed = true; }
+          if (!tpl.cooldown) { tpl.cooldown = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[0].cooldown)); changed = true; }
+        }
+      }
+    });
+    // Active session : ajouter restSec si manquant
+    if (this.activeSession) {
+      this.activeSession.exercises.forEach(e => {
+        if (e.restSec === undefined) {
+          const exDef = this.exerciseById(e.exerciseId);
+          e.restSec = defaultRestSec(exDef);
+          changed = true;
+        }
+      });
+      if (!this.activeSession.warmupChecks) { this.activeSession.warmupChecks = {}; changed = true; }
+      if (!this.activeSession.cooldownDone) { this.activeSession.cooldownDone = false; changed = true; }
+    }
+    if (changed) this.save();
   },
 
   save() {
@@ -501,6 +787,9 @@ function render() {
   screen.classList.add('active');
   root.appendChild(screen);
   window.scrollTo(0, 0);
+
+  // Re-render timer bar si actif (le screen vient d'être remplacé, le bandeau du body est conservé)
+  if (State.restTimer) renderTimerBar();
 }
 
 /* === SESSIONS SCREEN === */
@@ -612,13 +901,18 @@ function doStartSession(tpl) {
       for (let i = 0; i < n; i++) {
         sets.push({ reps: null, weight: null, done: false, setType: null });
       }
+      const exDef = State.exerciseById(e.exerciseId);
+      const restSec = e.restSec != null ? e.restSec : defaultRestSec(exDef);
       return {
         exerciseId: e.exerciseId,
         targetSets: n,
         targetReps: e.reps,
+        restSec,
         sets,
       };
     }),
+    warmupChecks: {},
+    cooldownDone: false,
     notes: '',
   };
   State.activeSession = session;
@@ -694,6 +988,9 @@ function renderActiveSessionScreen() {
   // Conditions block
   body.appendChild(renderConditionsBlock(session));
 
+  // Warmup checklist
+  body.appendChild(renderWarmupBlock(session));
+
   // Exercises
   session.exercises.forEach((exo, idx) => {
     body.appendChild(renderActiveExerciseCard(exo, idx));
@@ -704,6 +1001,9 @@ function renderActiveSessionScreen() {
     class: 'btn-add',
     onclick: () => openExercisePicker(exerciseId => addExerciseToActive(exerciseId)),
   }, icon('plus'), 'Ajouter un exercice'));
+
+  // Cooldown block
+  body.appendChild(renderCooldownBlock(session));
 
   // Session notes
   body.appendChild(el('label', { class: 'label-row' }, 'Notes / ressenti'));
@@ -726,6 +1026,79 @@ function renderActiveSessionScreen() {
 
   screen.appendChild(body);
   return screen;
+}
+
+function renderWarmupBlock(session) {
+  const tpl = State.templateById(session.templateId);
+  const items = (tpl && tpl.warmup) || [];
+  if (items.length === 0) return el('div', {});
+
+  const checks = session.warmupChecks = session.warmupChecks || {};
+  const doneCount = items.filter((_, i) => checks[i]).length;
+
+  const card = el('details', { class: 'collapsible warmup-block', open: doneCount < items.length ? '' : null });
+  const summary = el('summary', { class: 'collapsible-head' },
+    el('span', { class: 'collapsible-title' }, '🔥 Échauffement'),
+    el('span', { class: 'collapsible-count' }, `${doneCount} / ${items.length}`)
+  );
+  card.appendChild(summary);
+
+  const list = el('div', { class: 'warmup-list' });
+  items.forEach((item, i) => {
+    const row = el('label', { class: 'warmup-item' + (checks[i] ? ' done' : '') });
+    const cb = el('input', {
+      type: 'checkbox',
+      onchange: e => {
+        checks[i] = e.target.checked;
+        State.save();
+        render();
+      },
+    });
+    if (checks[i]) cb.checked = true;
+    row.appendChild(cb);
+    row.appendChild(el('span', { class: 'warmup-label' }, item));
+    list.appendChild(row);
+  });
+  card.appendChild(list);
+  return card;
+}
+
+function renderCooldownBlock(session) {
+  const tpl = State.templateById(session.templateId);
+  const items = (tpl && tpl.cooldown) || [];
+  if (items.length === 0) return el('div', {});
+
+  const totalSec = items.reduce((s, it) => s + it.durationSec * (it.perSide ? 2 : 1), 0);
+  const totalMin = Math.round(totalSec / 60);
+  const done = session.cooldownDone;
+
+  const card = el('details', { class: 'collapsible cooldown-block', open: '' });
+  const summary = el('summary', { class: 'collapsible-head' },
+    el('span', { class: 'collapsible-title' }, '🧘 Étirements de fin'),
+    el('span', { class: 'collapsible-count' }, done ? '✓ fait' : `${items.length} positions · ~${totalMin} min`)
+  );
+  card.appendChild(summary);
+
+  const body = el('div', { class: 'cooldown-body' });
+  const list = el('div', { class: 'cooldown-list' });
+  items.forEach((item, i) => {
+    list.appendChild(el('div', { class: 'cooldown-item' },
+      el('span', { class: 'cd-item-num' }, i + 1),
+      el('span', { class: 'cd-item-name' }, item.name),
+      el('span', { class: 'cd-item-dur' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
+    ));
+  });
+  body.appendChild(list);
+
+  const startBtn = el('button', {
+    class: 'btn ' + (done ? 'btn-secondary' : 'btn-primary') + ' btn-block',
+    onclick: startCooldownRun,
+    style: 'margin-top: 12px;',
+  }, done ? 'Refaire les étirements' : 'Démarrer le mode guidé');
+  body.appendChild(startBtn);
+
+  card.appendChild(body);
+  return card;
 }
 
 function renderConditionsBlock(session) {
@@ -779,7 +1152,11 @@ function renderActiveExerciseCard(exo, idx) {
   if (exDef) {
     nameWrap.appendChild(el('span', { class: 'exo-type-badge ' + exDef.type }, typeBadgeShort(exDef.type)));
   }
-  const targetText = el('div', { class: 'exo-target' }, `Cible : ${exo.targetSets || '—'} × ${exo.targetReps || '—'}`);
+  const restSec = exo.restSec != null ? exo.restSec : defaultRestSec(exDef);
+  const targetText = el('div', { class: 'exo-target' },
+    `Cible : ${exo.targetSets || '—'} × ${exo.targetReps || '—'}`,
+    el('span', { class: 'exo-rest' }, ' · repos ' + fmtTimerSec(restSec))
+  );
 
   const titleBlock = el('div', { style: 'flex: 1; min-width: 0;' }, nameWrap, targetText);
   header.appendChild(titleBlock);
@@ -856,6 +1233,7 @@ function renderSetRow(exo, set, sidx, exDef) {
 }
 
 function toggleSetDone(exo, set, sidx) {
+  const becomingDone = !set.done;
   set.done = !set.done;
   if (set.done && set.reps == null && State.activeSession) {
     // Try to autofill from previous set
@@ -866,6 +1244,12 @@ function toggleSetDone(exo, set, sidx) {
     }
   }
   State.save();
+  // Auto-start rest timer when validating a set
+  if (becomingDone && State.settings.timerAutoStart && State.activeSession) {
+    const exDef = State.exerciseById(exo.exerciseId);
+    const seconds = exo.restSec || defaultRestSec(exDef);
+    startRestTimer(seconds, exo.exerciseId, exDef ? exDef.name : 'Exercice');
+  }
   render();
 }
 
@@ -902,7 +1286,9 @@ function openActiveExoMenu(idx) {
   const exDef = State.exerciseById(exo.exerciseId);
 
   const actions = [
+    { label: 'Voir la description / démo', handler: () => openExerciseDetail(exo.exerciseId) },
     { label: 'Changer la cible', handler: () => editExoTarget(idx) },
+    { label: 'Changer le repos', handler: () => editExoRest(idx) },
     { label: 'Remplacer l\'exercice', handler: () => openExercisePicker(id => { exo.exerciseId = id; State.save(); render(); }) },
   ];
 
@@ -923,6 +1309,30 @@ function openActiveExoMenu(idx) {
   }});
 
   openActionMenu(exDef ? exDef.name : 'Exercice', actions);
+}
+
+function editExoRest(idx) {
+  const exo = State.activeSession.exercises[idx];
+  const cur = exo.restSec != null ? exo.restSec : defaultRestSec(State.exerciseById(exo.exerciseId));
+  const minInput = el('input', { type: 'number', min: '0', value: Math.floor(cur / 60), inputmode: 'numeric' });
+  const secInput = el('input', { type: 'number', min: '0', max: '59', value: cur % 60, inputmode: 'numeric' });
+  const body = el('div', {},
+    el('label', { class: 'label-row' }, 'Repos entre les sets'),
+    el('div', { class: 'row-2' },
+      el('div', {}, el('label', { class: 'label-row' }, 'Minutes'), minInput),
+      el('div', {}, el('label', { class: 'label-row' }, 'Secondes'), secInput)
+    ),
+  );
+  const save = el('button', { class: 'btn btn-primary', onclick: () => {
+    const m = Number(minInput.value) || 0;
+    const s = Number(secInput.value) || 0;
+    exo.restSec = Math.max(0, m * 60 + s);
+    State.save();
+    closeModal();
+    render();
+  }}, 'Enregistrer');
+  const cancel = el('button', { class: 'btn btn-secondary', onclick: closeModal }, 'Annuler');
+  openModal({ title: 'Temps de repos', body, footer: [cancel, save] });
 }
 
 function editExoTarget(idx) {
@@ -993,6 +1403,7 @@ function addExerciseToActive(exerciseId) {
     exerciseId,
     targetSets: 3,
     targetReps: '10',
+    restSec: defaultRestSec(exDef),
     sets,
   });
   State.save();
@@ -1123,9 +1534,38 @@ function openExercisePicker(onPick) {
 function openExerciseDetail(id) {
   const ex = State.exerciseById(id);
   if (!ex) return;
+  const desc = (typeof EXERCISE_DESCRIPTIONS !== 'undefined' && EXERCISE_DESCRIPTIONS[ex.id]) || ex.desc || null;
+
   const body = el('div', {});
+
+  // Carte principale : description en avant si dispo
+  const main = el('div', { class: 'card' },
+    el('div', { style: 'font-size: 18px; font-weight: 600; margin-bottom: 4px;' }, ex.name),
+    el('div', { style: 'color: var(--text-dim); font-size: 13px; margin-bottom: 12px;' },
+      ex.primary,
+      ' · ',
+      typeLabel(ex.type)
+    ),
+  );
+  if (desc) {
+    main.appendChild(el('div', { class: 'exo-desc' }, desc));
+  } else {
+    main.appendChild(el('div', { style: 'color: var(--text-muted); font-style: italic; font-size: 13px;' }, 'Pas de description.'));
+  }
+  body.appendChild(main);
+
+  // Bouton démo YouTube
+  const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ex.name + ' technique musculation');
+  body.appendChild(el('a', {
+    href: ytUrl,
+    target: '_blank',
+    rel: 'noopener noreferrer',
+    class: 'btn btn-secondary btn-block',
+    style: 'margin-bottom: 12px; text-decoration: none;',
+  }, '▶  Voir une démo (YouTube)'));
+
+  // Métadonnées
   body.appendChild(el('div', { class: 'card' },
-    el('div', { style: 'font-size: 18px; font-weight: 600; margin-bottom: 12px;' }, ex.name),
     el('div', { class: 'label-row' }, 'Type'),
     el('div', {}, typeLabel(ex.type)),
     el('div', { class: 'label-row' }, 'Muscle principal'),
@@ -1136,6 +1576,8 @@ function openExerciseDetail(id) {
     ) : null,
     el('div', { class: 'label-row' }, 'Équipement'),
     el('div', {}, ex.equipment),
+    el('div', { class: 'label-row' }, 'Repos par défaut'),
+    el('div', { style: 'font-family: var(--font-mono);' }, fmtTimerSec(defaultRestSec(ex))),
   ));
 
   const actions = [];
@@ -1565,6 +2007,10 @@ function renderTemplateEditScreen() {
     return screen;
   }
 
+  // Assurer la présence des champs v2
+  if (!tpl.warmup) tpl.warmup = [];
+  if (!tpl.cooldown) tpl.cooldown = [];
+
   const header = el('header', { class: 'screen-header' },
     el('button', { class: 'h-back', onclick: () => showScreen('sessions'), 'aria-label': 'Retour' }, icon('back')),
     el('h1', {}, 'Édition séance'),
@@ -1584,17 +2030,18 @@ function renderTemplateEditScreen() {
   letterI.value = tpl.letter || tpl.name.charAt(0);
   body.appendChild(letterI);
 
+  // === Exercices ===
   body.appendChild(el('label', { class: 'label-row' }, 'Exercices'));
-
   if (tpl.exercises.length === 0) {
     body.appendChild(el('div', { class: 'empty' }, 'Aucun exercice. Ajoute-en avec le bouton ci-dessous.'));
   } else {
     tpl.exercises.forEach((e, i) => {
       const exDef = State.exerciseById(e.exerciseId);
+      const restSec = e.restSec != null ? e.restSec : defaultRestSec(exDef);
       const row = el('div', { class: 'template-exo-row' },
         el('div', { class: 'grow' },
           el('div', { class: 'name' }, exDef ? exDef.name : 'Exercice'),
-          el('div', { class: 'target' }, `${e.sets} × ${e.reps}`)
+          el('div', { class: 'target' }, `${e.sets} × ${e.reps} · repos ${fmtTimerSec(restSec)}`)
         ),
         el('button', { class: 'exo-menu-btn', onclick: () => openTplExoMenu(tpl, i) }, icon('more'))
       );
@@ -1605,11 +2052,53 @@ function renderTemplateEditScreen() {
   body.appendChild(el('button', {
     class: 'btn-add',
     onclick: () => openExercisePicker(id => {
-      tpl.exercises.push({ exerciseId: id, sets: 3, reps: '10' });
+      const exDef = State.exerciseById(id);
+      tpl.exercises.push({ exerciseId: id, sets: 3, reps: '10', notes: '', restSec: defaultRestSec(exDef) });
       State.save();
       render();
     }),
   }, icon('plus'), 'Ajouter un exercice'));
+
+  // === Échauffement ===
+  body.appendChild(el('h2', { class: 'section-title' }, 'Échauffement'));
+  if (tpl.warmup.length === 0) {
+    body.appendChild(el('div', { class: 'empty', style: 'padding: 12px;' }, 'Aucune ligne. Ajoute des cases à cocher.'));
+  } else {
+    tpl.warmup.forEach((line, i) => {
+      const row = el('div', { class: 'template-exo-row' },
+        el('div', { class: 'grow' },
+          el('div', { class: 'name', style: 'font-size: 14px; font-weight: 400;' }, line)
+        ),
+        el('button', { class: 'exo-menu-btn', onclick: () => openWarmupLineMenu(tpl, i) }, icon('more'))
+      );
+      body.appendChild(row);
+    });
+  }
+  body.appendChild(el('button', {
+    class: 'btn-add',
+    onclick: () => editWarmupLine(tpl, -1),
+  }, icon('plus'), 'Ajouter une ligne'));
+
+  // === Étirements ===
+  body.appendChild(el('h2', { class: 'section-title' }, 'Étirements'));
+  if (tpl.cooldown.length === 0) {
+    body.appendChild(el('div', { class: 'empty', style: 'padding: 12px;' }, 'Aucun étirement.'));
+  } else {
+    tpl.cooldown.forEach((item, i) => {
+      const row = el('div', { class: 'template-exo-row' },
+        el('div', { class: 'grow' },
+          el('div', { class: 'name', style: 'font-size: 14px;' }, item.name),
+          el('div', { class: 'target' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
+        ),
+        el('button', { class: 'exo-menu-btn', onclick: () => openCooldownLineMenu(tpl, i) }, icon('more'))
+      );
+      body.appendChild(row);
+    });
+  }
+  body.appendChild(el('button', {
+    class: 'btn-add',
+    onclick: () => editCooldownLine(tpl, -1),
+  }, icon('plus'), 'Ajouter un étirement'));
 
   screen.appendChild(body);
   return screen;
@@ -1621,7 +2110,12 @@ function openTplExoMenu(tpl, idx) {
 
   const actions = [
     { label: 'Modifier séries × reps', handler: () => editTplExoTarget(tpl, idx) },
-    { label: 'Remplacer l\'exercice', handler: () => openExercisePicker(id => { e.exerciseId = id; State.save(); render(); }) },
+    { label: 'Modifier repos', handler: () => editTplExoRest(tpl, idx) },
+    { label: 'Remplacer l\'exercice', handler: () => openExercisePicker(id => {
+      e.exerciseId = id;
+      e.restSec = defaultRestSec(State.exerciseById(id));
+      State.save(); render();
+    }) },
   ];
   if (idx > 0) actions.push({ label: 'Monter', handler: () => { [tpl.exercises[idx-1], tpl.exercises[idx]] = [tpl.exercises[idx], tpl.exercises[idx-1]]; State.save(); render(); } });
   if (idx < tpl.exercises.length - 1) actions.push({ label: 'Descendre', handler: () => { [tpl.exercises[idx+1], tpl.exercises[idx]] = [tpl.exercises[idx], tpl.exercises[idx+1]]; State.save(); render(); } });
@@ -1652,6 +2146,111 @@ function editTplExoTarget(tpl, idx) {
   }}, 'Enregistrer');
   const cancel = el('button', { class: 'btn btn-secondary', onclick: closeModal }, 'Annuler');
   openModal({ title: 'Cible', body, footer: [cancel, save] });
+}
+
+function editTplExoRest(tpl, idx) {
+  const e = tpl.exercises[idx];
+  const cur = e.restSec != null ? e.restSec : defaultRestSec(State.exerciseById(e.exerciseId));
+  const minInput = el('input', { type: 'number', min: '0', value: Math.floor(cur / 60), inputmode: 'numeric' });
+  const secInput = el('input', { type: 'number', min: '0', max: '59', value: cur % 60, inputmode: 'numeric' });
+  const body = el('div', {},
+    el('label', { class: 'label-row' }, 'Repos entre les sets'),
+    el('div', { class: 'row-2' },
+      el('div', {}, el('label', { class: 'label-row' }, 'Minutes'), minInput),
+      el('div', {}, el('label', { class: 'label-row' }, 'Secondes'), secInput)
+    ),
+  );
+  const save = el('button', { class: 'btn btn-primary', onclick: () => {
+    const m = Number(minInput.value) || 0;
+    const s = Number(secInput.value) || 0;
+    e.restSec = Math.max(0, m * 60 + s);
+    State.save();
+    closeModal();
+    render();
+  }}, 'Enregistrer');
+  const cancel = el('button', { class: 'btn btn-secondary', onclick: closeModal }, 'Annuler');
+  openModal({ title: 'Repos', body, footer: [cancel, save] });
+}
+
+function openWarmupLineMenu(tpl, idx) {
+  openActionMenu('Ligne échauffement', [
+    { label: 'Modifier', handler: () => editWarmupLine(tpl, idx) },
+    idx > 0 ? { label: 'Monter', handler: () => { [tpl.warmup[idx-1], tpl.warmup[idx]] = [tpl.warmup[idx], tpl.warmup[idx-1]]; State.save(); render(); } } : null,
+    idx < tpl.warmup.length - 1 ? { label: 'Descendre', handler: () => { [tpl.warmup[idx+1], tpl.warmup[idx]] = [tpl.warmup[idx], tpl.warmup[idx+1]]; State.save(); render(); } } : null,
+    { label: 'Supprimer', danger: true, handler: () => {
+      tpl.warmup.splice(idx, 1);
+      State.save();
+      render();
+    } },
+  ]);
+}
+
+function editWarmupLine(tpl, idx) {
+  const initial = idx >= 0 ? tpl.warmup[idx] : '';
+  const input = el('input', { type: 'text', value: initial, placeholder: 'ex: Vélo 5 min' });
+  const body = el('div', {},
+    el('label', { class: 'label-row' }, 'Ligne'),
+    input
+  );
+  const save = el('button', { class: 'btn btn-primary', onclick: () => {
+    const v = input.value.trim();
+    if (!v) { toast('Vide'); return; }
+    if (idx >= 0) tpl.warmup[idx] = v;
+    else tpl.warmup.push(v);
+    State.save();
+    closeModal();
+    render();
+  }}, 'Enregistrer');
+  const cancel = el('button', { class: 'btn btn-secondary', onclick: closeModal }, 'Annuler');
+  openModal({ title: idx >= 0 ? 'Modifier ligne' : 'Nouvelle ligne', body, footer: [cancel, save] });
+}
+
+function openCooldownLineMenu(tpl, idx) {
+  openActionMenu('Étirement', [
+    { label: 'Modifier', handler: () => editCooldownLine(tpl, idx) },
+    idx > 0 ? { label: 'Monter', handler: () => { [tpl.cooldown[idx-1], tpl.cooldown[idx]] = [tpl.cooldown[idx], tpl.cooldown[idx-1]]; State.save(); render(); } } : null,
+    idx < tpl.cooldown.length - 1 ? { label: 'Descendre', handler: () => { [tpl.cooldown[idx+1], tpl.cooldown[idx]] = [tpl.cooldown[idx], tpl.cooldown[idx+1]]; State.save(); render(); } } : null,
+    { label: 'Supprimer', danger: true, handler: () => {
+      tpl.cooldown.splice(idx, 1);
+      State.save();
+      render();
+    } },
+  ]);
+}
+
+function editCooldownLine(tpl, idx) {
+  const initial = idx >= 0 ? tpl.cooldown[idx] : { name: '', durationSec: 30, perSide: true };
+  const nameI = el('input', { type: 'text', value: initial.name, placeholder: 'ex: Ischio-jambiers' });
+  const durI = el('input', { type: 'number', min: '5', max: '300', value: initial.durationSec, inputmode: 'numeric' });
+  const sideI = el('input', { type: 'checkbox' });
+  if (initial.perSide) sideI.checked = true;
+  const sideLabel = el('label', { class: 'toggle-switch' }, sideI, el('span', { class: 'toggle-slider' }));
+
+  const body = el('div', {},
+    el('label', { class: 'label-row' }, 'Nom'),
+    nameI,
+    el('label', { class: 'label-row' }, 'Durée (secondes)'),
+    durI,
+    el('div', { style: 'display: flex; align-items: center; justify-content: space-between; margin-top: 16px;' },
+      el('div', {},
+        el('div', { style: 'font-weight: 500;' }, 'Gauche + droite'),
+        el('div', { style: 'font-size: 12px; color: var(--text-dim);' }, 'Le timer fait deux passages')
+      ),
+      sideLabel
+    ),
+  );
+  const save = el('button', { class: 'btn btn-primary', onclick: () => {
+    const v = nameI.value.trim();
+    if (!v) { toast('Nom requis'); return; }
+    const item = { name: v, durationSec: Number(durI.value) || 30, perSide: sideI.checked };
+    if (idx >= 0) tpl.cooldown[idx] = item;
+    else tpl.cooldown.push(item);
+    State.save();
+    closeModal();
+    render();
+  }}, 'Enregistrer');
+  const cancel = el('button', { class: 'btn btn-secondary', onclick: closeModal }, 'Annuler');
+  openModal({ title: idx >= 0 ? 'Modifier étirement' : 'Nouvel étirement', body, footer: [cancel, save] });
 }
 
 /* === SUMMARY SCREEN (post-séance) === */
@@ -1983,14 +2582,36 @@ function renderSettingsScreen() {
 
   const body = el('div', { class: 'screen-body' });
 
-  body.appendChild(el('h2', { class: 'section-title' }, 'Données'));
+  // === Timer de repos ===
+  body.appendChild(el('h2', { class: 'section-title' }, 'Timer de repos'));
 
+  body.appendChild(makeToggleRow(
+    'Démarrage auto',
+    'Lance le timer dès qu\'un set est validé.',
+    'timerAutoStart'
+  ));
+  body.appendChild(makeToggleRow(
+    'Bip de fin',
+    'Signal sonore quand le repos est terminé.',
+    'timerSound'
+  ));
+  body.appendChild(makeToggleRow(
+    'Vibration',
+    'Vibrations à la fin du repos (si supporté).',
+    'timerVibrate'
+  ));
+
+  // Override global
+  body.appendChild(makeOverrideRow());
+
+  // === Données ===
+  body.appendChild(el('h2', { class: 'section-title' }, 'Données'));
   body.appendChild(makeSettingsRow('Exporter mes données', 'Sauvegarde JSON complète (templates, séances, exos custom).', 'Exporter', exportAllData));
   body.appendChild(makeSettingsRow('Importer un JSON', 'Remplace les données actuelles. Fais un export d\'abord.', 'Importer', importDataPrompt));
   body.appendChild(makeSettingsRow('Export pour analyse Claude', 'Format texte lisible à coller dans une conversation avec Claude.', 'Copier', exportForClaude));
 
+  // === Stats ===
   body.appendChild(el('h2', { class: 'section-title' }, 'Stats'));
-
   const stats = el('div', { class: 'settings-stats' },
     el('div', { class: 'sst' }, el('div', { class: 'v' }, State.sessions.length), el('div', { class: 'l' }, 'Séances')),
     el('div', { class: 'sst' }, el('div', { class: 'v' }, State.templates.length), el('div', { class: 'l' }, 'Templates')),
@@ -1998,18 +2619,100 @@ function renderSettingsScreen() {
   );
   body.appendChild(stats);
 
+  // === Danger ===
   body.appendChild(el('h2', { class: 'section-title' }, 'Zone dangereuse'));
-
   body.appendChild(makeSettingsRow('Tout effacer', 'Supprime toutes les données locales. Irréversible.', 'Effacer', confirmWipe, true));
 
   body.appendChild(el('div', { class: 'about-block' },
-    el('div', { class: 'about-title' }, 'Muscu — v1'),
+    el('div', { class: 'about-title' }, 'Muscu — v2'),
     el('div', { class: 'about-line' }, 'App locale, aucune donnée envoyée à un serveur.'),
     el('div', { class: 'about-line' }, 'Toutes tes données sont dans le localStorage de ce navigateur.'),
   ));
 
   screen.appendChild(body);
   return screen;
+}
+
+function makeToggleRow(title, desc, settingKey) {
+  const checked = !!State.settings[settingKey];
+  const toggle = el('label', { class: 'toggle-switch' });
+  const input = el('input', {
+    type: 'checkbox',
+    onchange: e => {
+      State.settings[settingKey] = e.target.checked;
+      State.save();
+    },
+  });
+  if (checked) input.checked = true;
+  const slider = el('span', { class: 'toggle-slider' });
+  toggle.appendChild(input);
+  toggle.appendChild(slider);
+
+  return el('div', { class: 'settings-row' },
+    el('div', { class: 'grow' },
+      el('div', { class: 'sr-title' }, title),
+      el('div', { class: 'sr-desc' }, desc),
+    ),
+    toggle
+  );
+}
+
+function makeOverrideRow() {
+  const cur = State.settings.timerDefaultOverride;
+  const row = el('div', { class: 'settings-row' });
+  const left = el('div', { class: 'grow' },
+    el('div', { class: 'sr-title' }, 'Durée par défaut'),
+    el('div', { class: 'sr-desc' },
+      cur != null
+        ? `Override global : ${fmtTimerSec(cur)} pour tous les exos`
+        : 'Selon le type d\'exo (compound 2 min, isolation 90 s, PdC 3 min, gainage 1 min)'
+    ),
+  );
+  row.appendChild(left);
+  row.appendChild(el('button', { class: 'btn btn-secondary', onclick: openOverrideEditor }, 'Modifier'));
+  return row;
+}
+
+function openOverrideEditor() {
+  const cur = State.settings.timerDefaultOverride;
+  const enabled = cur != null;
+  const minInput = el('input', { type: 'number', min: '0', value: enabled ? Math.floor(cur / 60) : '', inputmode: 'numeric' });
+  const secInput = el('input', { type: 'number', min: '0', max: '59', value: enabled ? cur % 60 : '', inputmode: 'numeric' });
+
+  const useDefault = el('button', { class: 'btn btn-secondary btn-block', onclick: () => {
+    State.settings.timerDefaultOverride = null;
+    State.save();
+    closeModal();
+    render();
+    toast('Repos selon type d\'exo');
+  }}, 'Utiliser les valeurs par type');
+
+  const body = el('div', {},
+    el('p', { style: 'color: var(--text-dim); font-size: 13px; margin-bottom: 12px;' },
+      'Override global : applique la même durée de repos à tous les nouveaux exos, peu importe le type. ' +
+      'Ne change pas les exos déjà ajoutés à un template.'),
+    el('label', { class: 'label-row' }, 'Durée'),
+    el('div', { class: 'row-2' },
+      el('div', {}, el('label', { class: 'label-row' }, 'Minutes'), minInput),
+      el('div', {}, el('label', { class: 'label-row' }, 'Secondes'), secInput)
+    ),
+    el('div', { style: 'height: 16px;' }),
+    useDefault,
+  );
+
+  const save = el('button', { class: 'btn btn-primary', onclick: () => {
+    const m = Number(minInput.value) || 0;
+    const s = Number(secInput.value) || 0;
+    const total = m * 60 + s;
+    if (total === 0) { toast('Durée invalide'); return; }
+    State.settings.timerDefaultOverride = total;
+    State.save();
+    closeModal();
+    render();
+    toast('Override appliqué');
+  }}, 'Enregistrer');
+  const cancel = el('button', { class: 'btn btn-secondary', onclick: closeModal }, 'Annuler');
+  openModal({ title: 'Durée par défaut', body, footer: [cancel, save] });
 }
 
 function makeSettingsRow(title, desc, btnLabel, handler, danger) {
@@ -2186,6 +2889,229 @@ function confirmWipe() {
     },
     { danger: true, okLabel: 'Continuer' }
   );
+}
+
+/* === REST TIMER === */
+let _restTickId = null;
+let _audioCtx = null;
+
+function startRestTimer(seconds, exerciseId, exerciseName) {
+  State.restTimer = {
+    exerciseId,
+    exerciseName,
+    totalSec: seconds,
+    endsAt: Date.now() + seconds * 1000,
+  };
+  scheduleTimerTick();
+  renderTimerBar();
+}
+
+function pauseRestTimer() {
+  if (!State.restTimer || State.restTimer.paused) return;
+  State.restTimer.paused = true;
+  State.restTimer.remainingMs = State.restTimer.endsAt - Date.now();
+  if (_restTickId) { clearInterval(_restTickId); _restTickId = null; }
+  renderTimerBar();
+}
+
+function resumeRestTimer() {
+  if (!State.restTimer || !State.restTimer.paused) return;
+  State.restTimer.endsAt = Date.now() + (State.restTimer.remainingMs || 0);
+  State.restTimer.paused = false;
+  delete State.restTimer.remainingMs;
+  scheduleTimerTick();
+  renderTimerBar();
+}
+
+function adjustRestTimer(deltaSec) {
+  if (!State.restTimer) return;
+  if (State.restTimer.paused) {
+    State.restTimer.remainingMs = Math.max(1000, (State.restTimer.remainingMs || 0) + deltaSec * 1000);
+  } else {
+    State.restTimer.endsAt = Math.max(Date.now() + 1000, State.restTimer.endsAt + deltaSec * 1000);
+  }
+  State.restTimer.totalSec = Math.max(1, State.restTimer.totalSec + deltaSec);
+  renderTimerBar();
+}
+
+function stopRestTimer() {
+  State.restTimer = null;
+  if (_restTickId) { clearInterval(_restTickId); _restTickId = null; }
+  renderTimerBar();
+}
+
+function scheduleTimerTick() {
+  if (_restTickId) clearInterval(_restTickId);
+  _restTickId = setInterval(() => {
+    if (!State.restTimer || State.restTimer.paused) return;
+    const remaining = State.restTimer.endsAt - Date.now();
+    if (remaining <= 0) {
+      onRestTimerEnd();
+      return;
+    }
+    updateTimerDisplay();
+  }, 250);
+}
+
+function onRestTimerEnd() {
+  // Bip + vibration
+  if (State.settings.timerSound) playBeep();
+  if (State.settings.timerVibrate && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  stopRestTimer();
+  toast('Repos terminé');
+}
+
+function playBeep() {
+  try {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _audioCtx;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    o.type = 'sine';
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+    g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + 0.3);
+  } catch (e) { /* ignore */ }
+}
+
+function fmtTimerSec(sec) {
+  sec = Math.max(0, Math.ceil(sec));
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function renderTimerBar() {
+  let bar = document.getElementById('timer-bar');
+  if (!State.restTimer) {
+    if (bar) bar.remove();
+    return;
+  }
+  if (!bar) {
+    bar = el('div', { id: 'timer-bar' });
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = '';
+  const remaining = State.restTimer.paused
+    ? (State.restTimer.remainingMs || 0) / 1000
+    : (State.restTimer.endsAt - Date.now()) / 1000;
+
+  const info = el('div', { class: 'timer-info' },
+    el('div', { class: 'timer-exo' }, State.restTimer.exerciseName),
+    el('div', { class: 'timer-value', id: 'timer-value' }, fmtTimerSec(remaining)),
+  );
+  const controls = el('div', { class: 'timer-controls' },
+    el('button', { class: 'timer-btn', onclick: () => adjustRestTimer(-15) }, '−15s'),
+    el('button', {
+      class: 'timer-btn timer-pp',
+      onclick: () => State.restTimer.paused ? resumeRestTimer() : pauseRestTimer()
+    }, State.restTimer.paused ? '▶' : '⏸'),
+    el('button', { class: 'timer-btn', onclick: () => adjustRestTimer(30) }, '+30s'),
+    el('button', { class: 'timer-btn timer-skip', onclick: stopRestTimer }, 'Skip'),
+  );
+  // Progress bar
+  const pct = Math.max(0, Math.min(100, (remaining / State.restTimer.totalSec) * 100));
+  const progress = el('div', { class: 'timer-progress' },
+    el('div', { class: 'timer-progress-fill', id: 'timer-progress-fill', style: `width: ${pct}%` })
+  );
+  bar.appendChild(progress);
+  const inner = el('div', { class: 'timer-bar-inner' }, info, controls);
+  bar.appendChild(inner);
+}
+
+function updateTimerDisplay() {
+  if (!State.restTimer) return;
+  const val = document.getElementById('timer-value');
+  const fill = document.getElementById('timer-progress-fill');
+  if (!val || !fill) { renderTimerBar(); return; }
+  const remaining = State.restTimer.paused
+    ? (State.restTimer.remainingMs || 0) / 1000
+    : (State.restTimer.endsAt - Date.now()) / 1000;
+  val.textContent = fmtTimerSec(remaining);
+  const pct = Math.max(0, Math.min(100, (remaining / State.restTimer.totalSec) * 100));
+  fill.style.width = pct + '%';
+}
+
+/* === COOLDOWN GUIDED RUN === */
+function startCooldownRun() {
+  const session = State.activeSession;
+  const tpl = session && State.templateById(session.templateId);
+  const cooldown = (tpl && tpl.cooldown) || [];
+  if (cooldown.length === 0) {
+    toast('Pas d\'étirements définis pour cette séance');
+    return;
+  }
+  openCooldownModal(cooldown, 0, 0);
+}
+
+function openCooldownModal(items, index, sideStep) {
+  if (index >= items.length) {
+    // Done
+    closeModal();
+    if (State.activeSession) {
+      State.activeSession.cooldownDone = true;
+      State.save();
+      render();
+    }
+    if (State.settings.timerSound) playBeep();
+    if (State.settings.timerVibrate && navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+    toast('Étirements terminés ✓');
+    return;
+  }
+  const item = items[index];
+  const isPerSide = !!item.perSide;
+  const sideLabel = isPerSide ? (sideStep === 0 ? 'Côté gauche' : 'Côté droit') : null;
+  const total = item.durationSec;
+  const endsAt = Date.now() + total * 1000;
+  const stepLabel = `${index + 1}/${items.length}` + (isPerSide ? ` · ${sideStep + 1}/2` : '');
+
+  const titleEl = el('div', { class: 'cd-title' }, item.name);
+  const sideEl = sideLabel ? el('div', { class: 'cd-side' }, sideLabel) : null;
+  const timerEl = el('div', { class: 'cd-timer' }, fmtTimerSec(total));
+  const stepEl = el('div', { class: 'cd-step' }, stepLabel);
+
+  const body = el('div', { class: 'cd-body' },
+    stepEl,
+    titleEl,
+    sideEl,
+    timerEl,
+    el('div', { class: 'cd-progress' }, el('div', { class: 'cd-progress-fill', style: 'width: 100%;' })),
+  );
+
+  const skipBtn = el('button', { class: 'btn btn-ghost', onclick: () => {
+    clearInterval(tickId);
+    goNext();
+  } }, 'Skip');
+  const stopBtn = el('button', { class: 'btn btn-secondary', onclick: () => {
+    clearInterval(tickId);
+    closeModal();
+  } }, 'Arrêter');
+
+  openModal({ title: 'Étirements', body, full: true, footer: [stopBtn, skipBtn] });
+
+  function goNext() {
+    const nextSide = isPerSide && sideStep === 0 ? 1 : 0;
+    const nextIndex = isPerSide && sideStep === 0 ? index : index + 1;
+    openCooldownModal(items, nextIndex, nextSide);
+  }
+
+  const tickId = setInterval(() => {
+    const remaining = (endsAt - Date.now()) / 1000;
+    if (remaining <= 0) {
+      clearInterval(tickId);
+      if (State.settings.timerSound) playBeep();
+      if (State.settings.timerVibrate && navigator.vibrate) navigator.vibrate(150);
+      goNext();
+      return;
+    }
+    timerEl.textContent = fmtTimerSec(remaining);
+    const fill = body.querySelector('.cd-progress-fill');
+    if (fill) fill.style.width = (remaining / total * 100) + '%';
+  }, 200);
 }
 
 /* === INIT === */
