@@ -1038,7 +1038,7 @@ function renderWarmupBlock(session) {
 
   const card = el('details', { class: 'collapsible warmup-block', open: doneCount < items.length ? '' : null });
   const summary = el('summary', { class: 'collapsible-head' },
-    el('span', { class: 'collapsible-title' }, '🔥 Échauffement'),
+    el('span', { class: 'collapsible-title' }, 'Échauffement'),
     el('span', { class: 'collapsible-count' }, `${doneCount} / ${items.length}`)
   );
   card.appendChild(summary);
@@ -1074,7 +1074,7 @@ function renderCooldownBlock(session) {
 
   const card = el('details', { class: 'collapsible cooldown-block', open: '' });
   const summary = el('summary', { class: 'collapsible-head' },
-    el('span', { class: 'collapsible-title' }, '🧘 Étirements de fin'),
+    el('span', { class: 'collapsible-title' }, 'Étirements de fin'),
     el('span', { class: 'collapsible-count' }, done ? '✓ fait' : `${items.length} positions · ~${totalMin} min`)
   );
   card.appendChild(summary);
