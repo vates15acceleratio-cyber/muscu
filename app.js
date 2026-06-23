@@ -203,7 +203,7 @@ const EXERCISE_DESCRIPTIONS = {
   'dos-sdt-sumo': "Pieds très écartés, pointes ouvertes 45°. Prise étroite à l'intérieur des genoux. Plus de fessiers et adducteurs, moins de lombaires.",
   'dos-sdt-roumain': "Barre debout en haut. Jambes très légèrement fléchies et fixes. Charnière de hanche : la barre glisse le long des cuisses. Étirement des ischios en bas, remonte par les hanches.",
   'dos-sdt-jt': "Comme le roumain mais jambes complètement tendues. Plus exigeant pour la souplesse des ischios. Limite la charge.",
-  'dos-sdt-trap': "Avec trap bar (cadre hexagonal). Position plus naturelle entre squat et SDT. Préserve le dos, charge facilement.",
+  'dos-sdt-trap': "Avec trap bar (cadre hexagonal). Position plus naturelle entre le squat et le soulevé de terre conventionnel. Préserve le dos, charge facilement.",
   'dos-shrugs-barre': "Barre devant toi bras tendus. Hausse les épaules vers les oreilles, pause en haut, redescends contrôlé. Pas de rotation circulaire.",
   'dos-shrugs-halt': "Haltères le long des hanches. Hausse les épaules. Plus d'amplitude que la barre, paumes face au corps.",
   'dos-pullover-p': "Debout devant poulie haute, barre droite bras tendus. Tire la barre vers les cuisses en gardant les bras tendus. Cible le grand dorsal.",
@@ -231,7 +231,7 @@ const EXERCISE_DESCRIPTIONS = {
   'ep-oiseau-machine': "Machine pec deck en sens inverse. Ouvre les bras vers l'arrière, contracte les omoplates.",
   'ep-face-pull': "Poulie haute, prise corde paumes vers soi. Tire les cordes vers le visage, mains qui partent vers l'extérieur. Contracte les rhomboïdes.",
   'ep-rowing-menton': "Barre devant les cuisses, prise serrée pronation. Tire vers le menton, coudes hauts. Attention aux épaules — n'amène pas la barre trop haut.",
-  'ep-pike': "Position pompes mais fesses en l'air (V inversé). Descends la tête vers le sol. Mimique du DM aux poids du corps.",
+  'ep-pike': "Position pompes mais fesses en l'air (V inversé). Descends la tête vers le sol. Mimique du développé militaire au poids du corps.",
   'ep-handstand': "Équilibre tête en bas contre un mur. Descends la tête vers le sol et remonte. Niveau avancé.",
 
   // BICEPS
@@ -318,12 +318,12 @@ const EXERCISE_DESCRIPTIONS = {
 
   // FONCTIONNEL
   'fn-burpees': "Debout → squat → planche → pompe → squat → saut. Cardio + full body intense.",
-  'fn-kb-swing': "Kettlebell entre les jambes, hanches en arrière. Élance la KB en propulsant les hanches en avant, jusqu'à hauteur poitrine. Ce sont les hanches qui propulsent, pas les bras.",
+  'fn-kb-swing': "Kettlebell entre les jambes, hanches en arrière. Élance la kettlebell en propulsant les hanches en avant, jusqu'à hauteur poitrine. Ce sont les hanches qui propulsent, pas les bras.",
   'fn-clean': "Mouvement olympique. Tire la barre du sol jusqu'aux épaules en un mouvement explosif, réception en quart de squat. Technique complexe.",
   'fn-snatch': "Mouvement olympique. Tire la barre du sol au-dessus de la tête en un seul mouvement explosif. Demande mobilité + technique.",
   'fn-thruster': "Front squat enchaîné avec un développé épaules. Descends en squat, remonte en poussant la barre au-dessus de la tête. Très cardio.",
   'fn-farmer': "Haltères ou kettlebells lourds dans chaque main. Marche sur une distance ou un temps. Gainage + trapèzes + avant-bras + cardio.",
-  'fn-tgu': "Allongé, KB à bout de bras. Lève-toi étape par étape (coude, main, hanche, pied) tout en gardant le poids en l'air. Redescends étape par étape.",
+  'fn-tgu': "Allongé, kettlebell à bout de bras. Lève-toi étape par étape (coude, main, hanche, pied) tout en gardant le poids en l'air. Redescends étape par étape.",
 };
 
 /* === MUSCLE GROUPS for filters === */
@@ -369,7 +369,7 @@ const DEFAULT_TEMPLATES = [
     warmup: [
       ...WARMUP_GENERAL,
       'Squat : 1×10 barre à vide, 1×5 à ~50%, 1×3 à ~75%',
-      'DC : 1×10 barre à vide, 1×5 à ~60%',
+      'Développé couché : 1×10 barre à vide, 1×5 à ~60%',
       'Tirage : 1×12 très léger',
     ],
     cooldown: [
@@ -400,8 +400,8 @@ const DEFAULT_TEMPLATES = [
       'Rotations de hanches — 10 par côté',
       'Good morning à vide (mains nuque) — 10 reps',
       'Band pull-apart ou rotations bras tendus — 15 reps',
-      'SDT roumain : 1×10 barre à vide (charnière de hanche), 1×5 à ~50%',
-      'DM haltères : 1×12 très léger',
+      'Soulevé de terre roumain : 1×10 barre à vide (charnière de hanche), 1×5 à ~50%',
+      'Développé militaire haltères : 1×12 très léger',
       'Tractions / tirage : 1×8 mouvement contrôlé, charge légère',
     ],
     cooldown: [
@@ -429,7 +429,7 @@ const DEFAULT_TEMPLATES = [
     warmup: [
       ...WARMUP_GENERAL,
       'Presse : 1×15 charge légère, 1×10 à ~50%',
-      'DC incliné : 1×10 haltères légers',
+      'Développé couché incliné : 1×10 haltères légers',
       'Rowing : 1×12 charge légère',
     ],
     cooldown: [
@@ -676,7 +676,7 @@ function typeLabel(type) {
 }
 
 function typeBadgeShort(type) {
-  return { loaded: 'KG', bodyweight: 'PdC', weighted: '+KG', assisted: '−KG', time: 'TIME' }[type] || type;
+  return { loaded: 'KG', bodyweight: 'CORPS', weighted: '+KG', assisted: '−KG', time: 'TEMPS' }[type] || type;
 }
 
 function toast(msg, duration = 2000) {
@@ -1031,7 +1031,7 @@ function renderActiveSessionScreen() {
 function renderWarmupBlock(session) {
   const tpl = State.templateById(session.templateId);
   const items = (tpl && tpl.warmup) || [];
-  if (items.length === 0) return el('div', {});
+  if (items.length === 0 && !tpl) return el('div', {});
 
   const checks = session.warmupChecks = session.warmupChecks || {};
   const doneCount = items.filter((_, i) => checks[i]).length;
@@ -1039,11 +1039,15 @@ function renderWarmupBlock(session) {
   const card = el('details', { class: 'collapsible warmup-block', open: doneCount < items.length ? '' : null });
   const summary = el('summary', { class: 'collapsible-head' },
     el('span', { class: 'collapsible-title' }, 'Échauffement'),
-    el('span', { class: 'collapsible-count' }, `${doneCount} / ${items.length}`)
+    el('span', { class: 'collapsible-count' }, items.length === 0 ? 'vide' : `${doneCount} / ${items.length}`)
   );
   card.appendChild(summary);
 
   const list = el('div', { class: 'warmup-list' });
+  if (items.length === 0) {
+    list.appendChild(el('div', { style: 'color: var(--text-muted); font-size: 13px; padding: 4px 0 12px;' },
+      'Aucun item. Clique sur Éditer pour en ajouter.'));
+  }
   items.forEach((item, i) => {
     const row = el('label', { class: 'warmup-item' + (checks[i] ? ' done' : '') });
     const cb = el('input', {
@@ -1059,6 +1063,13 @@ function renderWarmupBlock(session) {
     row.appendChild(el('span', { class: 'warmup-label' }, item));
     list.appendChild(row);
   });
+  // Bouton Éditer
+  if (tpl) {
+    list.appendChild(el('button', {
+      class: 'btn-edit-list',
+      onclick: e => { e.preventDefault(); openWarmupEditor(tpl, session); },
+    }, 'Éditer la liste'));
+  }
   card.appendChild(list);
   return card;
 }
@@ -1066,7 +1077,7 @@ function renderWarmupBlock(session) {
 function renderCooldownBlock(session) {
   const tpl = State.templateById(session.templateId);
   const items = (tpl && tpl.cooldown) || [];
-  if (items.length === 0) return el('div', {});
+  if (items.length === 0 && !tpl) return el('div', {});
 
   const totalSec = items.reduce((s, it) => s + it.durationSec * (it.perSide ? 2 : 1), 0);
   const totalMin = Math.round(totalSec / 60);
@@ -1075,30 +1086,198 @@ function renderCooldownBlock(session) {
   const card = el('details', { class: 'collapsible cooldown-block', open: '' });
   const summary = el('summary', { class: 'collapsible-head' },
     el('span', { class: 'collapsible-title' }, 'Étirements de fin'),
-    el('span', { class: 'collapsible-count' }, done ? '✓ fait' : `${items.length} positions · ~${totalMin} min`)
+    el('span', { class: 'collapsible-count' },
+      items.length === 0 ? 'vide' : (done ? '✓ fait' : `${items.length} positions · ~${totalMin} min`))
   );
   card.appendChild(summary);
 
   const body = el('div', { class: 'cooldown-body' });
-  const list = el('div', { class: 'cooldown-list' });
-  items.forEach((item, i) => {
-    list.appendChild(el('div', { class: 'cooldown-item' },
-      el('span', { class: 'cd-item-num' }, i + 1),
-      el('span', { class: 'cd-item-name' }, item.name),
-      el('span', { class: 'cd-item-dur' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
-    ));
-  });
-  body.appendChild(list);
+  if (items.length === 0) {
+    body.appendChild(el('div', { style: 'color: var(--text-muted); font-size: 13px; padding: 4px 0 12px;' },
+      'Aucun étirement. Clique sur Éditer pour en ajouter.'));
+  } else {
+    const list = el('div', { class: 'cooldown-list' });
+    items.forEach((item, i) => {
+      list.appendChild(el('div', { class: 'cooldown-item' },
+        el('span', { class: 'cd-item-num' }, i + 1),
+        el('span', { class: 'cd-item-name' }, item.name),
+        el('span', { class: 'cd-item-dur' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
+      ));
+    });
+    body.appendChild(list);
 
-  const startBtn = el('button', {
-    class: 'btn ' + (done ? 'btn-secondary' : 'btn-primary') + ' btn-block',
-    onclick: startCooldownRun,
-    style: 'margin-top: 12px;',
-  }, done ? 'Refaire les étirements' : 'Démarrer le mode guidé');
-  body.appendChild(startBtn);
+    const startBtn = el('button', {
+      class: 'btn ' + (done ? 'btn-secondary' : 'btn-primary') + ' btn-block',
+      onclick: startCooldownRun,
+      style: 'margin-top: 12px;',
+    }, done ? 'Refaire les étirements' : 'Démarrer le mode guidé');
+    body.appendChild(startBtn);
+  }
+  if (tpl) {
+    body.appendChild(el('button', {
+      class: 'btn-edit-list',
+      onclick: e => { e.preventDefault(); openCooldownEditor(tpl, session); },
+    }, 'Éditer la liste'));
+  }
 
   card.appendChild(body);
   return card;
+}
+
+/* === Éditeurs warmup/cooldown depuis la séance === */
+function openWarmupEditor(tpl, session) {
+  const body = el('div', { class: 'inline-editor' });
+
+  function refresh() {
+    body.innerHTML = '';
+    if (tpl.warmup.length === 0) {
+      body.appendChild(el('div', { class: 'empty', style: 'padding: 12px;' }, 'Aucune ligne.'));
+    } else {
+      tpl.warmup.forEach((line, i) => {
+        const row = el('div', { class: 'template-exo-row' },
+          el('div', { class: 'grow' }, el('div', { class: 'name', style: 'font-size: 14px; font-weight: 400;' }, line)),
+          el('button', { class: 'exo-menu-btn', onclick: () => openWarmupLineMenuInline(tpl, i, session) }, icon('more'))
+        );
+        body.appendChild(row);
+      });
+    }
+    body.appendChild(el('button', {
+      class: 'btn-add',
+      onclick: () => editWarmupLineInline(tpl, -1, session, refresh),
+    }, icon('plus'), 'Ajouter une ligne'));
+  }
+  refresh();
+
+  const closeBtn = el('button', { class: 'btn btn-primary btn-block', onclick: () => { closeModal(); render(); } }, 'Terminer');
+  openModal({ title: 'Échauffement', body, footer: [closeBtn] });
+}
+
+function openWarmupLineMenuInline(tpl, idx, session) {
+  const reopen = () => openWarmupEditor(tpl, session);
+  openActionMenu('Ligne', [
+    { label: 'Modifier', handler: () => { closeModal(); editWarmupLineInline(tpl, idx, session, reopen); } },
+    idx > 0 ? { label: 'Monter', handler: () => {
+      [tpl.warmup[idx-1], tpl.warmup[idx]] = [tpl.warmup[idx], tpl.warmup[idx-1]];
+      session.warmupChecks = {};
+      State.save();
+      closeModal(); reopen();
+    }} : null,
+    idx < tpl.warmup.length - 1 ? { label: 'Descendre', handler: () => {
+      [tpl.warmup[idx+1], tpl.warmup[idx]] = [tpl.warmup[idx], tpl.warmup[idx+1]];
+      session.warmupChecks = {};
+      State.save();
+      closeModal(); reopen();
+    }} : null,
+    { label: 'Supprimer', danger: true, handler: () => {
+      tpl.warmup.splice(idx, 1);
+      session.warmupChecks = {};
+      State.save();
+      closeModal(); reopen();
+    }},
+  ]);
+}
+
+function editWarmupLineInline(tpl, idx, session, onDone) {
+  const initial = idx >= 0 ? tpl.warmup[idx] : '';
+  const input = el('input', { type: 'text', value: initial, placeholder: 'ex: Vélo 5 min' });
+  const body = el('div', {}, el('label', { class: 'label-row' }, 'Ligne'), input);
+  const save = el('button', { class: 'btn btn-primary', onclick: () => {
+    const v = input.value.trim();
+    if (!v) { toast('Vide'); return; }
+    if (idx >= 0) tpl.warmup[idx] = v;
+    else tpl.warmup.push(v);
+    State.save();
+    closeModal();
+    if (onDone) onDone();
+  }}, 'Enregistrer');
+  const cancel = el('button', { class: 'btn btn-secondary', onclick: () => { closeModal(); if (onDone) onDone(); } }, 'Annuler');
+  openModal({ title: idx >= 0 ? 'Modifier ligne' : 'Nouvelle ligne', body, footer: [cancel, save] });
+}
+
+function openCooldownEditor(tpl, session) {
+  const body = el('div', { class: 'inline-editor' });
+
+  function refresh() {
+    body.innerHTML = '';
+    if (tpl.cooldown.length === 0) {
+      body.appendChild(el('div', { class: 'empty', style: 'padding: 12px;' }, 'Aucun étirement.'));
+    } else {
+      tpl.cooldown.forEach((item, i) => {
+        const row = el('div', { class: 'template-exo-row' },
+          el('div', { class: 'grow' },
+            el('div', { class: 'name', style: 'font-size: 14px;' }, item.name),
+            el('div', { class: 'target' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
+          ),
+          el('button', { class: 'exo-menu-btn', onclick: () => openCooldownLineMenuInline(tpl, i, session) }, icon('more'))
+        );
+        body.appendChild(row);
+      });
+    }
+    body.appendChild(el('button', {
+      class: 'btn-add',
+      onclick: () => editCooldownLineInline(tpl, -1, session, refresh),
+    }, icon('plus'), 'Ajouter un étirement'));
+  }
+  refresh();
+
+  const closeBtn = el('button', { class: 'btn btn-primary btn-block', onclick: () => { closeModal(); render(); } }, 'Terminer');
+  openModal({ title: 'Étirements', body, footer: [closeBtn] });
+}
+
+function openCooldownLineMenuInline(tpl, idx, session) {
+  const reopen = () => openCooldownEditor(tpl, session);
+  openActionMenu('Étirement', [
+    { label: 'Modifier', handler: () => { closeModal(); editCooldownLineInline(tpl, idx, session, reopen); } },
+    idx > 0 ? { label: 'Monter', handler: () => {
+      [tpl.cooldown[idx-1], tpl.cooldown[idx]] = [tpl.cooldown[idx], tpl.cooldown[idx-1]];
+      State.save();
+      closeModal(); reopen();
+    }} : null,
+    idx < tpl.cooldown.length - 1 ? { label: 'Descendre', handler: () => {
+      [tpl.cooldown[idx+1], tpl.cooldown[idx]] = [tpl.cooldown[idx], tpl.cooldown[idx+1]];
+      State.save();
+      closeModal(); reopen();
+    }} : null,
+    { label: 'Supprimer', danger: true, handler: () => {
+      tpl.cooldown.splice(idx, 1);
+      State.save();
+      closeModal(); reopen();
+    }},
+  ]);
+}
+
+function editCooldownLineInline(tpl, idx, session, onDone) {
+  const initial = idx >= 0 ? tpl.cooldown[idx] : { name: '', durationSec: 30, perSide: true };
+  const nameI = el('input', { type: 'text', value: initial.name, placeholder: 'ex: Ischio-jambiers' });
+  const durI = el('input', { type: 'number', min: '5', max: '300', value: initial.durationSec, inputmode: 'numeric' });
+  const sideI = el('input', { type: 'checkbox' });
+  if (initial.perSide) sideI.checked = true;
+  const sideLabel = el('label', { class: 'toggle-switch' }, sideI, el('span', { class: 'toggle-slider' }));
+  const body = el('div', {},
+    el('label', { class: 'label-row' }, 'Nom'),
+    nameI,
+    el('label', { class: 'label-row' }, 'Durée (secondes)'),
+    durI,
+    el('div', { style: 'display: flex; align-items: center; justify-content: space-between; margin-top: 16px;' },
+      el('div', {},
+        el('div', { style: 'font-weight: 500;' }, 'Gauche + droite'),
+        el('div', { style: 'font-size: 12px; color: var(--text-dim);' }, 'Le timer fait deux passages')
+      ),
+      sideLabel
+    ),
+  );
+  const save = el('button', { class: 'btn btn-primary', onclick: () => {
+    const v = nameI.value.trim();
+    if (!v) { toast('Nom requis'); return; }
+    const item = { name: v, durationSec: Number(durI.value) || 30, perSide: sideI.checked };
+    if (idx >= 0) tpl.cooldown[idx] = item;
+    else tpl.cooldown.push(item);
+    State.save();
+    closeModal();
+    if (onDone) onDone();
+  }}, 'Enregistrer');
+  const cancel = el('button', { class: 'btn btn-secondary', onclick: () => { closeModal(); if (onDone) onDone(); } }, 'Annuler');
+  openModal({ title: idx >= 0 ? 'Modifier étirement' : 'Nouvel étirement', body, footer: [cancel, save] });
 }
 
 function renderConditionsBlock(session) {
@@ -2665,7 +2844,7 @@ function makeOverrideRow() {
     el('div', { class: 'sr-desc' },
       cur != null
         ? `Override global : ${fmtTimerSec(cur)} pour tous les exos`
-        : 'Selon le type d\'exo (compound 2 min, isolation 90 s, PdC 3 min, gainage 1 min)'
+        : 'Selon le type d\'exo (compound 2 min, isolation 90 s, poids du corps 3 min, gainage 1 min)'
     ),
   );
   row.appendChild(left);

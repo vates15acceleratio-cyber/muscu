@@ -1,8 +1,14 @@
-# Muscu — v2
+# Muscu — v3
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
 
-## Nouveautés v2
+## Nouveautés v3
+
+- **Édition échauffement / étirements depuis la séance en cours** : bouton "Éditer la liste" dans chaque bloc → modal qui permet d'ajouter / modifier / réordonner / supprimer sans sortir de la séance
+- **Noms d'exercices complets** partout (plus de "DC", "SDT", "DM", "KB", "PdC") — on dit maintenant "Développé couché", "Soulevé de terre", "Développé militaire", "kettlebell", "poids du corps"
+- Badge type d'exo : "CORPS" au lieu de "PdC", "TEMPS" au lieu de "TIME"
+
+## Nouveautés v2 (rappel)
 
 - **Descriptions textuelles** pour les 138 exercices (position, mouvement, point technique clé)
 - **Bouton "Voir une démo"** sur chaque exo qui ouvre une recherche YouTube
@@ -10,7 +16,7 @@ App perso de musculation. Single-file PWA, données 100% locales (localStorage),
 - **Échauffement** : checklist en début de séance, items définis par template
 - **Étirements guidés** : mode plein écran qui enchaîne les positions avec timer auto et gestion gauche/droite
 - **Repos par défaut intelligent** selon le type d'exercice :
-  - Compound chargé (squat, DC, SDT, DM, rowing) : 2 min
+  - Compound chargé (squat, développé couché, soulevé de terre, développé militaire, rowing) : 2 min
   - Isolation chargée : 90 s
   - Poids du corps / lesté / assisté : 3 min
   - Abdos / gainage : 1 min
