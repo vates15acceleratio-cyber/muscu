@@ -2803,7 +2803,7 @@ function renderSettingsScreen() {
   body.appendChild(makeSettingsRow('Tout effacer', 'Supprime toutes les données locales. Irréversible.', 'Effacer', confirmWipe, true));
 
   body.appendChild(el('div', { class: 'about-block' },
-    el('div', { class: 'about-title' }, 'Muscu — v2'),
+    el('div', { class: 'about-title' }, 'Muscu — v3'),
     el('div', { class: 'about-line' }, 'App locale, aucune donnée envoyée à un serveur.'),
     el('div', { class: 'about-line' }, 'Toutes tes données sont dans le localStorage de ce navigateur.'),
   ));

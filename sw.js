@@ -2,7 +2,7 @@
    Stratégie : cache-first pour l'app shell, network-first pour le reste.
    Quand on déploie une nouvelle version, bumper CACHE_VERSION pour invalider l'ancien cache. */
 
-const CACHE_VERSION = 'muscu-v3';
+const CACHE_VERSION = 'muscu-v3-1';
 const APP_SHELL = [
   './',
   './index.html',
