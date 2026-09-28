@@ -408,14 +408,13 @@ const MUSCLE_GROUPS = [
   'Abdos', 'Obliques', 'Lombaires', 'Trapèzes', 'Avant-bras', 'Full body'
 ];
 
-const EQUIPMENT = [
-  'Barre', 'Barre EZ', 'Haltères', 'Haltère', 'Machine', 'Poulie',
-  'Aucun', 'Barre fixe', 'Barres parallèles', 'Ceinture lestée',
-  'Banc à lombaires', 'Kettlebell', 'Trap bar', 'Disques', 'Roue', 'Banc',
-  'Banc Larry Scott', 'Mur', 'Bancs', 'Haltère / Kettlebell', 'Barre / Haltère',
-  'Barre + boîte', 'Barre + disque', 'Banc + disque', 'Haltères + banc',
-  'Disque / Haltère', 'Haltère / Haltère', 'Kettlebell / Haltère',
-  'Barre / TRX', 'Barre / Haltères', 'Aucun (partenaire)'
+// Liste courte et propre pour le picker "Équipement" d'un exercice personnalisé
+// (les exercices de la bibliothèque ont des libellés d'équipement plus variés/composés,
+// pas adaptés à un select — d'où une liste séparée, volontairement restreinte).
+const CUSTOM_EQUIPMENT_OPTIONS = [
+  'Aucun', 'Barre', 'Haltères', 'Kettlebell', 'Machine', 'Poulie',
+  'Barre fixe', 'Barres parallèles', 'Anneaux', 'Élastique', 'TRX',
+  'Ceinture lestée', 'Banc', 'Mur', 'Autre',
 ];
 
 /* === DEFAULT TEMPLATES === */
@@ -1577,19 +1576,27 @@ function renderConditionsBlock(session, opts = {}) {
   energyInput.value = session.conditions.energy || '';
   energyWrap.appendChild(energyInput);
 
-  const mealWrap = el('div', {});
-  mealWrap.appendChild(el('label', {}, 'Repas avant'));
-  const mealInput = el('input', {
-    type: 'text', placeholder: 'oui / léger / non',
-    onchange: e => { session.conditions.meal = e.target.value; State.save(); },
-  });
-  mealInput.value = session.conditions.meal || '';
-  mealWrap.appendChild(mealInput);
-
   row.appendChild(sleepWrap);
   row.appendChild(energyWrap);
-  row.appendChild(mealWrap);
   block.appendChild(row);
+
+  // Repas avant : choix rapide (Non / Léger / Oui) plutôt que du texte libre à taper.
+  block.appendChild(el('label', { style: 'font-size:11px; color:var(--text-muted); display:block; margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;' }, 'Repas avant'));
+  const mealValues = [['non', 'Non'], ['léger', 'Léger'], ['oui', 'Oui']];
+  const mealBtns = mealValues.map(([value, label]) => el('button', {
+    class: 'btn ' + (session.conditions.meal === value ? 'btn-primary' : 'btn-secondary'),
+    style: 'flex: 1; padding: 10px 8px;',
+  }, label));
+  mealBtns.forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      session.conditions.meal = mealValues[i][0];
+      State.save();
+      mealBtns.forEach(b => { b.className = 'btn btn-secondary'; });
+      btn.className = 'btn btn-primary';
+    });
+  });
+  block.appendChild(el('div', { style: 'display: flex; gap: 8px;' }, ...mealBtns));
+
   return block;
 }
 
@@ -2073,8 +2080,27 @@ function openCreateCustomExercise(opts = {}) {
   const primaryI = el('select', {});
   MUSCLE_GROUPS.forEach(m => primaryI.appendChild(el('option', { value: m }, m)));
   if (opts.presetMuscle && MUSCLE_GROUPS.includes(opts.presetMuscle)) primaryI.value = opts.presetMuscle;
-  const equipI = el('input', { type: 'text', placeholder: 'Équipement (ex: Haltères)' });
-  const secI = el('input', { type: 'text', placeholder: 'Muscles secondaires (séparés par virgule)' });
+
+  // Muscles secondaires : chips à cocher plutôt qu'une liste séparée par virgules
+  const secondarySelected = new Set();
+  const secChipsRow = el('div', { style: 'display: flex; flex-wrap: wrap; gap: 6px;' });
+  MUSCLE_GROUPS.forEach(m => {
+    const chip = el('button', { type: 'button', class: 'chip' }, m);
+    chip.addEventListener('click', () => {
+      if (secondarySelected.has(m)) { secondarySelected.delete(m); chip.classList.remove('active'); }
+      else { secondarySelected.add(m); chip.classList.add('active'); }
+    });
+    secChipsRow.appendChild(chip);
+  });
+
+  // Équipement : select avec les valeurs courantes + "Autre" pour le cas particulier
+  const equipI = el('select', {});
+  CUSTOM_EQUIPMENT_OPTIONS.forEach(eq => equipI.appendChild(el('option', { value: eq }, eq)));
+  const equipOtherI = el('input', { type: 'text', placeholder: 'Précise l\'équipement', style: 'margin-top: 8px; display: none;' });
+  equipI.addEventListener('change', () => {
+    equipOtherI.style.display = equipI.value === 'Autre' ? 'block' : 'none';
+  });
+
   const calI = el('input', { type: 'checkbox' });
   calI.checked = !!opts.presetCalisthenics;
   const calLabel = el('label', { class: 'card-row', style: 'margin-top: 12px; cursor: pointer;' }, calI,
@@ -2088,9 +2114,10 @@ function openCreateCustomExercise(opts = {}) {
     el('label', { class: 'label-row' }, 'Muscle principal'),
     primaryI,
     el('label', { class: 'label-row' }, 'Muscles secondaires'),
-    secI,
+    secChipsRow,
     el('label', { class: 'label-row' }, 'Équipement'),
     equipI,
+    equipOtherI,
     calLabel,
   );
 
@@ -2101,8 +2128,8 @@ function openCreateCustomExercise(opts = {}) {
       name: nameI.value.trim(),
       type: typeI.value,
       primary: primaryI.value,
-      secondary: secI.value ? secI.value.split(',').map(s => s.trim()).filter(Boolean) : [],
-      equipment: equipI.value.trim() || 'Aucun',
+      secondary: [...secondarySelected],
+      equipment: (equipI.value === 'Autre' ? equipOtherI.value.trim() : equipI.value) || 'Aucun',
       isCustom: true,
     };
     if (calI.checked) ex.discipline = 'callisthenie';
@@ -2398,6 +2425,22 @@ function renderLineChart(points, unit = '', opts = {}) {
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.setAttribute('class', 'chart-svg');
 
+  // Dégradé pour le remplissage sous la courbe, propre à ce graphique
+  // (id unique pour éviter les collisions si plusieurs charts sont sur la même page).
+  const gradId = 'chart-grad-' + Math.random().toString(36).slice(2, 9);
+  const defs = document.createElementNS(svgNS, 'defs');
+  const grad = document.createElementNS(svgNS, 'linearGradient');
+  grad.setAttribute('id', gradId);
+  grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+  grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+  const stop1 = document.createElementNS(svgNS, 'stop');
+  stop1.setAttribute('offset', '0%'); stop1.setAttribute('stop-color', '#f5d76e'); stop1.setAttribute('stop-opacity', '0.35');
+  const stop2 = document.createElementNS(svgNS, 'stop');
+  stop2.setAttribute('offset', '100%'); stop2.setAttribute('stop-color', '#f5d76e'); stop2.setAttribute('stop-opacity', '0');
+  grad.appendChild(stop1); grad.appendChild(stop2);
+  defs.appendChild(grad);
+  svg.appendChild(defs);
+
   // Grid lines
   for (let i = 0; i <= 3; i++) {
     const y = P + i * (H - 2 * P) / 3;
@@ -2420,17 +2463,26 @@ function renderLineChart(points, unit = '', opts = {}) {
     svg.appendChild(t);
   }
 
-  // Line path
+  // Line + area fill
   if (points.length > 1) {
     let d = '';
     points.forEach((p, i) => {
       d += (i === 0 ? 'M' : 'L') + xScale(p.x) + ',' + yScale(p.y);
     });
+
+    // Remplissage : referme le tracé le long de la ligne de base avant de le colorer
+    const areaPath = document.createElementNS(svgNS, 'path');
+    const baseline = H - P;
+    areaPath.setAttribute('d', d + ` L${xScale(points[points.length - 1].x)},${baseline} L${xScale(points[0].x)},${baseline} Z`);
+    areaPath.setAttribute('fill', `url(#${gradId})`);
+    areaPath.setAttribute('stroke', 'none');
+    svg.appendChild(areaPath);
+
     const path = document.createElementNS(svgNS, 'path');
     path.setAttribute('d', d);
     path.setAttribute('fill', 'none');
     path.setAttribute('stroke', '#f5d76e');
-    path.setAttribute('stroke-width', '2');
+    path.setAttribute('stroke-width', '2.5');
     path.setAttribute('stroke-linecap', 'round');
     path.setAttribute('stroke-linejoin', 'round');
     svg.appendChild(path);
@@ -2438,11 +2490,14 @@ function renderLineChart(points, unit = '', opts = {}) {
 
   // Points
   points.forEach((p, i) => {
+    const isLast = i === points.length - 1;
     const c = document.createElementNS(svgNS, 'circle');
     c.setAttribute('cx', xScale(p.x));
     c.setAttribute('cy', yScale(p.y));
-    c.setAttribute('r', '3.5');
-    c.setAttribute('fill', '#f5d76e');
+    c.setAttribute('r', isLast ? '5' : '3.5');
+    c.setAttribute('fill', isLast ? '#f5d76e' : '#0a0e14');
+    c.setAttribute('stroke', '#f5d76e');
+    c.setAttribute('stroke-width', isLast ? '2' : '2');
     svg.appendChild(c);
     // Value above last point
     if (i === points.length - 1) {
