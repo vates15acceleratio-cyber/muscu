@@ -99,6 +99,8 @@ L'icône apparaît sur l'écran d'accueil et lance l'app en plein écran.
 
 Le service worker met l'app en cache à la première ouverture. Une fois installée, elle fonctionne complètement hors-ligne en salle.
 
+Depuis la v4, dès qu'une mise à jour est détectée, l'app se recharge automatiquement une fois pour l'appliquer (plus besoin de fermer/rouvrir manuellement). Si l'app semble bloquée sur une ancienne version malgré tout (ex: juste après avoir déployé une mise à jour), ferme-la complètement (swipe depuis les apps récentes) puis rouvre-la — l'auto-reload prendra le relais pour toutes les mises à jour suivantes.
+
 ## Utilisation
 
 ### Pendant la séance

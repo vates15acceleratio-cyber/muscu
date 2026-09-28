@@ -3533,10 +3533,23 @@ function init() {
   // Service worker (PWA offline)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(err => {
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        reg.update().catch(() => {});
+      }).catch(err => {
         // Silently fail — l'app marche sans
         console.warn('SW registration failed:', err);
       });
+    });
+
+    // Dès qu'un nouveau service worker prend le contrôle (MAJ déployée + skipWaiting +
+    // clients.claim), on recharge la page une fois pour exécuter le nouveau code tout de
+    // suite, au lieu de laisser l'utilisateur coincé sur l'ancienne version en mémoire
+    // jusqu'à ce qu'il ferme et rouvre l'app manuellement.
+    let swRefreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (swRefreshing) return;
+      swRefreshing = true;
+      window.location.reload();
     });
   }
 }
