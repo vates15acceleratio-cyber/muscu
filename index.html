@@ -133,6 +133,10 @@ input[type=number] { -moz-appearance: textfield; }
   font-weight: 600;
   letter-spacing: -0.01em;
   flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .screen-header .h-back {
@@ -586,6 +590,9 @@ input[type=number] { -moz-appearance: textfield; }
   padding-right: 16px;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  /* Fondu aux bords pour indiquer qu'il y a d'autres chips à scroller horizontalement */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 24px), transparent 100%);
 }
 .filter-chips::-webkit-scrollbar { display: none; }
 

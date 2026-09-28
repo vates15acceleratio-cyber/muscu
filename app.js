@@ -153,6 +153,7 @@ const EXERCISE_LIBRARY = [
   { id: 'ab-wood-chop', name: 'Wood chopper poulie', type: 'loaded', primary: 'Obliques', secondary: ['Abdos'], equipment: 'Poulie' },
   { id: 'ab-pallof', name: 'Pallof press', type: 'loaded', primary: 'Abdos', secondary: ['Obliques'], equipment: 'Poulie' },
   { id: 'ab-toes-bar', name: 'Toes to bar', type: 'bodyweight', primary: 'Abdos', secondary: [], equipment: 'Barre fixe' },
+  { id: 'ab-deadbug', name: 'Dead bug', type: 'bodyweight', primary: 'Abdos', secondary: ['Lombaires'], equipment: 'Aucun' },
 
   // FONCTIONNEL
   { id: 'fn-burpees', name: 'Burpees', type: 'bodyweight', primary: 'Full body', secondary: [], equipment: 'Aucun' },
@@ -207,7 +208,7 @@ const CALISTHENICS_IDS = new Set([
   'dos-tractions-lest', 'dos-tractions-ass', 'dos-rowing-aus',
   'ep-pike', 'ep-handstand', 'q-sissy',
   'ab-plank', 'ab-side-plank', 'ab-hollow', 'ab-leg-raise-susp', 'ab-leg-raise', 'ab-wheel', 'ab-dragon', 'ab-toes-bar',
-  'is-nordic', 'fn-burpees', 'fn-tgu',
+  'is-nordic', 'fn-burpees', 'fn-tgu', 'ab-deadbug',
 ]);
 
 /* === EXERCISE DESCRIPTIONS ===
@@ -361,6 +362,7 @@ const EXERCISE_DESCRIPTIONS = {
   'ab-wood-chop': "Poulie haute d'un côté. Tire en diagonale de haut vers bas opposé, bras tendus. Mouvement de rotation du tronc.",
   'ab-pallof': "Poulie côté hanche, mains au sternum. Pousse droit devant et reviens. Anti-rotation, gainage profond.",
   'ab-toes-bar': "Suspendu à une barre. Amène les pointes des pieds toucher la barre. Niveau avancé.",
+  'ab-deadbug': "Allongé sur le dos, bras tendus vers le plafond, hanches et genoux fléchis à 90°. Bas du dos plaqué au sol, descends un bras et la jambe opposée vers le sol sans creuser le dos, reviens, alterne.",
 
   // FONCTIONNEL
   'fn-burpees': "Debout → squat → planche → pompe → squat → saut. Cardio + full body intense.",
@@ -548,6 +550,91 @@ const DEFAULT_TEMPLATES = [
       { name: 'Quadriceps', durationSec: 30, perSide: true },
     ],
   },
+  {
+    id: 'tpl-upper',
+    name: 'Haut du corps',
+    letter: 'HC',
+    exercises: [
+      { exerciseId: 'pec-dc-barre', sets: 4, reps: '6-8', notes: '', restSec: 120 },
+      { exerciseId: 'dos-rowing-barre', sets: 4, reps: '8-10', notes: '', restSec: 120 },
+      { exerciseId: 'ep-dm-halt', sets: 3, reps: '8-10', notes: '', restSec: 90 },
+      { exerciseId: 'dos-tirage-v-large', sets: 3, reps: '10-12', notes: '', restSec: 90 },
+      { exerciseId: 'ep-elev-lat', sets: 3, reps: '12-15', notes: '', restSec: 60 },
+      { exerciseId: 'bi-curl-halt-alt', sets: 3, reps: '10-12', notes: '', restSec: 60 },
+      { exerciseId: 'tri-ext-poulie-corde', sets: 3, reps: '12', notes: '', restSec: 60 },
+    ],
+    warmup: [
+      'Vélo / rameur 5 min',
+      'Cercles d\'épaules avant/arrière — 10 de chaque',
+      'Band pull-apart ou rotations bras tendus — 15 reps',
+      'Développé couché : 1×10 barre à vide, 1×5 à ~50%',
+      'Rowing : 1×12 charge légère',
+      'Développé militaire : 1×10 très léger',
+    ],
+    cooldown: [
+      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
+      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
+      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
+      { name: 'Biceps / avant-bras', durationSec: 30, perSide: true },
+      { name: 'Triceps (coude au-dessus tête)', durationSec: 30, perSide: true },
+    ],
+  },
+  {
+    id: 'tpl-lower',
+    name: 'Bas du corps',
+    letter: 'BC',
+    exercises: [
+      { exerciseId: 'q-squat', sets: 4, reps: '6-8', notes: '', restSec: 150 },
+      { exerciseId: 'dos-sdt-roumain', sets: 3, reps: '8-10', notes: '', restSec: 120 },
+      { exerciseId: 'q-presse', sets: 3, reps: '10-12', notes: '', restSec: 120 },
+      { exerciseId: 'is-leg-curl-a', sets: 3, reps: '12', notes: '', restSec: 90 },
+      { exerciseId: 'q-fentes-bulg', sets: 3, reps: '10/jambe', notes: '', restSec: 90 },
+      { exerciseId: 'fess-hip-thrust', sets: 3, reps: '10-12', notes: '', restSec: 90 },
+      { exerciseId: 'mol-debout', sets: 4, reps: '15', notes: '', restSec: 60 },
+    ],
+    warmup: [
+      'Vélo / rameur 5 min',
+      'Rotations de hanches — 10 par côté',
+      'Squats à vide lents — 10 reps',
+      'Squat : 1×10 barre à vide, 1×5 à ~50%, 1×3 à ~75%',
+      'Soulevé de terre roumain : 1×10 barre à vide (charnière de hanche), 1×5 à ~50%',
+    ],
+    cooldown: [
+      { name: 'Quadriceps', durationSec: 30, perSide: true },
+      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
+      { name: 'Fessiers', durationSec: 30, perSide: true },
+      { name: 'Fléchisseurs de hanche', durationSec: 30, perSide: true },
+      { name: 'Mollets (jambe arrière tendue)', durationSec: 30, perSide: true },
+    ],
+  },
+  {
+    id: 'tpl-core',
+    name: 'Core',
+    letter: 'CO',
+    exercises: [
+      { exerciseId: 'ab-plank', sets: 3, reps: '45s', notes: '', restSec: 45 },
+      { exerciseId: 'ab-side-plank', sets: 3, reps: '30s /côté', notes: '', restSec: 45 },
+      { exerciseId: 'ab-deadbug', sets: 3, reps: '10/côté', notes: '', restSec: 45 },
+      { exerciseId: 'ab-leg-raise-susp', sets: 3, reps: '10-12', notes: '', restSec: 60 },
+      { exerciseId: 'ab-pallof', sets: 3, reps: '12/côté', notes: '', restSec: 60 },
+      { exerciseId: 'ab-russian-lest', sets: 3, reps: '20', notes: '', restSec: 45 },
+      { exerciseId: 'ab-wheel', sets: 3, reps: '8-10', notes: '', restSec: 60 },
+    ],
+    warmup: [
+      'Cercles d\'épaules avant/arrière — 10 de chaque',
+      'Rotations de hanches — 10 par côté',
+      'Cat-cow — 10 reps',
+      'Bird-dog — 8 par côté',
+      'Gainage : 1×20s planche pour activer',
+    ],
+    cooldown: [
+      { name: 'Lombaires (position de l\'enfant)', durationSec: 45, perSide: false },
+      { name: 'Fléchisseurs de hanche', durationSec: 30, perSide: true },
+      { name: 'Obliques (flexion latérale debout)', durationSec: 30, perSide: true },
+      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
+      { name: 'Dorsaux (torsion allongée)', durationSec: 30, perSide: true },
+    ],
+  },
 ];
 
 /* === Repos par défaut selon type d'exo === */
@@ -565,22 +652,41 @@ function defaultRestSec(exDef) {
   return 90;
 }
 
-/* === STORAGE === */
+/* === STORAGE ===
+   Une copie de secours (BACKUP_KEY) est réécrite à chaque save(), avec l'état
+   juste avant l'écrasement. Si la clé principale est absente ou corrompue au
+   chargement (JSON invalide), on retombe automatiquement dessus plutôt que de
+   perdre tout l'historique. */
 const STORAGE_KEY = 'muscu.v1';
+const BACKUP_KEY = 'muscu.v1.bak';
 
 const Storage = {
+  restoredFromBackup: false,
   load() {
+    this.restoredFromBackup = false;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
+      if (raw) return JSON.parse(raw);
     } catch (e) {
-      console.error('Storage load error', e);
-      return null;
+      console.error('Storage load error, clé principale corrompue — tentative sur la sauvegarde', e);
     }
+    try {
+      const backup = localStorage.getItem(BACKUP_KEY);
+      if (backup) {
+        const data = JSON.parse(backup);
+        this.restoredFromBackup = true;
+        console.warn('Données restaurées depuis la sauvegarde de secours');
+        return data;
+      }
+    } catch (e) {
+      console.error('Backup load error', e);
+    }
+    return null;
   },
   save(data) {
     try {
+      const prev = localStorage.getItem(STORAGE_KEY);
+      if (prev) localStorage.setItem(BACKUP_KEY, prev);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
       console.error('Storage save error', e);
@@ -596,6 +702,7 @@ const DEFAULT_SETTINGS = {
   timerSound: true,
   timerVibrate: true,
   timerDefaultOverride: null, // null = utilise la valeur par type
+  cooldownStartSide: 'left', // côté par lequel commencer les étirements "par côté"
 };
 
 const State = {
@@ -630,6 +737,9 @@ const State = {
       this.save();
     }
     this.migrate();
+    if (Storage.restoredFromBackup) {
+      toast('Données restaurées depuis une sauvegarde de secours — vérifie tes séances et exporte-les (Réglages).', 5000);
+    }
   },
 
   migrate() {
@@ -758,7 +868,7 @@ function el(tag, attrs = {}, ...children) {
   return node;
 }
 
-function icon(name) {
+function icon(name, size = 20) {
   const ICONS = {
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
@@ -771,6 +881,11 @@ function icon(name) {
     up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
     down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
     info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+    // Repris des icônes de la nav du bas pour garder les écrans vides cohérents avec le reste de l'app
+    // (au lieu d'emoji, qui changent de style selon l'OS et détonent du set d'icônes monochromes).
+    workout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M6 8h2M6 16h2M10 6h4M10 18h4M16 8h2M16 16h2M20 12h2M9 9h6v6H9z"/></svg>',
+    history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 3"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20V4M3 20h18M7 16l4-5 4 3 5-7"/></svg>',
   };
   const s = document.createElement('span');
   s.innerHTML = ICONS[name] || '';
@@ -779,8 +894,8 @@ function icon(name) {
   s.style.justifyContent = 'center';
   const svg = s.firstElementChild;
   if (svg) {
-    svg.setAttribute('width', '20');
-    svg.setAttribute('height', '20');
+    svg.setAttribute('width', String(size));
+    svg.setAttribute('height', String(size));
   }
   return s;
 }
@@ -983,7 +1098,7 @@ function renderSessionsScreen() {
   // Templates
   if (State.templates.length === 0) {
     body.appendChild(el('div', { class: 'empty' },
-      el('div', { class: 'icon' }, '🏋️'),
+      el('div', { class: 'icon' }, icon('workout', 36)),
       el('div', {}, 'Aucune séance configurée.'),
     ));
   } else {
@@ -1296,7 +1411,7 @@ function openWarmupEditor(tpl, session) {
       tpl.warmup.forEach((line, i) => {
         const row = el('div', { class: 'template-exo-row' },
           el('div', { class: 'grow' }, el('div', { class: 'name', style: 'font-size: 14px; font-weight: 400;' }, line)),
-          el('button', { class: 'exo-menu-btn', onclick: () => openWarmupLineMenuInline(tpl, i, session) }, icon('more'))
+          el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openWarmupLineMenuInline(tpl, i, session) }, icon('more'))
         );
         body.appendChild(row);
       });
@@ -1368,7 +1483,7 @@ function openCooldownEditor(tpl, session) {
             el('div', { class: 'name', style: 'font-size: 14px;' }, item.name),
             el('div', { class: 'target' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
           ),
-          el('button', { class: 'exo-menu-btn', onclick: () => openCooldownLineMenuInline(tpl, i, session) }, icon('more'))
+          el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openCooldownLineMenuInline(tpl, i, session) }, icon('more'))
         );
         body.appendChild(row);
       });
@@ -1819,6 +1934,18 @@ function renderLibraryBody(opts = {}) {
   });
   body.appendChild(chipsRow);
 
+  if (opts.pickerMode) {
+    body.appendChild(el('button', {
+      class: 'btn-add',
+      style: 'margin-bottom: 10px;',
+      onclick: () => openCreateCustomExercise({
+        presetMuscle: filter.muscle,
+        presetCalisthenics: !!filter.calisthenics,
+        onCreated: ex => opts.onPick(ex.id),
+      }),
+    }, icon('plus'), 'Créer un exercice personnalisé'));
+  }
+
   function renderChips() {
     calChip.classList.toggle('active', !!filter.calisthenics);
     chipsRow.querySelectorAll('.chip').forEach(c => { if (c !== calChip) c.classList.remove('active'); });
@@ -1836,7 +1963,7 @@ function renderLibraryBody(opts = {}) {
     list.innerHTML = '';
     const q = (filter.search || '').toLowerCase().trim();
     const items = State.allExercises().filter(e => {
-      if (filter.calisthenics && !CALISTHENICS_IDS.has(e.id)) return false;
+      if (filter.calisthenics && !CALISTHENICS_IDS.has(e.id) && e.discipline !== 'callisthenie') return false;
       if (filter.muscle && e.primary !== filter.muscle && !(e.secondary || []).includes(filter.muscle)) return false;
       if (q && !e.name.toLowerCase().includes(q) && !e.primary.toLowerCase().includes(q)) return false;
       return true;
@@ -1940,7 +2067,7 @@ function openExerciseDetail(id) {
   openModal({ title: 'Exercice', body, footer: actions });
 }
 
-function openCreateCustomExercise() {
+function openCreateCustomExercise(opts = {}) {
   const nameI = el('input', { type: 'text', placeholder: 'Nom de l\'exercice' });
   const typeI = el('select', {});
   ['loaded', 'bodyweight', 'weighted', 'assisted', 'time'].forEach(t => {
@@ -1948,8 +2075,13 @@ function openCreateCustomExercise() {
   });
   const primaryI = el('select', {});
   MUSCLE_GROUPS.forEach(m => primaryI.appendChild(el('option', { value: m }, m)));
+  if (opts.presetMuscle && MUSCLE_GROUPS.includes(opts.presetMuscle)) primaryI.value = opts.presetMuscle;
   const equipI = el('input', { type: 'text', placeholder: 'Équipement (ex: Haltères)' });
   const secI = el('input', { type: 'text', placeholder: 'Muscles secondaires (séparés par virgule)' });
+  const calI = el('input', { type: 'checkbox' });
+  calI.checked = !!opts.presetCalisthenics;
+  const calLabel = el('label', { class: 'card-row', style: 'margin-top: 12px; cursor: pointer;' }, calI,
+    el('span', {}, 'Exercice de callisthénie (apparaît dans le filtre "Callisthénie")'));
 
   const body = el('div', {},
     el('label', { class: 'label-row' }, 'Nom'),
@@ -1962,6 +2094,7 @@ function openCreateCustomExercise() {
     secI,
     el('label', { class: 'label-row' }, 'Équipement'),
     equipI,
+    calLabel,
   );
 
   const save = el('button', { class: 'btn btn-primary', onclick: () => {
@@ -1975,11 +2108,16 @@ function openCreateCustomExercise() {
       equipment: equipI.value.trim() || 'Aucun',
       isCustom: true,
     };
+    if (calI.checked) ex.discipline = 'callisthenie';
     State.customExercises.push(ex);
     State.save();
     closeModal();
-    render();
-    toast('Exercice ajouté');
+    if (opts.onCreated) {
+      opts.onCreated(ex);
+    } else {
+      render();
+      toast('Exercice ajouté');
+    }
   }}, 'Créer');
   const cancel = el('button', { class: 'btn btn-secondary', onclick: closeModal }, 'Annuler');
 
@@ -1994,7 +2132,7 @@ function renderHistoryScreen() {
 
   if (State.sessions.length === 0) {
     body.appendChild(el('div', { class: 'empty' },
-      el('div', { class: 'icon' }, '📜'),
+      el('div', { class: 'icon' }, icon('history', 36)),
       el('div', {}, 'Aucune séance enregistrée.'),
       el('div', { style: 'margin-top: 8px; font-size: 13px;' }, 'Termine une séance pour la voir ici.'),
     ));
@@ -2140,7 +2278,7 @@ function renderProgressionScreen() {
 
   if (usedExos.length === 0) {
     body.appendChild(el('div', { class: 'empty' },
-      el('div', { class: 'icon' }, '📈'),
+      el('div', { class: 'icon' }, icon('chart', 36)),
       el('div', {}, 'Pas encore de données.'),
       el('div', { style: 'margin-top: 8px; font-size: 13px;' }, 'Termine quelques séances pour voir ta progression.'),
     ));
@@ -2324,8 +2462,19 @@ function renderLineChart(points, unit = '', opts = {}) {
     }
   });
 
-  // X axis date labels: first and last
-  if (points.length > 0) {
+  // X axis date labels : un seul point => une seule date centrée, sinon première + dernière
+  // (sinon les deux labels se superposent et deviennent illisibles quand il n'y a qu'un point).
+  if (points.length === 1) {
+    const t = document.createElementNS(svgNS, 'text');
+    t.setAttribute('x', xScale(points[0].x));
+    t.setAttribute('y', H - 8);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('fill', '#6a7480');
+    t.setAttribute('font-size', '10');
+    t.setAttribute('font-family', 'ui-monospace, monospace');
+    t.textContent = fmtDateShort(points[0].x);
+    svg.appendChild(t);
+  } else if (points.length > 1) {
     const labels = [points[0], points[points.length - 1]];
     labels.forEach((p, i) => {
       const t = document.createElementNS(svgNS, 'text');
@@ -2388,7 +2537,7 @@ function renderTemplateEditScreen() {
           el('div', { class: 'name' }, exDef ? exDef.name : 'Exercice'),
           el('div', { class: 'target' }, `${e.sets} × ${e.reps} · repos ${fmtTimerSec(restSec)}`)
         ),
-        el('button', { class: 'exo-menu-btn', onclick: () => openTplExoMenu(tpl, i) }, icon('more'))
+        el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openTplExoMenu(tpl, i) }, icon('more'))
       );
       body.appendChild(row);
     });
@@ -2414,7 +2563,7 @@ function renderTemplateEditScreen() {
         el('div', { class: 'grow' },
           el('div', { class: 'name', style: 'font-size: 14px; font-weight: 400;' }, line)
         ),
-        el('button', { class: 'exo-menu-btn', onclick: () => openWarmupLineMenu(tpl, i) }, icon('more'))
+        el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openWarmupLineMenu(tpl, i) }, icon('more'))
       );
       body.appendChild(row);
     });
@@ -2435,7 +2584,7 @@ function renderTemplateEditScreen() {
           el('div', { class: 'name', style: 'font-size: 14px;' }, item.name),
           el('div', { class: 'target' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
         ),
-        el('button', { class: 'exo-menu-btn', onclick: () => openCooldownLineMenu(tpl, i) }, icon('more'))
+        el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openCooldownLineMenu(tpl, i) }, icon('more'))
       );
       body.appendChild(row);
     });
@@ -2949,6 +3098,10 @@ function renderSettingsScreen() {
   // Override global
   body.appendChild(makeOverrideRow());
 
+  // === Étirements ===
+  body.appendChild(el('h2', { class: 'section-title' }, 'Étirements'));
+  body.appendChild(makeCooldownSideRow());
+
   // === Données ===
   body.appendChild(el('h2', { class: 'section-title' }, 'Données'));
   body.appendChild(makeSettingsRow('Exporter mes données', 'Sauvegarde JSON complète (templates, séances, exos custom).', 'Exporter', exportAllData));
@@ -2969,7 +3122,7 @@ function renderSettingsScreen() {
   body.appendChild(makeSettingsRow('Tout effacer', 'Supprime toutes les données locales. Irréversible.', 'Effacer', confirmWipe, true));
 
   body.appendChild(el('div', { class: 'about-block' },
-    el('div', { class: 'about-title' }, 'Muscu — v3'),
+    el('div', { class: 'about-title' }, 'Muscu — v4'),
     el('div', { class: 'about-line' }, 'App locale, aucune donnée envoyée à un serveur.'),
     el('div', { class: 'about-line' }, 'Toutes tes données sont dans le localStorage de ce navigateur.'),
   ));
@@ -2999,6 +3152,27 @@ function makeToggleRow(title, desc, settingKey) {
       el('div', { class: 'sr-desc' }, desc),
     ),
     toggle
+  );
+}
+
+function makeCooldownSideRow() {
+  const cur = State.settings.cooldownStartSide === 'right' ? 'right' : 'left';
+  const mkBtn = (value, label) => el('button', {
+    class: 'btn ' + (cur === value ? 'btn-primary' : 'btn-secondary'),
+    style: 'flex: 1;',
+    onclick: () => {
+      State.settings.cooldownStartSide = value;
+      State.save();
+      render();
+    },
+  }, label);
+
+  return el('div', { class: 'settings-row' },
+    el('div', { class: 'grow' },
+      el('div', { class: 'sr-title' }, 'Premier côté'),
+      el('div', { class: 'sr-desc' }, 'Côté par lequel démarrer le mode guidé pour les étirements "par côté".'),
+      el('div', { class: 'row-2', style: 'margin-top: 10px;' }, mkBtn('left', 'Gauche'), mkBtn('right', 'Droite')),
+    ),
   );
 }
 
@@ -3393,7 +3567,9 @@ function startCooldownRun() {
   openCooldownModal(cooldown, 0, 0);
 }
 
-function openCooldownModal(items, index, sideStep) {
+// sidePass : 0 = premier côté de l'item (celui choisi dans Réglages), 1 = second côté.
+// Découplé du côté réel affiché pour pouvoir commencer indifféremment par la gauche ou la droite.
+function openCooldownModal(items, index, sidePass) {
   if (index >= items.length) {
     // Done
     closeModal();
@@ -3409,10 +3585,12 @@ function openCooldownModal(items, index, sideStep) {
   }
   const item = items[index];
   const isPerSide = !!item.perSide;
-  const sideLabel = isPerSide ? (sideStep === 0 ? 'Côté gauche' : 'Côté droit') : null;
+  const startSide = State.settings.cooldownStartSide === 'right' ? 1 : 0;
+  const actualSide = sidePass === 0 ? startSide : 1 - startSide;
+  const sideLabel = isPerSide ? (actualSide === 0 ? 'Côté gauche' : 'Côté droit') : null;
   const total = item.durationSec;
   const endsAt = Date.now() + total * 1000;
-  const stepLabel = `${index + 1}/${items.length}` + (isPerSide ? ` · ${sideStep + 1}/2` : '');
+  const stepLabel = `${index + 1}/${items.length}` + (isPerSide ? ` · ${sidePass + 1}/2` : '');
 
   const titleEl = el('div', { class: 'cd-title' }, item.name);
   const sideEl = sideLabel ? el('div', { class: 'cd-side' }, sideLabel) : null;
@@ -3439,9 +3617,9 @@ function openCooldownModal(items, index, sideStep) {
   openModal({ title: 'Étirements', body, full: true, footer: [stopBtn, skipBtn] });
 
   function goNext() {
-    const nextSide = isPerSide && sideStep === 0 ? 1 : 0;
-    const nextIndex = isPerSide && sideStep === 0 ? index : index + 1;
-    openCooldownModal(items, nextIndex, nextSide);
+    const nextPass = isPerSide && sidePass === 0 ? 1 : 0;
+    const nextIndex = isPerSide && sidePass === 0 ? index : index + 1;
+    openCooldownModal(items, nextIndex, nextPass);
   }
 
   const tickId = setInterval(() => {

@@ -7,7 +7,17 @@ App perso de musculation. Single-file PWA, données 100% locales (localStorage),
 - **Callisthénie** : 25 nouveaux mouvements skills (muscle-up, front lever, back lever, planche, pistol squat, L-sit / V-sit, human flag, archer pull-up/push-up, handstand, skin the cat...) avec description technique complète
 - **Filtre "Callisthénie"** dans la bibliothèque : regroupe les nouveaux skills + les mouvements poids du corps déjà présents qui sont des classiques de la callisthénie (tractions, dips, pompes, gainages, nordic curl...). Combinable avec la recherche et les filtres par groupe musculaire
 - **Séance D — Callisthénie** : nouveau template prêt à l'emploi (tractions, dips, pistol assisté, front lever tuck, planche tuck, L-sit, hollow hold) avec échauffement axé mobilité poignets/épaules et étirements adaptés. Apparaît automatiquement même si tu avais déjà des séances sauvegardées (migration auto)
+- **3 nouveaux templates par split** : **Haut du corps**, **Bas du corps** et **Core**, chacun avec échauffement et étirements dédiés. Comme pour la Séance D, ils s'ajoutent automatiquement à tes séances existantes sans y toucher — tu peux les garder, les modifier ou les supprimer comme n'importe quel autre template
 - **Fix** : la position de scroll ne saute plus en haut de l'écran à chaque fois que tu coches un set pendant une séance
+- **Fix** : l'écran reste allumé pendant une séance active (Wake Lock), pour que le bip de fin de repos sonne à l'heure même si tu ne touches pas le téléphone
+- **Dead bug** ajouté à la bibliothèque (Abdos / Callisthénie)
+- **Créer un exercice personnalisé directement depuis le sélecteur** (dans une séance ou un template), sans avoir à repasser par l'onglet Bibliothèque. Le muscle et le filtre "Callisthénie" actifs sont pré-remplis, et tu peux marquer un exo perso comme callisthénie pour qu'il ressorte dans ce filtre
+- **Étirements guidés : choix du premier côté** (Gauche/Droite) dans Réglages → Étirements
+- **Sauvegarde de secours automatique** : une copie de l'état précédent est gardée à chaque sauvegarde. Si le stockage local est corrompu, l'app restaure automatiquement cette copie au lieu de perdre tout l'historique
+- **Fix UI** : le graphique de Progression n'affiche plus deux dates superposées et illisibles quand il n'y a qu'une seule séance enregistrée
+- **Fix UI** : le titre de la séance dans l'en-tête ne passe plus sur 2 lignes (ellipsis) — l'en-tête sticky ne mange plus d'espace en permanence pendant le scroll
+- **Fix UI** : un fondu indique désormais qu'il y a d'autres filtres à scroller horizontalement dans la Bibliothèque
+- **Fix UI** : les icônes emoji des écrans vides (Séances / Historique / Progression) remplacées par des icônes SVG cohérentes avec le reste de l'app
 
 ## Nouveautés v3
 
@@ -137,6 +147,7 @@ Si chute marquée entre les sets (>35 %), suggestion **−5 %**.
 ## Données
 
 - **Stockage** : `localStorage`, clé `muscu.v1` (compatible v1 et v2). Tout en local.
+- **Filet de sécurité** : une copie de l'état précédent est gardée dans `muscu.v1.bak` à chaque sauvegarde. Si `muscu.v1` devient illisible, l'app restaure automatiquement cette copie au démarrage.
 - **Sauvegarde** : Réglages → **Exporter mes données (JSON)**.
 - **Restauration** : Réglages → **Importer un JSON**.
 - **Analyse externe** : Réglages → **Export pour analyse Claude** — texte formaté à coller dans une conversation Claude.
