@@ -3,6 +3,10 @@
    Single-file vanilla JS app, localStorage persistence
    ========================================================================== */
 
+// Bumpée à chaque commit + push (4.0, 4.1, 4.2...). Garder en phase avec
+// CACHE_VERSION dans sw.js (même valeur) et le titre du README.
+const APP_VERSION = '4.0';
+
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
   // PECTORAUX
@@ -3174,7 +3178,7 @@ function renderSettingsScreen() {
   body.appendChild(makeSettingsRow('Tout effacer', 'Supprime toutes les données locales. Irréversible.', 'Effacer', confirmWipe, true));
 
   body.appendChild(el('div', { class: 'about-block' },
-    el('div', { class: 'about-title' }, 'Muscu — v4'),
+    el('div', { class: 'about-title' }, 'Muscu — v' + APP_VERSION),
     el('div', { class: 'about-line' }, 'App locale, aucune donnée envoyée à un serveur.'),
     el('div', { class: 'about-line' }, 'Toutes tes données sont dans le localStorage de ce navigateur.'),
   ));

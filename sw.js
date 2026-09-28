@@ -1,8 +1,9 @@
 /* Muscu — Service Worker
    Stratégie : cache-first pour l'app shell, network-first pour le reste.
-   Quand on déploie une nouvelle version, bumper CACHE_VERSION pour invalider l'ancien cache. */
+   CACHE_VERSION suit APP_VERSION dans app.js (bumpée à chaque commit + push :
+   4.0, 4.1, 4.2...) — garder les deux synchronisées. */
 
-const CACHE_VERSION = 'muscu-v4-10';
+const CACHE_VERSION = 'muscu-v4.0';
 const APP_SHELL = [
   './',
   './index.html',

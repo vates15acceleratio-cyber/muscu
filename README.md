@@ -1,4 +1,4 @@
-# Muscu — v4
+# Muscu — v4.0
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
 
