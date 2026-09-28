@@ -598,6 +598,7 @@ const State = {
     templateEditId: null,
     progressionExerciseId: null,
     libraryFilter: { search: '', muscle: null, equipment: null, calisthenics: false },
+    activeSessionStep: 'warmup', // 'conditions' | 'warmup' | 'exercises' | 'cooldown'
   },
 
   init() {
@@ -774,6 +775,7 @@ function icon(name, size = 20) {
     workout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M6 8h2M6 16h2M10 6h4M10 18h4M16 8h2M16 16h2M20 12h2M9 9h6v6H9z"/></svg>',
     history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 3"/></svg>',
     chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20V4M3 20h18M7 16l4-5 4 3 5-7"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 13.09H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   };
   const s = document.createElement('span');
   s.innerHTML = ICONS[name] || '';
@@ -961,7 +963,7 @@ function renderSessionsScreen() {
 
   const header = el('header', { class: 'screen-header' },
     el('h1', {}, 'Séances'),
-    el('button', { class: 'h-action', onclick: () => showScreen('settings'), 'aria-label': 'Réglages' }, '⋯')
+    el('button', { class: 'h-action', onclick: () => showScreen('settings'), 'aria-label': 'Réglages' }, icon('settings'))
   );
   screen.appendChild(header);
 
@@ -1079,6 +1081,7 @@ function doStartSession(tpl) {
     notes: '',
   };
   State.activeSession = session;
+  State.ui.activeSessionStep = 'conditions';
   State.save();
   showScreen('active-session');
 }
@@ -1129,7 +1132,9 @@ function openSettingsMenu() {
   ]);
 }
 
-/* === ACTIVE SESSION SCREEN === */
+/* === ACTIVE SESSION SCREEN ===
+   Parcours en écrans distincts : Conditions (intro, une fois) puis 3 onglets
+   librement navigables — Échauffement / Exercices / Étirements. */
 function renderActiveSessionScreen() {
   const screen = el('section', { class: 'screen' });
   const session = State.activeSession;
@@ -1146,67 +1151,129 @@ function renderActiveSessionScreen() {
   );
   screen.appendChild(header);
 
+  const step = State.ui.activeSessionStep;
   const body = el('div', { class: 'screen-body' });
 
-  // Conditions block
-  body.appendChild(renderConditionsBlock(session));
-
-  // Warmup checklist
-  body.appendChild(renderWarmupBlock(session));
-
-  // Exercises
-  session.exercises.forEach((exo, idx) => {
-    body.appendChild(renderActiveExerciseCard(exo, idx));
-  });
-
-  // Add exercise button
-  body.appendChild(el('button', {
-    class: 'btn-add',
-    onclick: () => openExercisePicker(exerciseId => addExerciseToActive(exerciseId)),
-  }, icon('plus'), 'Ajouter un exercice'));
-
-  // Cooldown block
-  body.appendChild(renderCooldownBlock(session));
-
-  // Session notes
-  body.appendChild(el('label', { class: 'label-row' }, 'Notes / ressenti'));
-  const notesInput = el('textarea', {
-    placeholder: 'Sensations, observations, douleurs...',
-    onchange: e => { session.notes = e.target.value; State.save(); },
-    oninput: e => { session.notes = e.target.value; },
-  });
-  notesInput.value = session.notes || '';
-  notesInput.addEventListener('blur', () => State.save());
-  body.appendChild(notesInput);
-
-  // Finish button
-  body.appendChild(el('div', { style: 'height: 12px;' }));
-  body.appendChild(el('button', {
-    class: 'btn btn-primary btn-block',
-    onclick: finishSession,
-    style: 'padding: 16px;',
-  }, 'Terminer la séance'));
+  if (step === 'conditions') {
+    body.appendChild(renderConditionsStep(session));
+  } else {
+    // Onglets en dehors de .screen-body (qui a overflow-y:auto et deviendrait sinon
+    // le conteneur de référence du sticky) pour qu'ils collent juste sous le header,
+    // exactement comme le header colle en haut de la fenêtre.
+    screen.appendChild(renderSessionTabs(session, step));
+    if (step === 'exercises') body.appendChild(renderExercisesStep(session));
+    else if (step === 'cooldown') body.appendChild(renderCooldownStep(session));
+    else body.appendChild(renderWarmupStep(session));
+  }
 
   screen.appendChild(body);
   return screen;
 }
 
-function renderWarmupBlock(session) {
+function goToStep(step) {
+  State.ui.activeSessionStep = step;
+  render({ keepScroll: false });
+}
+
+/* === Écran intro : Conditions de récup === */
+function renderConditionsStep(session) {
+  const wrap = el('div', {});
+  wrap.appendChild(el('div', { class: 'session-intro' },
+    el('h2', {}, 'Avant de commencer'),
+    el('p', {}, 'Quelques infos rapides pour calibrer les recommandations de fin de séance.'),
+  ));
+  wrap.appendChild(renderConditionsBlock(session));
+  wrap.appendChild(el('button', {
+    class: 'btn btn-primary btn-block',
+    style: 'padding: 16px; margin-top: 8px;',
+    onclick: () => goToStep('warmup'),
+  }, 'Continuer'));
+  return wrap;
+}
+
+/* === Bandeau d'onglets === */
+function renderSessionTabs(session, currentStep) {
+  const tpl = State.templateById(session.templateId);
+  const warmupItems = (tpl && tpl.warmup) || [];
+  const warmupDone = warmupItems.filter((_, i) => session.warmupChecks && session.warmupChecks[i]).length;
+  const exoCount = session.exercises.length;
+  const exoDoneCount = session.exercises.filter(e => e.sets.length > 0 && e.sets.every(s => s.done)).length;
+  const cooldownItems = (tpl && tpl.cooldown) || [];
+
+  const tabs = [
+    {
+      key: 'warmup', label: 'Échauffement',
+      badge: warmupItems.length ? `${warmupDone}/${warmupItems.length}` : '—',
+      complete: warmupItems.length > 0 && warmupDone === warmupItems.length,
+    },
+    {
+      key: 'exercises', label: 'Exercices',
+      badge: `${exoDoneCount}/${exoCount}`,
+      complete: exoCount > 0 && exoDoneCount === exoCount,
+    },
+    {
+      key: 'cooldown', label: 'Étirements',
+      badge: cooldownItems.length === 0 ? '—' : (session.cooldownDone ? '✓' : `${cooldownItems.length}`),
+      complete: session.cooldownDone,
+    },
+  ];
+
+  const row = el('div', { class: 'session-tabs' });
+  tabs.forEach(t => {
+    row.appendChild(el('button', {
+      class: 'session-tab' + (currentStep === t.key ? ' active' : '') + (t.complete ? ' tab-complete' : ''),
+      onclick: () => goToStep(t.key),
+    },
+      el('span', { class: 'stab-label' }, t.label),
+      el('span', { class: 'stab-badge' }, t.badge),
+    ));
+  });
+  return row;
+}
+
+/* === Résumé Conditions + accès rapide à l'édition (affiché en haut de l'onglet Échauffement) === */
+function renderConditionsSummaryRow(session) {
+  const c = session.conditions || {};
+  const parts = [];
+  if (c.sleep) parts.push(`Sommeil ${c.sleep}h`);
+  if (c.energy) parts.push(`Énergie ${c.energy}/10`);
+  if (c.meal) parts.push(`Repas ${c.meal}`);
+  const summary = parts.length ? parts.join(' · ') : 'Non renseigné';
+
+  return el('div', {
+    class: 'cond-summary-row',
+    onclick: () => openModal({
+      title: 'Conditions de récup',
+      body: renderConditionsBlock(session, { hideTitle: true }),
+      footer: [el('button', { class: 'btn btn-primary btn-block', onclick: () => { closeModal(); render({ keepScroll: false }); } }, 'OK')],
+    }),
+  },
+    el('div', { class: 'grow' },
+      el('div', { class: 'label' }, 'Conditions de récup'),
+      el('div', { class: 'value' }, summary),
+    ),
+    el('span', { class: 'edit-ic' }, icon('edit', 16)),
+  );
+}
+
+/* === Onglet Échauffement === */
+function renderWarmupStep(session) {
+  const wrap = el('div', {});
+  wrap.appendChild(renderConditionsSummaryRow(session));
+
   const tpl = State.templateById(session.templateId);
   const items = (tpl && tpl.warmup) || [];
-  if (items.length === 0 && !tpl) return el('div', {});
-
   const checks = session.warmupChecks = session.warmupChecks || {};
   const doneCount = items.filter((_, i) => checks[i]).length;
 
-  const card = el('details', { class: 'collapsible warmup-block', open: doneCount < items.length ? '' : null });
-  const summary = el('summary', { class: 'collapsible-head' },
-    el('span', { class: 'collapsible-title' }, 'Échauffement'),
-    el('span', { class: 'collapsible-count' }, items.length === 0 ? 'vide' : `${doneCount} / ${items.length}`)
-  );
-  card.appendChild(summary);
+  const card = el('div', { class: 'card' });
+  card.appendChild(el('div', { class: 'card-row', style: 'margin-bottom: 8px;' },
+    el('div', { class: 'grow', style: 'font-weight: 600; font-size: 16px;' }, 'Échauffement'),
+    el('div', { style: 'font-size: 12px; color: var(--text-dim); font-family: var(--font-mono);' },
+      items.length === 0 ? 'vide' : `${doneCount} / ${items.length}`)
+  ));
 
-  const list = el('div', { class: 'warmup-list' });
+  const list = el('div', { class: 'warmup-list', style: 'padding: 0;' });
   if (items.length === 0) {
     list.appendChild(el('div', { style: 'color: var(--text-muted); font-size: 13px; padding: 4px 0 12px;' },
       'Aucun item. Clique sur Éditer pour en ajouter.'));
@@ -1226,37 +1293,63 @@ function renderWarmupBlock(session) {
     row.appendChild(el('span', { class: 'warmup-label' }, item));
     list.appendChild(row);
   });
-  // Bouton Éditer
   if (tpl) {
     list.appendChild(el('button', {
       class: 'btn-edit-list',
-      onclick: e => { e.preventDefault(); openWarmupEditor(tpl, session); },
+      onclick: () => openWarmupEditor(tpl, session),
     }, 'Éditer la liste'));
   }
   card.appendChild(list);
-  return card;
+  wrap.appendChild(card);
+
+  wrap.appendChild(el('button', {
+    class: 'btn btn-primary btn-block',
+    style: 'padding: 16px; margin-top: 16px;',
+    onclick: () => goToStep('exercises'),
+  }, 'Passer aux exercices'));
+
+  return wrap;
 }
 
-function renderCooldownBlock(session) {
+/* === Onglet Exercices === */
+function renderExercisesStep(session) {
+  const wrap = el('div', {});
+  session.exercises.forEach((exo, idx) => {
+    wrap.appendChild(renderActiveExerciseCard(exo, idx));
+  });
+
+  wrap.appendChild(el('button', {
+    class: 'btn-add',
+    onclick: () => openExercisePicker(exerciseId => addExerciseToActive(exerciseId)),
+  }, icon('plus'), 'Ajouter un exercice'));
+
+  wrap.appendChild(el('button', {
+    class: 'btn btn-primary btn-block',
+    style: 'padding: 16px; margin-top: 16px;',
+    onclick: () => goToStep('cooldown'),
+  }, 'Passer aux étirements'));
+
+  return wrap;
+}
+
+/* === Onglet Étirements (+ notes et fin de séance) === */
+function renderCooldownStep(session) {
+  const wrap = el('div', {});
   const tpl = State.templateById(session.templateId);
   const items = (tpl && tpl.cooldown) || [];
-  if (items.length === 0 && !tpl) return el('div', {});
-
   const totalSec = items.reduce((s, it) => s + it.durationSec * (it.perSide ? 2 : 1), 0);
   const totalMin = Math.round(totalSec / 60);
   const done = session.cooldownDone;
 
-  const card = el('details', { class: 'collapsible cooldown-block', open: '' });
-  const summary = el('summary', { class: 'collapsible-head' },
-    el('span', { class: 'collapsible-title' }, 'Étirements de fin'),
-    el('span', { class: 'collapsible-count' },
+  const card = el('div', { class: 'card' });
+  card.appendChild(el('div', { class: 'card-row', style: 'margin-bottom: 8px;' },
+    el('div', { class: 'grow', style: 'font-weight: 600; font-size: 16px;' }, 'Étirements de fin'),
+    el('div', { style: 'font-size: 12px; color: var(--text-dim); font-family: var(--font-mono);' },
       items.length === 0 ? 'vide' : (done ? '✓ fait' : `${items.length} positions · ~${totalMin} min`))
-  );
-  card.appendChild(summary);
+  ));
 
-  const body = el('div', { class: 'cooldown-body' });
   if (items.length === 0) {
-    body.appendChild(el('div', { style: 'color: var(--text-muted); font-size: 13px; padding: 4px 0 12px;' },
+    card.appendChild(el('div', { style: 'color: var(--text-muted); font-size: 13px; padding: 4px 0 12px;' },
       'Aucun étirement. Clique sur Éditer pour en ajouter.'));
   } else {
     const list = el('div', { class: 'cooldown-list' });
@@ -1267,24 +1360,40 @@ function renderCooldownBlock(session) {
         el('span', { class: 'cd-item-dur' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
       ));
     });
-    body.appendChild(list);
+    card.appendChild(list);
 
-    const startBtn = el('button', {
+    card.appendChild(el('button', {
       class: 'btn ' + (done ? 'btn-secondary' : 'btn-primary') + ' btn-block',
       onclick: startCooldownRun,
       style: 'margin-top: 12px;',
-    }, done ? 'Refaire les étirements' : 'Démarrer le mode guidé');
-    body.appendChild(startBtn);
+    }, done ? 'Refaire les étirements' : 'Démarrer le mode guidé'));
   }
   if (tpl) {
-    body.appendChild(el('button', {
+    card.appendChild(el('button', {
       class: 'btn-edit-list',
-      onclick: e => { e.preventDefault(); openCooldownEditor(tpl, session); },
+      onclick: () => openCooldownEditor(tpl, session),
     }, 'Éditer la liste'));
   }
+  wrap.appendChild(card);
 
-  card.appendChild(body);
-  return card;
+  wrap.appendChild(el('label', { class: 'label-row' }, 'Notes / ressenti'));
+  const notesInput = el('textarea', {
+    placeholder: 'Sensations, observations, douleurs...',
+    onchange: e => { session.notes = e.target.value; State.save(); },
+    oninput: e => { session.notes = e.target.value; },
+  });
+  notesInput.value = session.notes || '';
+  notesInput.addEventListener('blur', () => State.save());
+  wrap.appendChild(notesInput);
+
+  wrap.appendChild(el('div', { style: 'height: 12px;' }));
+  wrap.appendChild(el('button', {
+    class: 'btn btn-primary btn-block',
+    onclick: finishSession,
+    style: 'padding: 16px;',
+  }, 'Terminer la séance'));
+
+  return wrap;
 }
 
 /* === Éditeurs warmup/cooldown depuis la séance === */
@@ -1443,9 +1552,9 @@ function editCooldownLineInline(tpl, idx, session, onDone) {
   openModal({ title: idx >= 0 ? 'Modifier étirement' : 'Nouvel étirement', body, footer: [cancel, save] });
 }
 
-function renderConditionsBlock(session) {
+function renderConditionsBlock(session, opts = {}) {
   const block = el('div', { class: 'conditions' });
-  block.appendChild(el('h3', {}, 'Conditions de récup'));
+  if (!opts.hideTitle) block.appendChild(el('h3', {}, 'Conditions de récup'));
   const row = el('div', { class: 'cond-row' });
 
   const sleepWrap = el('div', {});

@@ -466,6 +466,87 @@ input[type=number] { -moz-appearance: textfield; }
 }
 .conditions input { padding: 8px 10px; font-size: 14px; }
 
+/* === SESSION STEP TABS (Échauffement / Exercices / Étirements) === */
+.session-tabs {
+  position: sticky;
+  top: calc(var(--safe-top) + var(--header-height));
+  z-index: 9;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin: 12px 16px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.session-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+}
+.session-tab .stab-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.session-tab .stab-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.session-tab.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.session-tab.active .stab-badge { color: var(--accent-dim); }
+.session-tab.tab-complete .stab-badge { color: var(--success); }
+
+.cond-summary-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.cond-summary-row .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.cond-summary-row .value {
+  font-size: 14px;
+  margin-top: 2px;
+  color: var(--text);
+}
+.cond-summary-row .edit-ic { color: var(--text-muted); flex-shrink: 0; }
+
+.session-intro {
+  text-align: center;
+  padding: 8px 4px 20px;
+}
+.session-intro h2 {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.session-intro p {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
 /* === Bottom nav === */
 #bottom-nav {
   position: fixed;
