@@ -430,127 +430,6 @@ const WARMUP_GENERAL = [
 
 const DEFAULT_TEMPLATES = [
   {
-    id: 'tpl-a',
-    name: 'Séance A',
-    letter: 'A',
-    exercises: [
-      { exerciseId: 'q-squat', sets: 4, reps: '8', notes: '', restSec: 120 },
-      { exerciseId: 'pec-dc-barre', sets: 4, reps: '8', notes: '', restSec: 120 },
-      { exerciseId: 'dos-tirage-h', sets: 4, reps: '10', notes: '', restSec: 90 },
-      { exerciseId: 'ep-elev-lat', sets: 3, reps: '12-15', notes: '', restSec: 90 },
-      { exerciseId: 'bi-curl-halt-alt', sets: 3, reps: '10-12', notes: '', restSec: 90 },
-      { exerciseId: 'ab-plank', sets: 3, reps: '60s', notes: '', restSec: 60 },
-    ],
-    warmup: [
-      ...WARMUP_GENERAL,
-      'Squat : 1×10 barre à vide, 1×5 à ~50%, 1×3 à ~75%',
-      'Développé couché : 1×10 barre à vide, 1×5 à ~60%',
-      'Tirage : 1×12 très léger',
-    ],
-    cooldown: [
-      { name: 'Quadriceps', durationSec: 30, perSide: true },
-      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
-      { name: 'Fessiers', durationSec: 30, perSide: true },
-      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
-      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
-      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
-      { name: 'Biceps / avant-bras', durationSec: 30, perSide: true },
-    ],
-  },
-  {
-    id: 'tpl-b',
-    name: 'Séance B',
-    letter: 'B',
-    exercises: [
-      { exerciseId: 'dos-sdt-roumain', sets: 3, reps: '10', notes: '', restSec: 120 },
-      { exerciseId: 'ep-dm-halt', sets: 4, reps: '8-10', notes: '', restSec: 90 },
-      { exerciseId: 'dos-tractions', sets: 4, reps: '8-10', notes: '', restSec: 180 },
-      { exerciseId: 'q-fentes-halt', sets: 3, reps: '10/jambe', notes: '', restSec: 90 },
-      { exerciseId: 'pec-pompes', sets: 3, reps: 'max', notes: '', restSec: 180 },
-      { exerciseId: 'mol-debout', sets: 4, reps: '15', notes: '', restSec: 60 },
-    ],
-    warmup: [
-      'Vélo / rameur 5 min',
-      'Cercles d\'épaules avant/arrière — 10 de chaque',
-      'Rotations de hanches — 10 par côté',
-      'Good morning à vide (mains nuque) — 10 reps',
-      'Band pull-apart ou rotations bras tendus — 15 reps',
-      'Soulevé de terre roumain : 1×10 barre à vide (charnière de hanche), 1×5 à ~50%',
-      'Développé militaire haltères : 1×12 très léger',
-      'Tractions / tirage : 1×8 mouvement contrôlé, charge légère',
-    ],
-    cooldown: [
-      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
-      { name: 'Fessiers', durationSec: 30, perSide: true },
-      { name: 'Fléchisseurs de hanche', durationSec: 30, perSide: true },
-      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
-      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
-      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
-      { name: 'Mollets (jambe arrière tendue)', durationSec: 30, perSide: true },
-    ],
-  },
-  {
-    id: 'tpl-c',
-    name: 'Séance C',
-    letter: 'C',
-    exercises: [
-      { exerciseId: 'q-presse', sets: 4, reps: '10-12', notes: '', restSec: 120 },
-      { exerciseId: 'pec-di-halt', sets: 4, reps: '10', notes: '', restSec: 90 },
-      { exerciseId: 'dos-rowing-barre', sets: 4, reps: '8-10', notes: '', restSec: 120 },
-      { exerciseId: 'is-leg-curl-a', sets: 3, reps: '12', notes: '', restSec: 90 },
-      { exerciseId: 'ep-elev-lat', sets: 3, reps: '12-15', notes: '', restSec: 90 },
-      { exerciseId: 'tri-ext-poulie-corde', sets: 3, reps: '12', notes: '', restSec: 90 },
-    ],
-    warmup: [
-      ...WARMUP_GENERAL,
-      'Presse : 1×15 charge légère, 1×10 à ~50%',
-      'Développé couché incliné : 1×10 haltères légers',
-      'Rowing : 1×12 charge légère',
-    ],
-    cooldown: [
-      { name: 'Quadriceps', durationSec: 30, perSide: true },
-      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
-      { name: 'Fessiers', durationSec: 30, perSide: true },
-      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
-      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
-      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
-      { name: 'Triceps (coude au-dessus tête)', durationSec: 30, perSide: true },
-    ],
-  },
-  {
-    id: 'tpl-d',
-    name: 'Séance D — Callisthénie',
-    letter: 'D',
-    exercises: [
-      { exerciseId: 'dos-tractions', sets: 4, reps: '6-8', notes: '', restSec: 150 },
-      { exerciseId: 'pec-dips-pec', sets: 4, reps: '8-10', notes: '', restSec: 120 },
-      { exerciseId: 'cal-pistol-assiste', sets: 3, reps: '6/jambe', notes: '', restSec: 120 },
-      { exerciseId: 'cal-fl-tuck', sets: 3, reps: '15s', notes: '', restSec: 90 },
-      { exerciseId: 'cal-planche-tuck', sets: 3, reps: '15s', notes: '', restSec: 90 },
-      { exerciseId: 'cal-lsit', sets: 3, reps: '10s', notes: '', restSec: 60 },
-      { exerciseId: 'ab-hollow', sets: 3, reps: '30s', notes: '', restSec: 60 },
-    ],
-    warmup: [
-      'Rotations + cercles de poignets — 15 de chaque sens',
-      'Passages poignet en extension au sol (weight bearing) — 30s',
-      'Cercles d\'épaules avant/arrière — 10 de chaque',
-      'Scapular pulls suspendu à la barre — 10 reps',
-      'Rotations de hanches — 10 par côté',
-      'Squats à vide lents — 10 reps',
-      'Tractions : 1×5 légères ou négatives lentes',
-      'Gainage : 1×20s planche pour activer',
-    ],
-    cooldown: [
-      { name: 'Poignets (extension / flexion)', durationSec: 30, perSide: false },
-      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
-      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
-      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
-      { name: 'Fléchisseurs de hanche', durationSec: 30, perSide: true },
-      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
-      { name: 'Quadriceps', durationSec: 30, perSide: true },
-    ],
-  },
-  {
     id: 'tpl-upper',
     name: 'Haut du corps',
     letter: 'HC',
@@ -775,6 +654,15 @@ const State = {
         changed = true;
       }
     });
+    // Retire les anciens templates par défaut A/B/C/D (remplacés par les splits
+    // Haut du corps / Bas du corps / Core / Callisthénie). Les séances déjà
+    // enregistrées dans l'historique ne sont pas concernées, seuls ces templates
+    // disparaissent de l'onglet Séances.
+    const REMOVED_DEFAULT_IDS = new Set(['tpl-a', 'tpl-b', 'tpl-c', 'tpl-d']);
+    if (this.templates.some(t => REMOVED_DEFAULT_IDS.has(t.id))) {
+      this.templates = this.templates.filter(t => !REMOVED_DEFAULT_IDS.has(t.id));
+      changed = true;
+    }
     // Active session : ajouter restSec si manquant
     if (this.activeSession) {
       this.activeSession.exercises.forEach(e => {
