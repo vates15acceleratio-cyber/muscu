@@ -162,7 +162,53 @@ const EXERCISE_LIBRARY = [
   { id: 'fn-thruster', name: 'Thruster', type: 'loaded', primary: 'Full body', secondary: [], equipment: 'Barre / Haltères' },
   { id: 'fn-farmer', name: 'Farmer\'s walk', type: 'loaded', primary: 'Trapèzes', secondary: ['Avant-bras', 'Full body'], equipment: 'Haltères' },
   { id: 'fn-tgu', name: 'Turkish get-up', type: 'loaded', primary: 'Full body', secondary: [], equipment: 'Kettlebell / Haltère' },
+
+  // CALLISTHÉNIE — SKILLS
+  { id: 'cal-mu-barre', name: 'Muscle-up barre', type: 'bodyweight', primary: 'Dorsaux', secondary: ['Pectoraux', 'Triceps', 'Biceps'], equipment: 'Barre fixe' },
+  { id: 'cal-mu-anneaux', name: 'Muscle-up anneaux', type: 'bodyweight', primary: 'Dorsaux', secondary: ['Pectoraux', 'Triceps'], equipment: 'Anneaux' },
+  { id: 'cal-fl-tuck', name: 'Front lever tuck', type: 'time', primary: 'Dorsaux', secondary: ['Abdos'], equipment: 'Barre fixe' },
+  { id: 'cal-fl-adv-tuck', name: 'Front lever tuck avancé', type: 'time', primary: 'Dorsaux', secondary: ['Abdos'], equipment: 'Barre fixe' },
+  { id: 'cal-fl-straddle', name: 'Front lever straddle', type: 'time', primary: 'Dorsaux', secondary: ['Abdos'], equipment: 'Barre fixe' },
+  { id: 'cal-fl-full', name: 'Front lever complet', type: 'time', primary: 'Dorsaux', secondary: ['Abdos'], equipment: 'Barre fixe' },
+  { id: 'cal-bl-tuck', name: 'Back lever tuck', type: 'time', primary: 'Dorsaux', secondary: ['Épaules'], equipment: 'Barre fixe' },
+  { id: 'cal-bl-full', name: 'Back lever complet', type: 'time', primary: 'Dorsaux', secondary: ['Épaules'], equipment: 'Barre fixe' },
+  { id: 'cal-planche-tuck', name: 'Planche tuck', type: 'time', primary: 'Épaules', secondary: ['Pectoraux', 'Abdos'], equipment: 'Aucun (sol / parallettes)' },
+  { id: 'cal-planche-straddle', name: 'Planche straddle', type: 'time', primary: 'Épaules', secondary: ['Pectoraux', 'Abdos'], equipment: 'Aucun (sol / parallettes)' },
+  { id: 'cal-planche-full', name: 'Planche complète', type: 'time', primary: 'Épaules', secondary: ['Pectoraux', 'Abdos'], equipment: 'Aucun (sol / parallettes)' },
+  { id: 'cal-pseudo-planche-pompe', name: 'Pompes pseudo planche', type: 'bodyweight', primary: 'Épaules', secondary: ['Pectoraux'], equipment: 'Aucun' },
+  { id: 'cal-pistol', name: 'Pistol squat', type: 'bodyweight', primary: 'Quadriceps', secondary: ['Fessiers', 'Abdos'], equipment: 'Aucun' },
+  { id: 'cal-pistol-assiste', name: 'Pistol squat assisté', type: 'assisted', primary: 'Quadriceps', secondary: ['Fessiers'], equipment: 'Box / TRX / anneaux' },
+  { id: 'cal-shrimp', name: 'Shrimp squat', type: 'bodyweight', primary: 'Quadriceps', secondary: ['Fessiers'], equipment: 'Aucun' },
+  { id: 'cal-lsit', name: 'L-sit', type: 'time', primary: 'Abdos', secondary: ['Épaules', 'Triceps'], equipment: 'Parallettes / sol' },
+  { id: 'cal-vsit', name: 'V-sit', type: 'time', primary: 'Abdos', secondary: ['Épaules', 'Triceps'], equipment: 'Parallettes / sol' },
+  { id: 'cal-flag-tuck', name: 'Human flag tuck', type: 'time', primary: 'Obliques', secondary: ['Épaules', 'Dorsaux'], equipment: 'Barre verticale' },
+  { id: 'cal-flag-full', name: 'Human flag complet', type: 'time', primary: 'Obliques', secondary: ['Épaules', 'Dorsaux'], equipment: 'Barre verticale' },
+  { id: 'cal-archer-traction', name: 'Tractions archer', type: 'bodyweight', primary: 'Dorsaux', secondary: ['Biceps'], equipment: 'Barre fixe' },
+  { id: 'cal-archer-pompe', name: 'Pompes archer', type: 'bodyweight', primary: 'Pectoraux', secondary: ['Triceps'], equipment: 'Aucun' },
+  { id: 'cal-oap-neg', name: 'Négatives one-arm push-up', type: 'bodyweight', primary: 'Pectoraux', secondary: ['Triceps', 'Épaules'], equipment: 'Aucun' },
+  { id: 'cal-skin-cat', name: 'Skin the cat', type: 'bodyweight', primary: 'Épaules', secondary: ['Dorsaux'], equipment: 'Barre fixe' },
+  { id: 'cal-hs-mur', name: 'Handstand au mur (statique)', type: 'time', primary: 'Épaules', secondary: ['Triceps'], equipment: 'Mur' },
+  { id: 'cal-hs-libre', name: 'Handstand en équilibre libre', type: 'time', primary: 'Épaules', secondary: ['Triceps'], equipment: 'Aucun' },
 ];
+
+/* === IDs considérés "callisthénie" pour le filtre bibliothèque ===
+   Mélange des skills ci-dessus + des mouvements poids du corps déjà présents
+   dans EXERCISE_LIBRARY qui sont des classiques de la pratique callisthénique. */
+const CALISTHENICS_IDS = new Set([
+  'cal-mu-barre', 'cal-mu-anneaux', 'cal-fl-tuck', 'cal-fl-adv-tuck', 'cal-fl-straddle', 'cal-fl-full',
+  'cal-bl-tuck', 'cal-bl-full', 'cal-planche-tuck', 'cal-planche-straddle', 'cal-planche-full',
+  'cal-pseudo-planche-pompe', 'cal-pistol', 'cal-pistol-assiste', 'cal-shrimp', 'cal-lsit', 'cal-vsit',
+  'cal-flag-tuck', 'cal-flag-full', 'cal-archer-traction', 'cal-archer-pompe', 'cal-oap-neg',
+  'cal-skin-cat', 'cal-hs-mur', 'cal-hs-libre',
+  // Fondamentaux déjà dans la bibliothèque
+  'pec-pompes', 'pec-pompes-dia', 'pec-dips-pec', 'pec-dips-pec-lest',
+  'tri-dips', 'tri-dips-banc', 'tri-dips-lest', 'tri-dips-ass',
+  'dos-tractions', 'dos-tractions-sup', 'dos-tractions-neutre', 'dos-tractions-large',
+  'dos-tractions-lest', 'dos-tractions-ass', 'dos-rowing-aus',
+  'ep-pike', 'ep-handstand', 'q-sissy',
+  'ab-plank', 'ab-side-plank', 'ab-hollow', 'ab-leg-raise-susp', 'ab-leg-raise', 'ab-wheel', 'ab-dragon', 'ab-toes-bar',
+  'is-nordic', 'fn-burpees', 'fn-tgu',
+]);
 
 /* === EXERCISE DESCRIPTIONS ===
    Format court : position, mouvement, point technique clé. */
@@ -324,6 +370,33 @@ const EXERCISE_DESCRIPTIONS = {
   'fn-thruster': "Front squat enchaîné avec un développé épaules. Descends en squat, remonte en poussant la barre au-dessus de la tête. Très cardio.",
   'fn-farmer': "Haltères ou kettlebells lourds dans chaque main. Marche sur une distance ou un temps. Gainage + trapèzes + avant-bras + cardio.",
   'fn-tgu': "Allongé, kettlebell à bout de bras. Lève-toi étape par étape (coude, main, hanche, pied) tout en gardant le poids en l'air. Redescends étape par étape.",
+
+  // CALLISTHÉNIE — SKILLS
+  'cal-mu-barre': "Traction explosive suivie d'un passage au-dessus de la barre (transition coudes hauts) puis extension des bras en dips. Enchaîne traction + dips sans lâcher la barre. Technique de transition à isoler avant d'enchaîner.",
+  'cal-mu-anneaux': "Comme le muscle-up barre mais aux anneaux, plus instable. Fausse prise (false grip) recommandée pour faciliter la transition. Niveau avancé.",
+  'cal-fl-tuck': "Suspendu à la barre, tire le corps à l'horizontale genoux repliés contre la poitrine, bras tendus, dos droit. Maintiens la position, gainage serré.",
+  'cal-fl-adv-tuck': "Comme le tuck mais hanches ouvertes à ~90°, genoux toujours repliés. Bras et dos tendus, tire les omoplates vers le bas.",
+  'cal-fl-straddle': "Jambes tendues et écartées à l'horizontale, bras tendus. Écarter les jambes réduit le bras de levier par rapport au front lever complet.",
+  'cal-fl-full': "Corps entièrement tendu à l'horizontale, jambes serrées, bras tendus. Version complète du front lever, exige un gainage et un dos très forts.",
+  'cal-bl-tuck': "Suspendu à la barre en pronation, bascule le corps à l'horizontale à l'envers, genoux repliés vers la poitrine. Épaules en extension complète.",
+  'cal-bl-full': "Comme le back lever tuck mais corps entièrement tendu à l'horizontale, face au sol. Demande une bonne mobilité d'épaules.",
+  'cal-planche-tuck': "Appui mains au sol (ou parallettes), épaules très avancées au-dessus des mains, genoux repliés contre la poitrine, pieds décollés du sol. Pousse le sol, gainage serré.",
+  'cal-planche-straddle': "Jambes tendues et écartées à l'horizontale devant toi, épaules avancées, bras tendus. Étape intermédiaire vers la planche complète.",
+  'cal-planche-full': "Corps entièrement tendu et parallèle au sol en appui bras tendus, jambes serrées. Skill de force de poussée le plus exigeant en callisthénie.",
+  'cal-pseudo-planche-pompe': "Pompe avec les mains plus bas que d'habitude (proches des hanches), corps incliné vers l'avant, épaules loin devant les mains. Prépare la planche.",
+  'cal-pistol': "Debout sur une jambe, l'autre tendue devant toi. Descends en squat complet sur la jambe d'appui, bras tendus devant pour l'équilibre, remonte sans poser l'autre pied.",
+  'cal-pistol-assiste': "Pistol squat avec assistance (anneaux, TRX tenu en main, ou box qui limite la profondeur). Réduit la charge sur la jambe d'appui le temps de gagner en force et mobilité.",
+  'cal-shrimp': "Debout sur une jambe, tiens la cheville de l'autre jambe repliée derrière toi. Descends en touchant le genou arrière au sol, remonte sur la jambe d'appui.",
+  'cal-lsit': "Appui bras tendus (sol ou parallettes), jambes tendues à l'horizontale devant toi, corps en L. Pousse fort dans les mains, épaules basses loin des oreilles.",
+  'cal-vsit': "Comme le L-sit mais jambes levées au-dessus de l'horizontale, buste et jambes forment un V. Demande plus de souplesse ischios et de force abdominale.",
+  'cal-flag-tuck': "Agrippe une barre verticale (prise haute en poussée, prise basse en traction), corps horizontal genoux repliés. Le buste doit rester aligné avec les bras.",
+  'cal-flag-full': "Comme le tuck mais corps entièrement tendu à l'horizontale, perpendiculaire à la barre verticale. Skill avancé, forte demande en obliques et épaules.",
+  'cal-archer-traction': "Traction où un bras tire principalement pendant que l'autre reste tendu sur le côté, en appui léger. Alterne les côtés. Étape vers la traction à un bras.",
+  'cal-archer-pompe': "Pompe où un bras pousse principalement pendant que l'autre reste tendu sur le côté au sol. Alterne les côtés. Étape vers la pompe à un bras.",
+  'cal-oap-neg': "Position pompe à un bras (autre main dans le dos ou au sol en appui léger), descends le plus lentement possible en résistant. Ne remonte pas forcément seul au début.",
+  'cal-skin-cat': "Suspendu à la barre, remonte les jambes tendues et fais-les passer entre les bras jusqu'à l'inversion complète du corps derrière la barre, puis reviens. Mobilité d'épaules requise.",
+  'cal-hs-mur': "Appui mains au sol face ou dos au mur, jambes contre le mur pour l'équilibre. Gainage serré, pousse dans les mains, regard entre les mains.",
+  'cal-hs-libre': "Équilibre sur les mains sans appui, au centre de la pièce. Ajuste l'équilibre par les doigts. Niveau avancé, demande beaucoup de pratique de chute contrôlée.",
 };
 
 /* === MUSCLE GROUPS for filters === */
@@ -442,6 +515,39 @@ const DEFAULT_TEMPLATES = [
       { name: 'Triceps (coude au-dessus tête)', durationSec: 30, perSide: true },
     ],
   },
+  {
+    id: 'tpl-d',
+    name: 'Séance D — Callisthénie',
+    letter: 'D',
+    exercises: [
+      { exerciseId: 'dos-tractions', sets: 4, reps: '6-8', notes: '', restSec: 150 },
+      { exerciseId: 'pec-dips-pec', sets: 4, reps: '8-10', notes: '', restSec: 120 },
+      { exerciseId: 'cal-pistol-assiste', sets: 3, reps: '6/jambe', notes: '', restSec: 120 },
+      { exerciseId: 'cal-fl-tuck', sets: 3, reps: '15s', notes: '', restSec: 90 },
+      { exerciseId: 'cal-planche-tuck', sets: 3, reps: '15s', notes: '', restSec: 90 },
+      { exerciseId: 'cal-lsit', sets: 3, reps: '10s', notes: '', restSec: 60 },
+      { exerciseId: 'ab-hollow', sets: 3, reps: '30s', notes: '', restSec: 60 },
+    ],
+    warmup: [
+      'Rotations + cercles de poignets — 15 de chaque sens',
+      'Passages poignet en extension au sol (weight bearing) — 30s',
+      'Cercles d\'épaules avant/arrière — 10 de chaque',
+      'Scapular pulls suspendu à la barre — 10 reps',
+      'Rotations de hanches — 10 par côté',
+      'Squats à vide lents — 10 reps',
+      'Tractions : 1×5 légères ou négatives lentes',
+      'Gainage : 1×20s planche pour activer',
+    ],
+    cooldown: [
+      { name: 'Poignets (extension / flexion)', durationSec: 30, perSide: false },
+      { name: 'Épaules (bras en travers)', durationSec: 30, perSide: true },
+      { name: 'Dorsaux (position de l\'enfant)', durationSec: 45, perSide: false },
+      { name: 'Pectoraux (bras contre mur)', durationSec: 30, perSide: true },
+      { name: 'Fléchisseurs de hanche', durationSec: 30, perSide: true },
+      { name: 'Ischio-jambiers', durationSec: 30, perSide: true },
+      { name: 'Quadriceps', durationSec: 30, perSide: true },
+    ],
+  },
 ];
 
 /* === Repos par défaut selon type d'exo === */
@@ -505,7 +611,7 @@ const State = {
     historyDetailId: null,
     templateEditId: null,
     progressionExerciseId: null,
-    libraryFilter: { search: '', muscle: null, equipment: null },
+    libraryFilter: { search: '', muscle: null, equipment: null, calisthenics: false },
   },
 
   init() {
@@ -549,6 +655,14 @@ const State = {
           if (!tpl.warmup) { tpl.warmup = [...WARMUP_GENERAL]; changed = true; }
           if (!tpl.cooldown) { tpl.cooldown = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[0].cooldown)); changed = true; }
         }
+      }
+    });
+    // Migration v3 → v4 : ajouter les nouveaux templates par défaut (ex. Séance D Callisthénie)
+    // s'ils n'existent pas déjà (par id), sans toucher aux templates déjà personnalisés par l'utilisateur.
+    DEFAULT_TEMPLATES.forEach(def => {
+      if (!this.templates.some(t => t.id === def.id)) {
+        this.templates.push(JSON.parse(JSON.stringify(def)));
+        changed = true;
       }
     });
     // Active session : ajouter restSec si manquant
@@ -755,7 +869,41 @@ function showScreen(name, params = {}) {
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.screen === name);
   });
+  // Garde l'écran allumé pendant une séance (sinon le verrouillage auto coupe le timer de repos)
+  if (name === 'active-session') acquireWakeLock();
+  else releaseWakeLock();
 }
+
+/* === WAKE LOCK ===
+   Sans ça, l'écran se verrouille pendant un repos (60-180s sans toucher le tel) et le
+   navigateur suspend les timers JS en arrière-plan : le bip de fin de repos arrive en retard,
+   seulement quand on rouvre l'app. */
+let _wakeLock = null;
+
+async function acquireWakeLock() {
+  if (!('wakeLock' in navigator) || _wakeLock) return;
+  try {
+    _wakeLock = await navigator.wakeLock.request('screen');
+    _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+  } catch (e) {
+    // Refusé (batterie faible, onglet caché...) — l'app reste utilisable, juste moins fiable en fond.
+  }
+}
+
+function releaseWakeLock() {
+  if (_wakeLock) {
+    _wakeLock.release().catch(() => {});
+    _wakeLock = null;
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  // L'OS relâche automatiquement le wake lock quand l'onglet passe en arrière-plan ;
+  // on le redemande au retour si on est toujours en séance.
+  if (document.visibilityState === 'visible' && State.ui.currentScreen === 'active-session') {
+    acquireWakeLock();
+  }
+});
 
 document.addEventListener('click', e => {
   const navBtn = e.target.closest('.nav-btn');
@@ -766,8 +914,12 @@ document.addEventListener('click', e => {
 });
 
 /* === MAIN RENDER === */
-function render() {
+function render(opts = {}) {
   const root = document.getElementById('screens');
+  const keepScroll = opts.keepScroll !== false && State.ui.currentScreen === render._lastScreen;
+  // .screen-body a overflow-y:auto mais #app n'est pas borné en hauteur (min-height),
+  // donc en pratique c'est la fenêtre/document qui scrolle, pas le div interne.
+  const prevScrollY = keepScroll ? (window.scrollY || document.documentElement.scrollTop) : 0;
   root.innerHTML = '';
 
   const screenName = State.ui.currentScreen;
@@ -786,7 +938,15 @@ function render() {
   }
   screen.classList.add('active');
   root.appendChild(screen);
-  window.scrollTo(0, 0);
+
+  if (keepScroll && prevScrollY) {
+    window.scrollTo(0, prevScrollY);
+    const body = screen.querySelector('.screen-body');
+    if (body) body.scrollTop = prevScrollY;
+  } else {
+    window.scrollTo(0, 0);
+  }
+  render._lastScreen = screenName;
 
   // Re-render timer bar si actif (le screen vient d'être remplacé, le bandeau du body est conservé)
   if (State.restTimer) renderTimerBar();
@@ -1648,7 +1808,11 @@ function renderLibraryBody(opts = {}) {
 
   // Filter chips
   const allChip = el('button', { class: 'chip' + (!filter.muscle ? ' active' : ''), onclick: () => { filter.muscle = null; updateLibList(); renderChips(); } }, 'Tous');
-  const chipsRow = el('div', { class: 'filter-chips' }, allChip);
+  const calChip = el('button', {
+    class: 'chip' + (filter.calisthenics ? ' active' : ''),
+    onclick: () => { filter.calisthenics = !filter.calisthenics; updateLibList(); renderChips(); },
+  }, 'Callisthénie');
+  const chipsRow = el('div', { class: 'filter-chips' }, allChip, calChip);
   MUSCLE_GROUPS.forEach(m => {
     const c = el('button', { class: 'chip' + (filter.muscle === m ? ' active' : ''), onclick: () => { filter.muscle = filter.muscle === m ? null : m; updateLibList(); renderChips(); } }, m);
     chipsRow.appendChild(c);
@@ -1656,7 +1820,8 @@ function renderLibraryBody(opts = {}) {
   body.appendChild(chipsRow);
 
   function renderChips() {
-    chipsRow.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    calChip.classList.toggle('active', !!filter.calisthenics);
+    chipsRow.querySelectorAll('.chip').forEach(c => { if (c !== calChip) c.classList.remove('active'); });
     if (!filter.muscle) allChip.classList.add('active');
     else {
       [...chipsRow.querySelectorAll('.chip')].find(c => c.textContent === filter.muscle)?.classList.add('active');
@@ -1671,6 +1836,7 @@ function renderLibraryBody(opts = {}) {
     list.innerHTML = '';
     const q = (filter.search || '').toLowerCase().trim();
     const items = State.allExercises().filter(e => {
+      if (filter.calisthenics && !CALISTHENICS_IDS.has(e.id)) return false;
       if (filter.muscle && e.primary !== filter.muscle && !(e.secondary || []).includes(filter.muscle)) return false;
       if (q && !e.name.toLowerCase().includes(q) && !e.primary.toLowerCase().includes(q)) return false;
       return true;

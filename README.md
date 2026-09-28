@@ -1,6 +1,13 @@
-# Muscu — v3
+# Muscu — v4
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4
+
+- **Callisthénie** : 25 nouveaux mouvements skills (muscle-up, front lever, back lever, planche, pistol squat, L-sit / V-sit, human flag, archer pull-up/push-up, handstand, skin the cat...) avec description technique complète
+- **Filtre "Callisthénie"** dans la bibliothèque : regroupe les nouveaux skills + les mouvements poids du corps déjà présents qui sont des classiques de la callisthénie (tractions, dips, pompes, gainages, nordic curl...). Combinable avec la recherche et les filtres par groupe musculaire
+- **Séance D — Callisthénie** : nouveau template prêt à l'emploi (tractions, dips, pistol assisté, front lever tuck, planche tuck, L-sit, hollow hold) avec échauffement axé mobilité poignets/épaules et étirements adaptés. Apparaît automatiquement même si tu avais déjà des séances sauvegardées (migration auto)
+- **Fix** : la position de scroll ne saute plus en haut de l'écran à chaque fois que tu coches un set pendant une séance
 
 ## Nouveautés v3
 
