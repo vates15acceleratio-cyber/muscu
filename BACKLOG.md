@@ -2,7 +2,9 @@
 
 Idées notées pour plus tard. **Ce ne sont pas des engagements** : rien n'est codé sans que le propriétaire l'ait confirmé (proposer, faire confirmer, puis coder, tester et pousser).
 
-## 1. Filtrer les exercices par équipement
+## Demandées par le propriétaire
+
+### 1. Filtrer les exercices par équipement
 
 Pouvoir filtrer la Bibliothèque (et le sélecteur d'exercices d'une séance ou d'un template) selon l'équipement : **Machine / Haltères / Barre / Rien**.
 
@@ -13,7 +15,7 @@ Points à traiter :
 - Ne pas modifier les valeurs d'équipement stockées (elles sont dans les données existantes) : ajouter une correspondance à l'affichage, comme pour la traduction.
 - Prévoir la traduction anglaise des libellés du filtre (`i18n.js`).
 
-## 2. Un schéma ou une image pour chaque exercice
+### 2. Un schéma ou une image pour chaque exercice
 
 Illustrer les exercices (aujourd'hui : texte de description et lien de démo YouTube).
 
@@ -25,3 +27,27 @@ Illustrer les exercices (aujourd'hui : texte de description et lien de démo You
 - la **correspondance** avec les ids d'exercices existants, sans changer ces ids (ils sont dans l'historique des utilisateurs).
 
 Rappels : toute version qui touche aux données passe par le test du sandbox (voir `CLAUDE.md`), et l'écran de démarrage (Logo d'accueil) ne se modifie pas.
+
+## Brainstorming — à trier plus tard
+
+Idées proposées par Claude, toutes gardées pour l'instant. Le propriétaire fera le tri ; aucune n'est priorisée ni validée.
+
+### Pendant la séance
+3. **Voir la dernière performance** : afficher, à côté de chaque exercice, ce qui avait été fait la dernière fois (charge × reps). Aujourd'hui l'app n'affiche que la cible.
+4. **Préremplir avec les suggestions du coach** : le bilan de fin de séance propose la charge suivante (`suggestNextTargets`), mais la séance suivante ne la reprend pas. Elle pourrait préremplir les champs.
+5. **Calculateur de disques** : pour une charge donnée à la barre, indiquer les disques à mettre de chaque côté.
+6. **Note ou RPE par exercice** : un ressenti noté exercice par exercice, en plus des notes de la séance.
+
+### Suivi
+7. **Volume par groupe musculaire** : tonnage ou nombre de séries par semaine et par muscle, pour repérer ce qui est sous-travaillé.
+8. **Suivi du poids de corps** avec une courbe, dans l'écran Progression.
+9. **Calendrier de l'historique** : vue mensuelle des jours entraînés, avec le nombre de séances par semaine.
+10. **Estimation du 1RM** (charge maximale pour une répétition) à partir des séries, avec sa courbe.
+
+### Données
+11. **Rappel d'export** : une bannière après N séances sans sauvegarde, puisque l'historique n'existe que dans le navigateur.
+12. **Export CSV** de l'historique, pour un tableur.
+13. **Inclure la langue dans l'export JSON** : elle est aujourd'hui dans une clé séparée (`muscu.lang`) et n'est pas sauvegardée. Petit correctif de données : à passer par le test du sandbox.
+
+### Apparence
+14. **Thème clair** : le réglage `theme` existe dans les données, mais seul le thème sombre est implémenté. Attention : le Logo d'accueil reste tel quel (fond noir).
