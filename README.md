@@ -7,6 +7,7 @@ App perso de musculation. Single-file PWA, données 100% locales (localStorage),
 - **Traduction complète en anglais** : un petit drapeau (🇫🇷 / 🇬🇧) en haut de l'écran principal « Séances », à côté de l'engrenage, bascule toute l'app entre français et anglais. Le choix est mémorisé sur l'appareil (clé `muscu.lang`) et le français reste la langue par défaut
 - **Tout est traduit** : interface, messages, bibliothèque (noms, muscles, équipements et descriptions des exercices), templates Haut/Bas/Core avec leurs échauffements et étirements, recommandations du coach, dates, export texte
 - **Tes données ne changent pas** : l'historique, les identifiants et les exercices personnalisés restent tels quels. Seul l'affichage est traduit, donc tu peux changer de langue à tout moment sans rien perdre. Les textes que tu as saisis toi-même (nom d'un template renommé, exercice perso, ligne d'échauffement modifiée, notes) restent dans ta langue de saisie
+- **Timer de repos en plein écran** : valider un set ouvre un écran de repos (nom de l'exercice, gros décompte, barre de progression, −15 s / pause / +30 s, Skip). Il se ferme tout seul à la fin du repos (bip + vibration). **Sur le dernier set d'un exercice, aucun timer ne se lance**
 - Nouveaux fichiers `i18n.js` (moteur + interface) et `i18n-desc.js` (descriptions d'exercices en anglais), mis en cache hors-ligne comme le reste
 
 ## Nouveautés v4
@@ -123,8 +124,8 @@ Depuis la v4, dès qu'une mise à jour est détectée, l'app se recharge automat
 - Les conditions restent modifiables via la ligne « Conditions de récup » en haut de l'onglet Échauffement
 - Onglet **Échauffement** : coche les items au fur et à mesure (**Éditer la liste** pour les modifier sans quitter la séance)
 - Onglet **Exercices** : pour chaque exo, remplis reps + kg, clique le **✓** (case verte). Maintenir le **✓** appuyé supprime le set
-- À la validation, le **timer de repos** démarre automatiquement dans un bandeau fixe au-dessus de la nav
-- Contrôles du timer : −15 s · pause/play · +30 s · Skip
+- À la validation d'un set, le **timer de repos** s'ouvre automatiquement en plein écran (sauf sur le dernier set de l'exercice, où rien ne se lance)
+- Contrôles du timer : −15 s · pause/play · +30 s · Skip (ferme l'écran de repos pour revenir à la saisie)
 - Le bip + vibration signalent la fin du repos
 - Onglet **Étirements** : **Démarrer le mode guidé** fait défiler les positions avec timer auto ; tes notes / ressenti se saisissent au même endroit
 - L'écran reste allumé pendant la séance pour que le bip de fin de repos sonne à l'heure

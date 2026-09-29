@@ -1721,8 +1721,10 @@ function toggleSetDone(exo, set, sidx) {
     }
   }
   State.save();
-  // Auto-start rest timer when validating a set
-  if (becomingDone && State.settings.timerAutoStart && State.activeSession) {
+  // Auto-start rest timer when validating a set — sauf sur le dernier set de l'exercice
+  // (rien à attendre ensuite : on passe à l'exercice suivant sans repos imposé).
+  const isLastSet = sidx === exo.sets.length - 1;
+  if (becomingDone && !isLastSet && State.settings.timerAutoStart && State.activeSession) {
     const exDef = State.exerciseById(exo.exerciseId);
     const seconds = exo.restSec || defaultRestSec(exDef);
     startRestTimer(seconds, exo.exerciseId, exDef ? exDef.name : 'Exercice');
@@ -3590,26 +3592,28 @@ function renderTimerBar() {
     ? (State.restTimer.remainingMs || 0) / 1000
     : (State.restTimer.endsAt - Date.now()) / 1000;
 
-  const info = el('div', { class: 'timer-info' },
-    el('div', { class: 'timer-exo' }, State.restTimer.exerciseName),
-    el('div', { class: 'timer-value', id: 'timer-value' }, fmtTimerSec(remaining)),
-  );
+  // Écran de repos plein écran : nom de l'exercice, gros décompte, barre de progression, contrôles.
   const controls = el('div', { class: 'timer-controls' },
     el('button', { class: 'timer-btn', onclick: () => adjustRestTimer(-15) }, '−15s'),
     el('button', {
       class: 'timer-btn timer-pp',
+      'aria-label': State.restTimer.paused ? 'Reprendre' : 'Pause',
       onclick: () => State.restTimer.paused ? resumeRestTimer() : pauseRestTimer()
     }, State.restTimer.paused ? '▶' : '⏸'),
     el('button', { class: 'timer-btn', onclick: () => adjustRestTimer(30) }, '+30s'),
-    el('button', { class: 'timer-btn timer-skip', onclick: stopRestTimer }, 'Skip'),
   );
-  // Progress bar
   const pct = Math.max(0, Math.min(100, (remaining / State.restTimer.totalSec) * 100));
   const progress = el('div', { class: 'timer-progress' },
     el('div', { class: 'timer-progress-fill', id: 'timer-progress-fill', style: `width: ${pct}%` })
   );
-  bar.appendChild(progress);
-  const inner = el('div', { class: 'timer-bar-inner' }, info, controls);
+  const inner = el('div', { class: 'timer-full' },
+    el('div', { class: 'timer-label' }, 'Repos'),
+    el('div', { class: 'timer-exo' }, State.restTimer.exerciseName),
+    el('div', { class: 'timer-value', id: 'timer-value' }, fmtTimerSec(remaining)),
+    progress,
+    controls,
+    el('button', { class: 'timer-skip', onclick: stopRestTimer }, 'Skip'),
+  );
   bar.appendChild(inner);
 }
 

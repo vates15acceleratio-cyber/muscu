@@ -110,6 +110,7 @@ const I18N_UI = {
   'Séance abandonnée': 'Workout discarded',
   'Aucun set validé. Terminer quand même ?': 'No sets completed. Finish anyway?',
   'Repos terminé': 'Rest over',
+  'Reprendre': 'Resume', 'Pause': 'Pause',
 
   // Bibliothèque
   '+ Custom': '+ Custom', 'Rechercher un exercice...': 'Search for an exercise...', 'Callisthénie': 'Calisthenics',
