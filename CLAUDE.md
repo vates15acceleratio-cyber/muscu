@@ -50,6 +50,10 @@ node muscu-sandbox/run-migration-test.js /chemin/vers/muscu   # code 0 = tout pa
 
 Si le dépôt `general` n'est pas attaché à la session, l'ajouter d'abord (`add_repo`). Le fonctionnement, les fixtures et la façon de les mettre à jour sont décrits dans `muscu-sandbox/README.md`. Ne pas modifier les fixtures v1 et v3 ; pour un nouveau champ de données, compléter `current()` dans `generate-fixtures.js`. Ces données ne doivent jamais être ajoutées au dépôt `muscu` (public, publié sur Pages).
 
+## Idées à faire
+
+Les idées notées pour plus tard sont dans `BACKLOG.md` (à lire quand le propriétaire parle de « la prochaine fois » ou demande ce qui reste à faire). Ce ne sont pas des engagements.
+
 ## Déroulé habituel
 
 - Une fonctionnalité est proposée, confirmée par le propriétaire, puis codée, testée (Playwright/Chromium) et poussée sur `main`.
