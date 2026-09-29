@@ -111,6 +111,9 @@ const I18N_UI = {
   'Aucun set validé. Terminer quand même ?': 'No sets completed. Finish anyway?',
   'Repos terminé': 'Rest over',
   'Reprendre': 'Resume', 'Pause': 'Pause',
+  'Superset ?': 'Superset?', 'Défaire': 'Undo', 'Inverser': 'Swap',
+  'Lier les deux exercices en superset': 'Link the two exercises as a superset',
+  'Inverser l\'ordre A ↔ B': 'Swap the A ↔ B order', 'Défaire le superset': 'Break the superset',
 
   // Bibliothèque
   '+ Custom': '+ Custom', 'Rechercher un exercice...': 'Search for an exercise...', 'Callisthénie': 'Calisthenics',

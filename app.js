@@ -5,7 +5,7 @@
 
 // Bumpée à chaque commit + push (4.0, 4.1, 4.2...). Garder en phase avec
 // CACHE_VERSION dans sw.js (même valeur) et le titre du README.
-const APP_VERSION = '4.1';
+const APP_VERSION = '4.2';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -667,6 +667,9 @@ const State = {
       this.templates = this.templates.filter(t => !REMOVED_DEFAULT_IDS.has(t.id));
       changed = true;
     }
+    // Supersets : ne garder que les paires adjacentes valides
+    this.templates.forEach(tpl => { if (normalizeSupersets(tpl.exercises)) changed = true; });
+    if (this.activeSession && normalizeSupersets(this.activeSession.exercises)) changed = true;
     // Active session : ajouter restSec si manquant
     if (this.activeSession) {
       this.activeSession.exercises.forEach(e => {
@@ -783,6 +786,9 @@ function icon(name, size = 20) {
     up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>',
     down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
     info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    unlink: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.004 5.004 0 0 0-6.98 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.004 5.004 0 0 0 6.98 0l1.71-1.71"/><path d="M8 2v3M2 8h3M16 19v3M19 16h3"/></svg>',
+    swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg>',
     // Repris des icônes de la nav du bas pour garder les écrans vides cohérents avec le reste de l'app
     // (au lieu d'emoji, qui changent de style selon l'OS et détonent du set d'icônes monochromes).
     workout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M6 8h2M6 16h2M10 6h4M10 18h4M16 8h2M16 16h2M20 12h2M9 9h6v6H9z"/></svg>',
@@ -1088,6 +1094,7 @@ function doStartSession(tpl) {
       const restSec = e.restSec != null ? e.restSec : defaultRestSec(exDef);
       return {
         exerciseId: e.exerciseId,
+        ssId: e.ssId || null,
         targetSets: n,
         targetReps: e.reps,
         restSec,
@@ -1148,6 +1155,143 @@ function openSettingsMenu() {
     { label: 'Exporter pour analyse Claude', handler: exportForClaude },
     { label: 'Tout effacer', danger: true, handler: confirmWipe },
   ]);
+}
+
+/* === SUPERSETS ===
+   Deux exercices ADJACENTS portant le même `ssId` forment un superset (2 maximum).
+   Le premier est "A", le second "B". B dirige le repos : valider un set de A ne lance
+   pas de timer ; valider un set de B lance le timer de B (sauf sur son dernier set).
+   Le lien se fait / se défait à volonté, en séance comme dans un template. */
+function supersetPartnerIndex(list, idx) {
+  const id = list[idx] && list[idx].ssId;
+  if (!id) return null;
+  if (list[idx + 1] && list[idx + 1].ssId === id) return idx + 1;
+  if (list[idx - 1] && list[idx - 1].ssId === id) return idx - 1;
+  return null;
+}
+
+function supersetRole(list, idx) {
+  const p = supersetPartnerIndex(list, idx);
+  return p == null ? null : (p > idx ? 'A' : 'B');
+}
+
+// Garde-fou (import, données anciennes...) : ne conserve que les vraies paires adjacentes.
+function normalizeSupersets(list) {
+  if (!Array.isArray(list)) return false;
+  let changed = false;
+  const paired = new Set();
+  for (let i = 0; i < list.length - 1; i++) {
+    if (list[i].ssId && list[i + 1].ssId === list[i].ssId && !paired.has(i)) { paired.add(i); paired.add(i + 1); i++; }
+  }
+  list.forEach((x, i) => { if (x.ssId && !paired.has(i)) { x.ssId = null; changed = true; } });
+  return changed;
+}
+
+function clearSuperset(list, idx) {
+  const p = supersetPartnerIndex(list, idx);
+  if (list[idx]) list[idx].ssId = null;
+  if (p != null) list[p].ssId = null;
+}
+
+// Bloc = un exercice seul ou une paire liée : Monter / Descendre déplacent le bloc entier.
+function blockRange(list, idx) {
+  const p = supersetPartnerIndex(list, idx);
+  if (p == null) return [idx, idx];
+  return p > idx ? [idx, p] : [p, idx];
+}
+
+function canMoveBlock(list, idx, dir) {
+  const [s, e] = blockRange(list, idx);
+  return dir < 0 ? s > 0 : e < list.length - 1;
+}
+
+function moveBlock(list, idx, dir) {
+  if (!canMoveBlock(list, idx, dir)) return;
+  const [s, e] = blockRange(list, idx);
+  const size = e - s + 1;
+  if (dir < 0) {
+    const [ps] = blockRange(list, s - 1);
+    list.splice(ps, 0, ...list.splice(s, size));
+  } else {
+    const [, ne] = blockRange(list, e + 1);
+    const moved = list.splice(s, size);
+    list.splice(ne - size + 1, 0, ...moved);
+  }
+}
+
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+// Lie list[i] et list[i+1]. Autant de sets pour A et B : on aligne sur le plus grand.
+function linkSuperset(list, i, isTemplate) {
+  const a = list[i], b = list[i + 1];
+  const id = uid('ss');
+  a.ssId = id; b.ssId = id;
+  if (isTemplate) {
+    const n = Math.max(Number(a.sets) || 0, Number(b.sets) || 0);
+    a.sets = n; b.sets = n;
+  } else {
+    const n = Math.max(a.sets.length, b.sets.length);
+    [a, b].forEach(x => {
+      while (x.sets.length < n) {
+        const last = x.sets[x.sets.length - 1];
+        x.sets.push({ reps: null, weight: null, done: false, setType: last ? last.setType : (x.setTypeOverride || null) });
+      }
+      x.targetSets = n;
+    });
+  }
+  State.ui.ssAnim = { id, type: 'new' };
+  State.save();
+  render();
+}
+
+function swapSuperset(list, i) {
+  [list[i], list[i + 1]] = [list[i + 1], list[i]];
+  State.ui.ssAnim = { id: list[i].ssId, type: 'swap' };
+  State.save();
+  render();
+}
+
+// Rupture animée (chaîne cassée, cartes qui s'écartent) puis mise à jour des données.
+function breakSuperset(list, i, groupNode) {
+  if (groupNode && groupNode.classList.contains('ss-breaking')) return;
+  const finish = () => { clearSuperset(list, i); State.save(); render(); };
+  if (!groupNode || prefersReducedMotion()) { finish(); return; }
+  groupNode.classList.add('ss-breaking');
+  const iconSlot = groupNode.querySelector('.ss-pill-icon');
+  if (iconSlot) iconSlot.replaceChildren(icon('unlink', 16));
+  setTimeout(finish, 380);
+}
+
+function renderSupersetLinkButton(onclick) {
+  return el('button', {
+    class: 'ss-link-btn',
+    'aria-label': 'Lier les deux exercices en superset',
+    onclick,
+  }, icon('link', 16), 'Superset ?');
+}
+
+// Paire A/B : deux cartes reliées par une chaîne, avec Inverser et Défaire.
+function renderSupersetGroup(list, i, cardA, cardB) {
+  const id = list[i].ssId;
+  const cls = ['ss-group'];
+  if (State.ui.ssAnim && State.ui.ssAnim.id === id) {
+    cls.push(State.ui.ssAnim.type === 'swap' ? 'ss-swap' : 'ss-new');
+    State.ui.ssAnim = null;
+  }
+  const group = el('div', { class: cls.join(' ') });
+  cardA.classList.add('ss-card-a');
+  cardB.classList.add('ss-card-b');
+  const connector = el('div', { class: 'ss-connector' },
+    el('div', { class: 'ss-pill' }, el('span', { class: 'ss-pill-icon' }, icon('link', 16)), 'Superset'),
+    el('button', { class: 'ss-btn', 'aria-label': 'Inverser l\'ordre A ↔ B', onclick: () => swapSuperset(list, i) }, icon('swap', 14), 'Inverser'),
+    el('button', { class: 'ss-btn ss-btn-break', 'aria-label': 'Défaire le superset', onclick: () => breakSuperset(list, i, group) }, icon('unlink', 14), 'Défaire'),
+  );
+  group.appendChild(cardA);
+  group.appendChild(connector);
+  group.appendChild(cardB);
+  return group;
 }
 
 /* === ACTIVE SESSION SCREEN ===
@@ -1332,9 +1476,24 @@ function renderWarmupStep(session) {
 /* === Onglet Exercices === */
 function renderExercisesStep(session) {
   const wrap = el('div', {});
-  session.exercises.forEach((exo, idx) => {
-    wrap.appendChild(renderActiveExerciseCard(exo, idx));
-  });
+  const list = session.exercises;
+  let i = 0;
+  while (i < list.length) {
+    if (supersetPartnerIndex(list, i) === i + 1) {
+      wrap.appendChild(renderSupersetGroup(list, i,
+        renderActiveExerciseCard(list[i], i, 'A'),
+        renderActiveExerciseCard(list[i + 1], i + 1, 'B')));
+      i += 2;
+      continue;
+    }
+    wrap.appendChild(renderActiveExerciseCard(list[i], i));
+    // Lien proposé seulement entre deux exercices libres adjacents (un superset = 2 exos max)
+    if (i + 1 < list.length && !list[i].ssId && !list[i + 1].ssId) {
+      const at = i;
+      wrap.appendChild(renderSupersetLinkButton(() => linkSuperset(list, at, false)));
+    }
+    i++;
+  }
 
   wrap.appendChild(el('button', {
     class: 'btn-add',
@@ -1619,7 +1778,7 @@ function renderConditionsBlock(session, opts = {}) {
   return block;
 }
 
-function renderActiveExerciseCard(exo, idx) {
+function renderActiveExerciseCard(exo, idx, ssRole) {
   const exDef = State.exerciseById(exo.exerciseId);
   const card = el('div', { class: 'exo-card' });
 
@@ -1629,6 +1788,7 @@ function renderActiveExerciseCard(exo, idx) {
   if (exDef) {
     nameWrap.appendChild(el('span', { class: 'exo-type-badge ' + exDef.type }, typeBadgeShort(exDef.type)));
   }
+  if (ssRole) nameWrap.appendChild(el('span', { class: 'ss-role' }, ssRole));
   const restSec = exo.restSec != null ? exo.restSec : defaultRestSec(exDef);
   const targetText = el('div', { class: 'exo-target' },
     tf('Cible : {s} × {r}', { s: exo.targetSets || '—', r: exo.targetReps || '—' }),
@@ -1724,7 +1884,9 @@ function toggleSetDone(exo, set, sidx) {
   // Auto-start rest timer when validating a set — sauf sur le dernier set de l'exercice
   // (rien à attendre ensuite : on passe à l'exercice suivant sans repos imposé).
   const isLastSet = sidx === exo.sets.length - 1;
-  if (becomingDone && !isLastSet && State.settings.timerAutoStart && State.activeSession) {
+  // Superset : l'exercice A n'a pas de timer, c'est B (avec son propre repos) qui le dirige.
+  const isSupersetA = State.activeSession && supersetRole(State.activeSession.exercises, State.activeSession.exercises.indexOf(exo)) === 'A';
+  if (becomingDone && !isLastSet && !isSupersetA && State.settings.timerAutoStart && State.activeSession) {
     const exDef = State.exerciseById(exo.exerciseId);
     const seconds = exo.restSec || defaultRestSec(exDef);
     startRestTimer(seconds, exo.exerciseId, exDef ? exDef.name : 'Exercice');
@@ -1733,6 +1895,13 @@ function toggleSetDone(exo, set, sidx) {
 }
 
 function promptDeleteSet(exo, sidx) {
+  // Dans un superset, on retire aussi le set du même rang chez le partenaire, s'il est encore vierge.
+  const list = State.activeSession.exercises;
+  const p = supersetPartnerIndex(list, list.indexOf(exo));
+  if (p != null) {
+    const ps = list[p].sets[sidx];
+    if (ps && !ps.done && ps.reps == null && ps.weight == null) list[p].sets.splice(sidx, 1);
+  }
   exo.sets.splice(sidx, 1);
   State.save();
   render();
@@ -1741,7 +1910,15 @@ function promptDeleteSet(exo, sidx) {
 
 function addSet(exoIdx) {
   const session = State.activeSession;
-  const exo = session.exercises[exoIdx];
+  // Dans un superset, ajouter un set à l'un l'ajoute aux deux (autant de sets pour A et B).
+  const p = supersetPartnerIndex(session.exercises, exoIdx);
+  addSetTo(session.exercises[exoIdx]);
+  if (p != null) addSetTo(session.exercises[p]);
+  State.save();
+  render();
+}
+
+function addSetTo(exo) {
   const lastSet = exo.sets[exo.sets.length - 1];
   const newSet = {
     reps: null,
@@ -1755,8 +1932,6 @@ function addSet(exoIdx) {
     newSet.weight = lastSet.weight;
   }
   exo.sets.push(newSet);
-  State.save();
-  render();
 }
 
 function openActiveExoMenu(idx) {
@@ -1768,7 +1943,7 @@ function openActiveExoMenu(idx) {
     { label: 'Voir la description / démo', handler: () => openExerciseDetail(exo.exerciseId) },
     { label: 'Changer la cible', handler: () => editExoTarget(idx) },
     { label: 'Changer le repos', handler: () => editExoRest(idx) },
-    { label: 'Remplacer l\'exercice', handler: () => openExercisePicker(id => { exo.exerciseId = id; State.save(); render(); }) },
+    { label: 'Remplacer l\'exercice', handler: () => openExercisePicker(id => { clearSuperset(session.exercises, idx); exo.exerciseId = id; State.save(); render(); }) },
   ];
 
   // Allow set type override for current sets
@@ -1776,11 +1951,12 @@ function openActiveExoMenu(idx) {
     actions.push({ label: 'Mode de saisie des sets...', handler: () => openSetTypeOverride(idx) });
   }
 
-  if (idx > 0) actions.push({ label: 'Monter', handler: () => { [session.exercises[idx-1], session.exercises[idx]] = [session.exercises[idx], session.exercises[idx-1]]; State.save(); render(); } });
-  if (idx < session.exercises.length - 1) actions.push({ label: 'Descendre', handler: () => { [session.exercises[idx+1], session.exercises[idx]] = [session.exercises[idx], session.exercises[idx+1]]; State.save(); render(); } });
+  if (canMoveBlock(session.exercises, idx, -1)) actions.push({ label: 'Monter', handler: () => { moveBlock(session.exercises, idx, -1); State.save(); render(); } });
+  if (canMoveBlock(session.exercises, idx, 1)) actions.push({ label: 'Descendre', handler: () => { moveBlock(session.exercises, idx, 1); State.save(); render(); } });
 
   actions.push({ label: 'Supprimer l\'exercice', danger: true, handler: () => {
     openConfirm('Supprimer cet exercice de la séance ?', () => {
+      clearSuperset(session.exercises, idx);
       session.exercises.splice(idx, 1);
       State.save();
       render();
@@ -1828,6 +2004,8 @@ function editExoTarget(idx) {
   const save = el('button', { class: 'btn btn-primary', onclick: () => {
     exo.targetSets = Number(setsInput.value) || exo.targetSets;
     exo.targetReps = repsInput.value;
+    const pIdx = supersetPartnerIndex(State.activeSession.exercises, idx);
+    if (pIdx != null) State.activeSession.exercises[pIdx].targetSets = exo.targetSets;
     State.save();
     closeModal();
     render();
@@ -2602,18 +2780,21 @@ function renderTemplateEditScreen() {
   if (tpl.exercises.length === 0) {
     body.appendChild(el('div', { class: 'empty' }, 'Aucun exercice. Ajoute-en avec le bouton ci-dessous.'));
   } else {
-    tpl.exercises.forEach((e, i) => {
-      const exDef = State.exerciseById(e.exerciseId);
-      const restSec = e.restSec != null ? e.restSec : defaultRestSec(exDef);
-      const row = el('div', { class: 'template-exo-row' },
-        el('div', { class: 'grow' },
-          el('div', { class: 'name' }, exDef ? exDef.name : 'Exercice'),
-          el('div', { class: 'target' }, `${e.sets} × ${e.reps}` + tr(' · repos ') + fmtTimerSec(restSec))
-        ),
-        el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openTplExoMenu(tpl, i) }, icon('more'))
-      );
-      body.appendChild(row);
-    });
+    const list = tpl.exercises;
+    let i = 0;
+    while (i < list.length) {
+      if (supersetPartnerIndex(list, i) === i + 1) {
+        body.appendChild(renderSupersetGroup(list, i, renderTplExoRow(tpl, i), renderTplExoRow(tpl, i + 1)));
+        i += 2;
+        continue;
+      }
+      body.appendChild(renderTplExoRow(tpl, i));
+      if (i + 1 < list.length && !list[i].ssId && !list[i + 1].ssId) {
+        const at = i;
+        body.appendChild(renderSupersetLinkButton(() => linkSuperset(list, at, true)));
+      }
+      i++;
+    }
   }
 
   body.appendChild(el('button', {
@@ -2671,6 +2852,20 @@ function renderTemplateEditScreen() {
   return screen;
 }
 
+function renderTplExoRow(tpl, i) {
+  const e = tpl.exercises[i];
+  const exDef = State.exerciseById(e.exerciseId);
+  const restSec = e.restSec != null ? e.restSec : defaultRestSec(exDef);
+  const role = supersetRole(tpl.exercises, i);
+  return el('div', { class: 'template-exo-row' },
+    el('div', { class: 'grow' },
+      el('div', { class: 'name' }, exDef ? exDef.name : 'Exercice', role ? el('span', { class: 'ss-role' }, role) : null),
+      el('div', { class: 'target' }, `${e.sets} × ${e.reps}` + tr(' · repos ') + fmtTimerSec(restSec))
+    ),
+    el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openTplExoMenu(tpl, i) }, icon('more'))
+  );
+}
+
 function openTplExoMenu(tpl, idx) {
   const e = tpl.exercises[idx];
   const exDef = State.exerciseById(e.exerciseId);
@@ -2679,14 +2874,16 @@ function openTplExoMenu(tpl, idx) {
     { label: 'Modifier séries × reps', handler: () => editTplExoTarget(tpl, idx) },
     { label: 'Modifier repos', handler: () => editTplExoRest(tpl, idx) },
     { label: 'Remplacer l\'exercice', handler: () => openExercisePicker(id => {
+      clearSuperset(tpl.exercises, idx);
       e.exerciseId = id;
       e.restSec = defaultRestSec(State.exerciseById(id));
       State.save(); render();
     }) },
   ];
-  if (idx > 0) actions.push({ label: 'Monter', handler: () => { [tpl.exercises[idx-1], tpl.exercises[idx]] = [tpl.exercises[idx], tpl.exercises[idx-1]]; State.save(); render(); } });
-  if (idx < tpl.exercises.length - 1) actions.push({ label: 'Descendre', handler: () => { [tpl.exercises[idx+1], tpl.exercises[idx]] = [tpl.exercises[idx], tpl.exercises[idx+1]]; State.save(); render(); } });
+  if (canMoveBlock(tpl.exercises, idx, -1)) actions.push({ label: 'Monter', handler: () => { moveBlock(tpl.exercises, idx, -1); State.save(); render(); } });
+  if (canMoveBlock(tpl.exercises, idx, 1)) actions.push({ label: 'Descendre', handler: () => { moveBlock(tpl.exercises, idx, 1); State.save(); render(); } });
   actions.push({ label: 'Supprimer', danger: true, handler: () => {
+    clearSuperset(tpl.exercises, idx);
     tpl.exercises.splice(idx, 1);
     State.save();
     render();
@@ -2707,6 +2904,8 @@ function editTplExoTarget(tpl, idx) {
   const save = el('button', { class: 'btn btn-primary', onclick: () => {
     e.sets = Number(setsI.value) || e.sets;
     e.reps = repsI.value || e.reps;
+    const pIdx = supersetPartnerIndex(tpl.exercises, idx);
+    if (pIdx != null) tpl.exercises[pIdx].sets = e.sets; // autant de sets pour A et B
     State.save();
     closeModal();
     render();
@@ -3359,6 +3558,7 @@ function importDataPrompt() {
           tf('Importer {s} séances et {t} templates ? Les données actuelles seront remplacées.', { s: data.sessions.length, t: data.templates.length }),
           () => {
             State.templates = data.templates;
+            State.templates.forEach(t => normalizeSupersets(t.exercises));
             State.sessions = data.sessions;
             State.customExercises = data.customExercises || [];
             if (data.settings) State.settings = data.settings;

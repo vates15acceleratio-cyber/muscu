@@ -1,6 +1,17 @@
-# Muscu — v4.1
+# Muscu — v4.2
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.2
+
+- **Supersets** : entre deux exercices adjacents, un bouton chaîne **« Superset ? »** les lie d'un tap. Un superset compte **2 exercices maximum** : un exercice déjà lié n'est plus proposé pour un autre lien. Le lien se **fait et se défait à volonté**, rien n'est jamais verrouillé
+  - **Dans la séance en cours** (onglet Exercices) **et dans l'éditeur de template** : un superset enregistré dans un template revient à chaque nouvelle séance. Les templates par défaut (Haut/Bas/Core) n'en contiennent aucun
+  - Les deux cartes sont reliées par une chaîne, avec les pastilles **A** et **B** et une barre dorée sur le côté. Le bouton **Défaire** (chaîne cassée) supprime le lien
+  - **Timer** : l'exercice **B dirige le repos**. Valider un set de A ne lance aucun timer ; valider un set de B lance le timer avec **le temps de repos de B** (sauf sur son dernier set). Le bouton **Inverser** échange A et B pour changer celui qui dirige
+  - **Autant de sets pour A et B** : au moment du lien, le plus petit est complété. **+ Ajouter un set** sur l'un l'ajoute aux deux ; supprimer un set vierge retire aussi celui du même rang chez l'autre
+  - L'alternance A → B → A → B n'est pas imposée par l'écran : tu coches les sets dans l'ordre que tu veux
+  - **Monter / Descendre** déplace la paire d'un bloc. **Supprimer ou remplacer** un exercice lié défait le lien (l'autre exercice reste seul)
+  - **Animations** à la création (les cartes se rapprochent, la chaîne se referme), à la rupture (la chaîne se brise, les cartes s'écartent) et à l'inversion. Elles sont désactivées si le téléphone est réglé sur « réduire les animations »
 
 ## Nouveautés v4.1
 
@@ -145,6 +156,12 @@ Depuis la v4, dès qu'une mise à jour est détectée, l'app se recharge automat
 - **Bip de fin** / **Vibration** : on/off
 - **Durée par défaut** : par défaut, dépend du type d'exo. Tu peux forcer une durée globale unique.
 - **Étirements → Premier côté** : Gauche ou Droite, pour le côté par lequel démarre le mode guidé des étirements « par côté »
+
+### Supersets
+
+- Onglet **Exercices** (ou éditeur de template) : appuie sur **Superset ?** entre deux exercices pour les lier en **A** et **B**
+- Enchaîne un set de A puis un set de B ; le timer de repos ne part qu'à la validation d'un set de B
+- **Inverser** change quel exercice dirige le repos ; **Défaire** supprime le lien
 
 ### Bibliothèque
 

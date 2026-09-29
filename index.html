@@ -1263,6 +1263,133 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
   font-weight: 600;
 }
 
+/* === SUPERSETS === */
+.ss-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin: -4px 0 12px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 500;
+}
+.ss-link-btn:active { background: var(--surface-2); color: var(--accent); border-color: var(--accent-dim); }
+
+.ss-group {
+  position: relative;
+  margin-bottom: 12px;
+  padding-left: 12px;
+}
+.ss-group::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10px; bottom: 10px;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent-dim), var(--accent));
+  box-shadow: 0 0 8px rgba(245,215,110,.35);
+  transform-origin: center;
+}
+.ss-group .exo-card,
+.ss-group .template-exo-row { margin-bottom: 0; }
+
+.ss-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 0;
+}
+.ss-pill,
+.ss-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+.ss-pill {
+  padding: 7px 11px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+}
+.ss-btn {
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.ss-btn:active { background: var(--surface-2); }
+.ss-btn-break { color: var(--danger); border-color: rgba(248,81,73,.4); }
+.ss-pill-icon { display: inline-flex; }
+
+.ss-role {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-dim);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* Création : les cartes se rapprochent, la chaîne se referme */
+.ss-group.ss-new::before { animation: ssRailIn .45s ease-out both; }
+.ss-group.ss-new .ss-card-a { animation: ssCloseA .5s cubic-bezier(.2,.9,.3,1.15) both; }
+.ss-group.ss-new .ss-card-b { animation: ssCloseB .5s cubic-bezier(.2,.9,.3,1.15) both; }
+.ss-group.ss-new .ss-pill-icon { animation: ssChainPop .55s .12s cubic-bezier(.2,.9,.3,1.3) both; }
+@keyframes ssRailIn { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes ssCloseA { from { transform: translateY(-16px); } to { transform: none; } }
+@keyframes ssCloseB { from { transform: translateY(16px); } to { transform: none; } }
+@keyframes ssChainPop {
+  0%   { transform: scale(.2) rotate(-50deg); opacity: 0; }
+  60%  { transform: scale(1.35) rotate(10deg); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+/* Rupture : la chaîne se brise, les cartes s'écartent */
+.ss-group.ss-breaking::before { animation: ssRailBreak .3s ease-in forwards; }
+.ss-group.ss-breaking .ss-card-a { animation: ssApartA .36s ease-in forwards; }
+.ss-group.ss-breaking .ss-card-b { animation: ssApartB .36s ease-in forwards; }
+.ss-group.ss-breaking .ss-pill-icon { animation: ssChainSnap .36s ease-out both; }
+.ss-group.ss-breaking .ss-btn { opacity: .5; pointer-events: none; }
+@keyframes ssRailBreak { 0% { transform: scaleY(1); opacity: 1; } 40% { transform: scaleY(1.1); } 100% { transform: scaleY(0); opacity: 0; } }
+@keyframes ssApartA { to { transform: translateY(-14px); opacity: .85; } }
+@keyframes ssApartB { to { transform: translateY(14px); opacity: .85; } }
+@keyframes ssChainSnap {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.4) rotate(-14deg); }
+  55%  { transform: scale(1.4) rotate(14deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* Inversion A <-> B */
+.ss-group.ss-swap .ss-card-a { animation: ssSwapDown .35s ease-out both; }
+.ss-group.ss-swap .ss-card-b { animation: ssSwapUp .35s ease-out both; }
+@keyframes ssSwapDown { from { transform: translateY(24px); opacity: .5; } to { transform: none; opacity: 1; } }
+@keyframes ssSwapUp { from { transform: translateY(-24px); opacity: .5; } to { transform: none; opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-group, .ss-group::before, .ss-group *, .ss-group *::before { animation: none !important; }
+}
+
 /* === COLLAPSIBLES (warmup, cooldown) — alignés sur .exo-card === */
 .collapsible {
   background: var(--surface);
