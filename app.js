@@ -5,7 +5,7 @@
 
 // Bumpée à chaque commit + push (4.0, 4.1, 4.2...). Garder en phase avec
 // CACHE_VERSION dans sw.js (même valeur) et le titre du README.
-const APP_VERSION = '4.3';
+const APP_VERSION = '4.4';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -1097,6 +1097,7 @@ function doStartSession(tpl) {
       return {
         exerciseId: e.exerciseId,
         ssId: e.ssId || null,
+        ssColor: e.ssId && e.ssColor != null ? e.ssColor : null,
         targetSets: n,
         targetReps: e.reps,
         restSec,
@@ -1164,6 +1165,23 @@ function openSettingsMenu() {
    Le premier est "A", le second "B". B dirige le repos : valider un set de A ne lance
    pas de timer ; valider un set de B lance le timer de B (sauf sur son dernier set).
    Le lien se fait / se défait à volonté, en séance comme dans un template. */
+// Une couleur par superset (la plus petite libre au moment du lien), mémorisée dans `ssColor`
+// sur les deux exercices : elle suit le template, la séance et l'historique.
+const SS_COLORS = ['#4dd0e1', '#a78bfa', '#ff8a65', '#66d98a', '#f472b6'];
+
+function nextSupersetColor(list) {
+  const used = new Set(list.filter(x => x.ssId && x.ssColor != null).map(x => x.ssColor));
+  for (let c = 0; c < SS_COLORS.length; c++) if (!used.has(c)) return c;
+  return list.filter(x => x.ssId).length % SS_COLORS.length;
+}
+
+function applySupersetColor(group, exo) {
+  const hex = SS_COLORS[(exo && exo.ssColor != null ? exo.ssColor : 0) % SS_COLORS.length];
+  group.style.setProperty('--ss', hex);
+  group.style.setProperty('--ss-soft', hex + '22');
+  group.style.setProperty('--ss-dim', hex + '99');
+}
+
 function supersetPartnerIndex(list, idx) {
   const id = list[idx] && list[idx].ssId;
   if (!id) return null;
@@ -1191,8 +1209,8 @@ function normalizeSupersets(list) {
 
 function clearSuperset(list, idx) {
   const p = supersetPartnerIndex(list, idx);
-  if (list[idx]) list[idx].ssId = null;
-  if (p != null) list[p].ssId = null;
+  if (list[idx]) { list[idx].ssId = null; list[idx].ssColor = null; }
+  if (p != null) { list[p].ssId = null; list[p].ssColor = null; }
 }
 
 // Bloc = un exercice seul ou une paire liée : Monter / Descendre déplacent le bloc entier.
@@ -1229,7 +1247,9 @@ function prefersReducedMotion() {
 function linkSuperset(list, i, isTemplate) {
   const a = list[i], b = list[i + 1];
   const id = uid('ss');
+  const color = nextSupersetColor(list);
   a.ssId = id; b.ssId = id;
+  a.ssColor = color; b.ssColor = color;
   if (isTemplate) {
     const n = Math.max(Number(a.sets) || 0, Number(b.sets) || 0);
     a.sets = n; b.sets = n;
@@ -1249,10 +1269,35 @@ function linkSuperset(list, i, isTemplate) {
 }
 
 function swapSuperset(list, i) {
+  const id = list[i].ssId;
+  // FLIP : on mesure les deux cartes AVANT, on échange les données et on re-rend, puis chaque
+  // carte repart de l'ancienne position de l'autre et glisse jusqu'à la sienne en se croisant.
+  const before = [...document.querySelectorAll(`.ss-group[data-ss="${id}"] .ss-card-a, .ss-group[data-ss="${id}"] .ss-card-b`)]
+    .map(c => c.getBoundingClientRect());
   [list[i], list[i + 1]] = [list[i + 1], list[i]];
-  State.ui.ssAnim = { id: list[i].ssId, type: 'swap' };
   State.save();
   render();
+  if (before.length !== 2 || prefersReducedMotion()) return;
+  const first = document.querySelector(`.ss-group[data-ss="${id}"] .ss-card-a`);
+  const second = document.querySelector(`.ss-group[data-ss="${id}"] .ss-card-b`);
+  if (!first || !second || !first.animate) return;
+  // ancien B (before[1]) devient le premier ; ancien A (before[0]) devient le second
+  flipCard(first, before[1].top - first.getBoundingClientRect().top, 1);
+  flipCard(second, before[0].top - second.getBoundingClientRect().top, -1);
+}
+
+// Déplacement de `dy` px vers la position finale, avec un décalage latéral au milieu du trajet
+// (côtés opposés) pour que les deux blocs se croisent visiblement. Mouvement seul, pas d'opacité.
+function flipCard(node, dy, side) {
+  node.style.position = 'relative';
+  node.style.zIndex = side > 0 ? '3' : '2';
+  const anim = node.animate([
+    { transform: `translate(0, ${dy}px) scale(1)`, boxShadow: 'var(--elev-1)' },
+    { transform: `translate(${side * 12}px, ${dy / 2}px) scale(1.015)`, boxShadow: '0 14px 30px rgba(0,0,0,.55)', offset: 0.5 },
+    { transform: 'translate(0, 0) scale(1)', boxShadow: 'var(--elev-1)' },
+  ], { duration: 600, easing: 'cubic-bezier(.3,.7,.2,1)' });
+  const reset = () => { node.style.position = ''; node.style.zIndex = ''; };
+  anim.onfinish = reset; anim.oncancel = reset;
 }
 
 // Rupture animée (chaîne cassée, cartes qui s'écartent) puis mise à jour des données.
@@ -1264,6 +1309,33 @@ function breakSuperset(list, i, groupNode) {
   const iconSlot = groupNode.querySelector('.ss-pill-icon');
   if (iconSlot) iconSlot.replaceChildren(icon('unlink', 16));
   setTimeout(finish, 380);
+}
+
+// Groupe en lecture seule (historique, bilan) : même habillage, sans boutons.
+function renderStaticSupersetGroup(list, i, cardA, cardB) {
+  const group = el('div', { class: 'ss-group ss-static', 'data-ss': list[i].ssId });
+  applySupersetColor(group, list[i]);
+  cardA.classList.add('ss-card-a');
+  cardB.classList.add('ss-card-b');
+  group.appendChild(cardA);
+  group.appendChild(el('div', { class: 'ss-connector' },
+    el('div', { class: 'ss-pill' }, el('span', { class: 'ss-pill-icon' }, icon('link', 16)), 'Superset')));
+  group.appendChild(cardB);
+  return group;
+}
+
+// Parcourt une liste d'exercices : paire liée -> groupe A/B, sinon carte seule.
+function renderExerciseBlocks(list, buildCard, container) {
+  let i = 0;
+  while (i < list.length) {
+    if (supersetPartnerIndex(list, i) === i + 1) {
+      container.appendChild(renderStaticSupersetGroup(list, i, buildCard(list[i], 'A'), buildCard(list[i + 1], 'B')));
+      i += 2;
+    } else {
+      container.appendChild(buildCard(list[i], null));
+      i++;
+    }
+  }
 }
 
 function renderSupersetLinkButton(onclick) {
@@ -1279,10 +1351,11 @@ function renderSupersetGroup(list, i, cardA, cardB) {
   const id = list[i].ssId;
   const cls = ['ss-group'];
   if (State.ui.ssAnim && State.ui.ssAnim.id === id) {
-    cls.push(State.ui.ssAnim.type === 'swap' ? 'ss-swap' : 'ss-new');
+    cls.push('ss-new');
     State.ui.ssAnim = null;
   }
-  const group = el('div', { class: cls.join(' ') });
+  const group = el('div', { class: cls.join(' '), 'data-ss': id });
+  applySupersetColor(group, list[i]);
   cardA.classList.add('ss-card-a');
   cardB.classList.add('ss-card-b');
   const connector = el('div', { class: 'ss-connector' },
@@ -2365,10 +2438,13 @@ function renderHistoryScreen() {
     const sorted = [...State.sessions].sort((a, b) => b.startedAt - a.startedAt);
     sorted.forEach(s => {
       const setCount = s.exercises.reduce((sum, e) => sum + e.sets.filter(x => x.done).length, 0);
+      const ssCount = s.exercises.filter((_, i) => supersetRole(s.exercises, i) === 'A').length;
       const item = el('div', { class: 'hist-item', onclick: () => showScreen('history-detail', { historyDetailId: s.id }) },
         el('div', { class: 'date' }, fmtDate(s.startedAt)),
         el('div', { class: 'session-name' }, s.templateName || 'Séance'),
-        el('div', { class: 'summary' }, tf('{n} exos · {m} sets validés', { n: s.exercises.length, m: setCount }))
+        el('div', { class: 'summary' },
+          tf('{n} exos · {m} sets validés', { n: s.exercises.length, m: setCount }) +
+          (ssCount ? ` · ${ssCount} superset${ssCount > 1 ? 's' : ''}` : ''))
       );
       body.appendChild(item);
     });
@@ -2410,13 +2486,14 @@ function renderHistoryDetailScreen() {
     ));
   }
 
-  // Exercises
-  session.exercises.forEach(exo => {
+  // Exercises (les paires en superset sont regroupées, comme pendant la séance)
+  renderExerciseBlocks(session.exercises, (exo, role) => {
     const exDef = State.exerciseById(exo.exerciseId);
     const card = el('div', { class: 'card' });
     card.appendChild(el('div', { style: 'font-weight: 600; font-size: 16px; margin-bottom: 4px;' },
       exDef ? exDef.name : 'Exercice',
-      exDef ? el('span', { class: 'exo-type-badge ' + exDef.type }, typeBadgeShort(exDef.type)) : null
+      exDef ? el('span', { class: 'exo-type-badge ' + exDef.type }, typeBadgeShort(exDef.type)) : null,
+      role ? el('span', { class: 'ss-role' }, role) : null
     ));
     card.appendChild(el('div', { class: 'exo-target', style: 'margin-bottom: 8px;' }, tf('Cible : {s} × {r}', { s: exo.targetSets || '—', r: exo.targetReps || '—' })));
 
@@ -2439,8 +2516,8 @@ function renderHistoryDetailScreen() {
         card.appendChild(setRow);
       });
     }
-    body.appendChild(card);
-  });
+    return card;
+  }, body);
 
   if (session.notes) {
     body.appendChild(el('label', { class: 'label-row' }, 'Notes'));
@@ -3102,11 +3179,12 @@ function renderSummaryScreen() {
   // Détail séance
   body.appendChild(el('h2', { class: 'section-title' }, 'Détail'));
 
-  session.exercises.forEach(exo => {
+  renderExerciseBlocks(session.exercises, (exo, role) => {
     const exDef = State.exerciseById(exo.exerciseId);
     const defType = exDef ? exDef.type : 'loaded';
     const card = el('div', { class: 'history-exo-card' },
-      el('div', { class: 'history-exo-name' }, exDef ? exDef.name : 'Exercice'),
+      el('div', { class: 'history-exo-name' }, exDef ? exDef.name : 'Exercice',
+        role ? el('span', { class: 'ss-role' }, role) : null),
     );
     exo.sets.forEach((s, i) => {
       if (!s.done) return;
@@ -3121,8 +3199,8 @@ function renderSummaryScreen() {
         el('span', { class: 'h-set-val' }, repsTxt + wTxt)
       ));
     });
-    body.appendChild(card);
-  });
+    return card;
+  }, body);
 
   body.appendChild(el('div', { class: 'summary-actions' },
     el('button', { class: 'btn btn-secondary', onclick: () => showScreen('history-detail', { historyDetailId: session.id }) }, 'Voir / Éditer'),
@@ -3590,9 +3668,10 @@ function exportForClaude() {
   lines.push(tr('--- TEMPLATES ---'));
   State.templates.forEach(tpl => {
     lines.push(`\n# ${tr(tpl.name)}`);
-    tpl.exercises.forEach(e => {
+    tpl.exercises.forEach((e, ei) => {
       const exDef = State.exerciseById(e.exerciseId);
-      lines.push(`  - ${exDef ? tr(exDef.name) : '???'} : ${e.sets}×${e.reps}`);
+      const role = supersetRole(tpl.exercises, ei);
+      lines.push(`  - ${role ? '[Superset ' + role + '] ' : ''}${exDef ? tr(exDef.name) : '???'} : ${e.sets}×${e.reps}`);
     });
   });
 
@@ -3611,9 +3690,10 @@ function exportForClaude() {
     }
     const duration = s.endedAt ? Math.floor((s.endedAt - s.startedAt) / 60000) : null;
     if (duration) lines.push('  ' + tf('Durée : {n} min', { n: duration }));
-    s.exercises.forEach(exo => {
+    s.exercises.forEach((exo, xi) => {
       const exDef = State.exerciseById(exo.exerciseId);
       const defType = exDef ? exDef.type : 'loaded';
+      const role = supersetRole(s.exercises, xi);
       const done = exo.sets.filter(x => x.done);
       if (done.length === 0) return;
       const setsTxt = done.map(x => {
@@ -3624,7 +3704,7 @@ function exportForClaude() {
         if (t === 'assisted') return `${reps}@-${x.weight}kg`;
         return reps;
       }).join(', ');
-      lines.push(`  - ${exDef ? tr(exDef.name) : '???'} : ${setsTxt}`);
+      lines.push(`  - ${role ? '[Superset ' + role + '] ' : ''}${exDef ? tr(exDef.name) : '???'} : ${setsTxt}`);
     });
     if (s.notes) lines.push('  ' + tf('Notes : {t}', { t: s.notes }));
   });

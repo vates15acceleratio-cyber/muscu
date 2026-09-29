@@ -3,7 +3,7 @@
    CACHE_VERSION suit APP_VERSION dans app.js (bumpée à chaque commit + push :
    4.0, 4.1, 4.2...) — garder les deux synchronisées. */
 
-const CACHE_VERSION = 'muscu-v4.3';
+const CACHE_VERSION = 'muscu-v4.4';
 const APP_SHELL = [
   './',
   './index.html',

@@ -1,6 +1,12 @@
-# Muscu — v4.3
+# Muscu — v4.4
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.4
+
+- **Supersets dans l'historique** : le détail d'une séance de l'Historique et le bilan « Séance terminée » regroupent les deux exercices d'un superset (chaîne, mention « Superset », pastilles A / B), et la liste de l'Historique indique « · 1 superset » quand la séance en contient. Dans l'**export pour analyse Claude**, les exercices liés sont préfixés `[Superset A]` / `[Superset B]`. Les séances enregistrées avant la 4.2 n'ont pas de superset. Modifier une séance depuis l'historique conserve ses supersets
+- **Une couleur par superset** : cyan, violet, corail, vert, rose. Elle teinte la barre latérale, la chaîne, les pastilles A / B et les deux cartes, et suit le superset dans le template, la séance et l'historique. Le premier superset créé prend la première couleur libre, ce qui permet de distinguer plusieurs supersets dans une même séance
+- **Inversion A ↔ B plus lisible** : les deux blocs échangent réellement leur place — chacun glisse jusqu'à la position de l'autre en se croisant (léger décalage latéral, relief pendant le trajet). Mouvement seul, sans variation de luminosité, et désactivé avec « réduire les animations »
 
 ## Nouveautés v4.3
 
