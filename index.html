@@ -117,9 +117,12 @@ input[type=number] { -moz-appearance: textfield; }
 
 /* === Screens === */
 .screen { display: none; flex-direction: column; flex: 1; }
-.screen.active { display: flex; animation: screenIn 0.2s ease-out; }
+.screen.active { display: flex; }
+/* Le fondu d'entrée ne se joue que lors d'un VRAI changement d'écran (classe posée par render()).
+   Sinon, chaque re-rendu (valider un set, lier un superset...) faisait clignoter toute la page. */
+.screen.active.screen-enter { animation: screenIn 0.2s ease-out; }
 @media (prefers-reduced-motion: reduce) {
-  .screen.active { animation: none; }
+  .screen.active.screen-enter { animation: none; }
 }
 
 .screen-header {
@@ -684,7 +687,8 @@ input[type=number] { -moz-appearance: textfield; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(20%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes screenIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+/* Mouvement seul, sans variation d'opacité : pas de scintillement. */
+@keyframes screenIn { from { transform: translateY(6px); } to { transform: translateY(0); } }
 
 /* === Library === */
 .search-bar {
@@ -1177,7 +1181,6 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
   justify-content: center;
   padding: calc(var(--safe-top) + 24px) 24px calc(var(--safe-bottom) + 24px);
   overscroll-behavior: contain;
-  animation: fadeIn 0.2s;
 }
 .timer-full {
   width: 100%;
@@ -1369,10 +1372,10 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
 .ss-group.ss-breaking .ss-card-a { animation: ssApartA .36s ease-in forwards; }
 .ss-group.ss-breaking .ss-card-b { animation: ssApartB .36s ease-in forwards; }
 .ss-group.ss-breaking .ss-pill-icon { animation: ssChainSnap .36s ease-out both; }
-.ss-group.ss-breaking .ss-btn { opacity: .5; pointer-events: none; }
-@keyframes ssRailBreak { 0% { transform: scaleY(1); opacity: 1; } 40% { transform: scaleY(1.1); } 100% { transform: scaleY(0); opacity: 0; } }
-@keyframes ssApartA { to { transform: translateY(-14px); opacity: .85; } }
-@keyframes ssApartB { to { transform: translateY(14px); opacity: .85; } }
+.ss-group.ss-breaking .ss-btn { pointer-events: none; }
+@keyframes ssRailBreak { 0% { transform: scaleY(1); } 40% { transform: scaleY(1.1); } 100% { transform: scaleY(0); } }
+@keyframes ssApartA { to { transform: translateY(-14px); } }
+@keyframes ssApartB { to { transform: translateY(14px); } }
 @keyframes ssChainSnap {
   0%   { transform: scale(1); }
   25%  { transform: scale(1.4) rotate(-14deg); }
@@ -1383,8 +1386,8 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
 /* Inversion A <-> B */
 .ss-group.ss-swap .ss-card-a { animation: ssSwapDown .35s ease-out both; }
 .ss-group.ss-swap .ss-card-b { animation: ssSwapUp .35s ease-out both; }
-@keyframes ssSwapDown { from { transform: translateY(24px); opacity: .5; } to { transform: none; opacity: 1; } }
-@keyframes ssSwapUp { from { transform: translateY(-24px); opacity: .5; } to { transform: none; opacity: 1; } }
+@keyframes ssSwapDown { from { transform: translateY(24px); } to { transform: none; } }
+@keyframes ssSwapUp { from { transform: translateY(-24px); } to { transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
   .ss-group, .ss-group::before, .ss-group *, .ss-group *::before { animation: none !important; }

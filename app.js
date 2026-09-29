@@ -5,7 +5,7 @@
 
 // Bumpée à chaque commit + push (4.0, 4.1, 4.2...). Garder en phase avec
 // CACHE_VERSION dans sw.js (même valeur) et le titre du README.
-const APP_VERSION = '4.2';
+const APP_VERSION = '4.3';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -961,6 +961,8 @@ function render(opts = {}) {
     default: screen = renderSessionsScreen();
   }
   screen.classList.add('active');
+  // Fondu d'entrée seulement quand on change réellement d'écran (pas à chaque re-rendu).
+  if (screenName !== render._lastScreen) screen.classList.add('screen-enter');
   root.appendChild(screen);
 
   if (keepScroll && prevScrollY) {

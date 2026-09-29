@@ -1,6 +1,10 @@
-# Muscu — v4.2
+# Muscu — v4.3
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.3
+
+- **Fix : plus de clignotement de l'écran.** Jusqu'ici, chaque re-rendu (valider un set, lier / défaire / inverser un superset, changer d'onglet) rejouait un fondu qui faisait tomber toute la page à l'opacité 0 avant de la ré-afficher. Le fondu d'entrée n'est plus joué qu'à un vrai changement d'écran, et il est remplacé par un léger glissement **sans variation de luminosité**. L'écran de repos plein écran apparaît lui aussi sans fondu, et les animations de superset n'utilisent plus que du mouvement (aucun changement d'opacité)
 
 ## Nouveautés v4.2
 
