@@ -11,6 +11,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0e14'/%3E%3Cg fill='%23f5d76e'%3E%3Crect x='12' y='40' width='10' height='20' rx='2'/%3E%3Crect x='78' y='40' width='10' height='20' rx='2'/%3E%3Crect x='22' y='44' width='6' height='12'/%3E%3Crect x='72' y='44' width='6' height='12'/%3E%3Crect x='28' y='47' width='44' height='6'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0e14'/%3E%3Cg fill='%23f5d76e'%3E%3Crect x='12' y='40' width='10' height='20' rx='2'/%3E%3Crect x='78' y='40' width='10' height='20' rx='2'/%3E%3Crect x='22' y='44' width='6' height='12'/%3E%3Crect x='72' y='44' width='6' height='12'/%3E%3Crect x='28' y='47' width='44' height='6'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preload" as="image" href="splash.webp">
+<link rel="preload" as="image" href="splash-gear.webp">
 <title>Muscu</title>
 <style>
 :root {
@@ -1627,94 +1629,58 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
 
 /* === ÉCRAN DE DÉMARRAGE ===
    Intégré à la page (visible avant le chargement de app.js). Mouvement seul, aucune variation
-   d'opacité : pas de clignotement. Retiré par le petit script inline juste après le balisage. */
+   d'opacité : pas de clignotement. Retiré par le petit script inline juste après le balisage.
+   L'illustration est faite de deux images : le fond (astronaute, engrenage effacé) et l'engrenage
+   seul (calque transparent centré sur son axe), qui tourne par-dessus. */
 #splash {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: var(--bg);
+  background: #050505; /* même noir que l'image, pour qu'elle se fonde dans l'écran */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 26px;
-  padding: calc(var(--safe-top) + 24px) 24px calc(var(--safe-bottom) + 24px);
+  gap: 18px;
+  padding: calc(var(--safe-top) + 24px) 16px calc(var(--safe-bottom) + 24px);
   cursor: pointer;
 }
 #splash.splash-out {
   transform: translateY(-100%);
   transition: transform .45s cubic-bezier(.6, 0, .4, 1);
 }
-.splash-art { width: min(64vw, 260px); height: auto; overflow: visible; }
-.splash-float { animation: splashFloat 2.8s ease-in-out infinite; }
-.splash-gear { animation: splashSpin 9s linear infinite; }
+.splash-figure {
+  position: relative;
+  width: min(94vw, 460px);
+  aspect-ratio: 1012 / 880;
+  animation: splashFloat 2.8s ease-in-out infinite;
+}
+.splash-figure img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; }
+.splash-base { left: 0; top: 0; width: 100%; height: 100%; }
+.splash-gear { height: auto; aspect-ratio: 1 / 1; animation: splashSpin 3s linear infinite; will-change: transform; }
 .splash-text {
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: var(--accent);
-  text-shadow: 0 0 18px rgba(245,215,110,.28);
+  color: #e8aa3c;
+  text-shadow: 0 0 18px rgba(230,167,63,.3);
   animation: splashRise .6s cubic-bezier(.2,.8,.25,1) both;
 }
-@keyframes splashFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes splashFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 @keyframes splashSpin { to { transform: rotate(360deg); } }
 @keyframes splashRise { from { transform: translateY(14px); } to { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
-  .splash-float, .splash-gear, .splash-text { animation: none; }
+  .splash-figure, .splash-gear, .splash-text { animation: none; }
   #splash.splash-out { transition: none; }
 }
 </style>
 </head>
 <body>
 <div id="splash" role="img" aria-label="Made by Vates Inc.">
-<svg class="splash-art" viewBox="0 0 260 270" width="260" height="270" aria-hidden="true">
-  <defs>
-    <linearGradient id="sp-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f9e28c"/><stop offset="1" stop-color="#c9a227"/></linearGradient>
-    <linearGradient id="sp-visor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#27506f"/><stop offset="1" stop-color="#0c1a2a"/></linearGradient>
-    <linearGradient id="sp-suit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d5dde6"/></linearGradient>
-  </defs>
-  <g fill="#fff">
-    <circle cx="24" cy="30" r="1.6"/><circle cx="60" cy="14" r="1.1"/><circle cx="222" cy="26" r="1.8"/><circle cx="244" cy="70" r="1.2"/>
-    <circle cx="14" cy="112" r="1.3"/><circle cx="238" cy="196" r="1.5"/><circle cx="30" cy="212" r="1.7"/><circle cx="212" cy="250" r="1.1"/>
-    <circle cx="150" cy="10" r="1.2"/><circle cx="44" cy="258" r="1.2"/>
-  </g>
-  <circle cx="34" cy="60" r="1.4" fill="#f5d76e"/><circle cx="232" cy="120" r="1.4" fill="#f5d76e"/><circle cx="18" cy="170" r="1.2" fill="#f5d76e"/>
-  <g class="splash-float">
-    <!-- sac à dos -->
-    <rect x="66" y="112" width="78" height="62" rx="14" fill="#7d8b99"/>
-    <rect x="72" y="120" width="12" height="30" rx="5" fill="#5f6d7b"/>
-    <!-- jambes + bottes -->
-    <rect x="82" y="168" width="24" height="46" rx="11" fill="url(#sp-suit)"/>
-    <rect x="108" y="168" width="24" height="46" rx="11" fill="url(#sp-suit)"/>
-    <rect x="80" y="206" width="28" height="16" rx="7" fill="#f5d76e"/>
-    <rect x="106" y="206" width="28" height="16" rx="7" fill="#f5d76e"/>
-    <!-- corps -->
-    <rect x="77" y="104" width="56" height="72" rx="22" fill="url(#sp-suit)"/>
-    <rect x="94" y="128" width="24" height="18" rx="5" fill="#0a0e14"/>
-    <circle cx="101" cy="137" r="3" fill="#f5d76e"/><circle cx="110" cy="137" r="3" fill="#4dd0e1"/>
-    <!-- bras gauche (côté gauche de l'image) -->
-    <line x1="86" y1="120" x2="60" y2="150" stroke="#e9eff5" stroke-width="20" stroke-linecap="round"/>
-    <circle cx="58" cy="153" r="11" fill="#f5d76e"/>
-    <!-- casque -->
-    <ellipse cx="105" cy="104" rx="26" ry="7" fill="#b7c3cf"/>
-    <circle cx="105" cy="70" r="39" fill="url(#sp-suit)"/>
-    <ellipse cx="105" cy="72" rx="29" ry="25" fill="url(#sp-visor)"/>
-    <path d="M86 62 Q96 50 112 52" stroke="#fff" stroke-width="3.5" stroke-linecap="round" fill="none" opacity=".75"/>
-    <circle cx="121" cy="84" r="2.4" fill="#fff" opacity=".6"/>
-    <!-- engrenage porté -->
-    <g transform="translate(198 122)">
-      <g class="splash-gear">
-        <path d="M33.0,0.0 L32.8,3.7 L41.3,7.9 L39.1,15.5 L29.7,14.4 L26.7,19.4 L24.3,22.3 L28.8,30.6 L22.5,35.5 L15.5,29.1 L10.2,31.4 L6.6,32.3 L5.3,41.7 L-2.6,41.9 L-4.5,32.7 L-10.2,31.4 L-13.7,30.0 L-20.2,36.8 L-26.8,32.4 L-22.9,23.8 L-26.7,19.4 L-28.7,16.3 L-38.0,17.9 L-40.7,10.4 L-32.5,5.8 L-33.0,0.0 L-32.8,-3.7 L-41.3,-7.9 L-39.1,-15.5 L-29.7,-14.4 L-26.7,-19.4 L-24.3,-22.3 L-28.8,-30.6 L-22.5,-35.5 L-15.5,-29.1 L-10.2,-31.4 L-6.6,-32.3 L-5.3,-41.7 L2.6,-41.9 L4.5,-32.7 L10.2,-31.4 L13.7,-30.0 L20.2,-36.8 L26.8,-32.4 L22.9,-23.8 L26.7,-19.4 L28.7,-16.3 L38.0,-17.9 L40.7,-10.4 L32.5,-5.8 Z" fill="url(#sp-gold)"/>
-        <circle r="24" fill="none" stroke="#a8841c" stroke-width="2" opacity=".7"/>
-        <circle r="12" fill="#0a0e14"/>
-        <circle r="12" fill="none" stroke="#f9e28c" stroke-width="2"/>
-      </g>
-    </g>
-    <!-- bras droit qui porte l'engrenage -->
-    <line x1="128" y1="120" x2="162" y2="130" stroke="#e9eff5" stroke-width="20" stroke-linecap="round"/>
-    <circle cx="168" cy="131" r="11" fill="#f5d76e"/>
-  </g>
-</svg>
+<div class="splash-figure">
+    <img class="splash-base" src="splash.webp" alt="" width="1012" height="880" decoding="sync">
+    <img class="splash-gear" src="splash-gear.webp" alt="" width="410" height="410" decoding="sync" style="left:29.460%;top:59.637%;width:40.514%">
+  </div>
   <div class="splash-text">Made by Vates Inc.</div>
 </div>
 <script>

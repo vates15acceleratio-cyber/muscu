@@ -1,6 +1,10 @@
-# Muscu — v4.5
+# Muscu — v4.51
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.51
+
+- **Nouvelle illustration de l'écran de démarrage** : la silhouette d'astronaute avec l'engrenage doré (fournie par toi) remplace le dessin précédent. **L'engrenage tourne** sur lui-même (un tour en 3 s) pendant que l'astronaute flotte doucement. L'image est découpée en deux fichiers (`splash.webp` : l'astronaute sans engrenage, `splash-gear.webp` : l'engrenage seul sur fond transparent, centré sur son axe), mis en cache hors-ligne. Toujours 2 secondes, glissement vers le haut, aucun fondu ; avec « réduire les animations », l'image reste fixe
 
 ## Nouveautés v4.5
 
@@ -89,6 +93,8 @@ muscu/
 ├── app.js                  # Logique de l'app
 ├── i18n.js                 # Traduction FR / EN (moteur + interface + noms d'exercices)
 ├── i18n-desc.js            # Descriptions d'exercices en anglais
+├── splash.webp             # Écran de démarrage : astronaute (sans l'engrenage)
+├── splash-gear.webp        # Écran de démarrage : engrenage seul (tourne)
 ├── sw.js                   # Service worker (cache offline)
 ├── manifest.webmanifest    # Manifest PWA
 ├── icon-192.svg            # Icône 192×192
