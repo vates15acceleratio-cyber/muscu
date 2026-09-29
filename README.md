@@ -71,7 +71,7 @@ Si tu avais déjà la v1 déployée sur GitHub Pages :
 
 1. Sur GitHub, va sur ton repo, supprime les anciens fichiers et upload les nouveaux d'un coup (ou édite chaque fichier individuellement).
 2. Sur ton téléphone, ouvre l'app, **ferme-la complètement** (swipe depuis les apps récentes), puis rouvre. Le service worker détecte la nouvelle version et met l'app à jour.
-3. **Tes données sont préservées** (templates, séances, exos custom). La migration s'applique automatiquement : repos par défaut, échauffements et étirements sont ajoutés aux templates A/B/C existants.
+3. **Tes données sont préservées** (templates, séances, exos custom). La migration s'applique automatiquement : repos par défaut, échauffements et étirements sont ajoutés à tes templates existants. Depuis la v4, les anciennes séances A/B/C/D par défaut sont remplacées par **Haut du corps**, **Bas du corps** et **Core** ; ton historique de séances enregistrées n'est jamais touché.
 
 Pour forcer un refresh si l'app semble bloquée en v1 : désinstalle l'app du tel → relance depuis l'URL en mode navigateur → ré-installe via "Ajouter à l'écran d'accueil".
 
@@ -118,28 +118,42 @@ Depuis la v4, dès qu'une mise à jour est détectée, l'app se recharge automat
 
 ### Pendant la séance
 
-- L'écran s'ouvre avec le bloc **échauffement** en haut (checklist), les exos au milieu, le bloc **étirements** en bas
-- Coche les items d'échauffement au fur et à mesure
-- Pour chaque exo : remplis reps + kg, clique le **✓** (case verte)
+- La séance s'ouvre sur un écran **Conditions de récup** (sommeil, énergie, repas avant : Non / Léger / Oui), puis **Continuer**
+- Ensuite 3 onglets librement navigables, chacun avec sa progression (ex: 3/6) : **Échauffement**, **Exercices**, **Étirements**. Le bouton **Continuer** / **Passer aux…** avance dans l'ordre, mais tu peux taper n'importe quel onglet à tout moment
+- Les conditions restent modifiables via la ligne « Conditions de récup » en haut de l'onglet Échauffement
+- Onglet **Échauffement** : coche les items au fur et à mesure (**Éditer la liste** pour les modifier sans quitter la séance)
+- Onglet **Exercices** : pour chaque exo, remplis reps + kg, clique le **✓** (case verte). Maintenir le **✓** appuyé supprime le set
 - À la validation, le **timer de repos** démarre automatiquement dans un bandeau fixe au-dessus de la nav
 - Contrôles du timer : −15 s · pause/play · +30 s · Skip
 - Le bip + vibration signalent la fin du repos
-- En fin de séance, clique **Démarrer le mode guidé** dans le bloc étirements pour faire défiler les positions avec timer auto
+- Onglet **Étirements** : **Démarrer le mode guidé** fait défiler les positions avec timer auto ; tes notes / ressenti se saisissent au même endroit
+- L'écran reste allumé pendant la séance pour que le bip de fin de repos sonne à l'heure
 - **Terminer la séance** quand c'est fait
 
 ### Personnaliser un template
 
-- Onglet **Séances** → **⋮** sur une séance → **Modifier le template**
+- Onglet **Séances** → **⋯** sur la carte d'une séance → **Modifier le template** (ou **Dupliquer** / **Supprimer**)
 - Tu peux ajouter / réordonner / supprimer des exercices
 - Pour chaque exo : séries × reps et **temps de repos**
 - Tu peux éditer la liste d'échauffement et la liste d'étirements
 
 ### Réglages timer
 
-- Onglet **Séances** → **⋯** en haut à droite → écran Réglages
+- Onglet **Séances** → icône **⚙️** en haut à droite → écran Réglages
 - **Démarrage auto** : si off, le timer ne se lance plus automatiquement
 - **Bip de fin** / **Vibration** : on/off
 - **Durée par défaut** : par défaut, dépend du type d'exo. Tu peux forcer une durée globale unique.
+- **Étirements → Premier côté** : Gauche ou Droite, pour le côté par lequel démarre le mode guidé des étirements « par côté »
+
+### Bibliothèque
+
+- Onglet **Biblio** : recherche + filtres par groupe muscu, plus le filtre **Callisthénie**
+- Tape un exercice pour voir sa **description** technique et ouvrir une **démo YouTube**
+- **+ Custom** crée un exercice perso (nom, type, muscles, équipement). Depuis le sélecteur d'une séance ou d'un template, **Créer un exercice personnalisé** pré-remplit le muscle et le filtre actifs
+
+### Langue
+
+- Le drapeau 🇫🇷 / 🇬🇧 en haut de l'écran **Séances** bascule l'app entre français et anglais (choix mémorisé)
 
 ### Coach automatique
 
