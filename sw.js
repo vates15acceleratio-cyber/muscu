@@ -4,7 +4,7 @@
    évolution notable = +0,1 -> 4.5 ; correctif très mineur -> 4.41, 4.42...)
    — garder les deux synchronisées. */
 
-const CACHE_VERSION = 'muscu-v4.41';
+const CACHE_VERSION = 'muscu-v4.5';
 const APP_SHELL = [
   './',
   './index.html',

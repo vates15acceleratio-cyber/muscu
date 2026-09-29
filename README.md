@@ -1,6 +1,10 @@
-# Muscu — v4.41
+# Muscu — v4.5
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.5
+
+- **Écran de démarrage** : à chaque ouverture de l'app, un écran « Made by Vates Inc. » avec un astronaute qui porte un engrenage (illustration SVG intégrée, aucune image externe). Il s'affiche immédiatement, reste **2 secondes** (un tap le ferme plus tôt) puis glisse vers le haut. L'astronaute flotte doucement et l'engrenage tourne lentement. Mouvement seul, **sans fondu ni variation de luminosité** ; avec « réduire les animations », il reste fixe et disparaît sans transition. Il ne réapparaît pas à chaque changement d'écran
 
 ## Nouveautés v4.41
 
