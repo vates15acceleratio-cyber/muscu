@@ -1,6 +1,13 @@
-# Muscu — v4.0
+# Muscu — v4.1
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.1
+
+- **Traduction complète en anglais** : un petit drapeau (🇫🇷 / 🇬🇧) en haut de l'écran principal « Séances », à côté de l'engrenage, bascule toute l'app entre français et anglais. Le choix est mémorisé sur l'appareil (clé `muscu.lang`) et le français reste la langue par défaut
+- **Tout est traduit** : interface, messages, bibliothèque (noms, muscles, équipements et descriptions des exercices), templates Haut/Bas/Core avec leurs échauffements et étirements, recommandations du coach, dates, export texte
+- **Tes données ne changent pas** : l'historique, les identifiants et les exercices personnalisés restent tels quels. Seul l'affichage est traduit, donc tu peux changer de langue à tout moment sans rien perdre. Les textes que tu as saisis toi-même (nom d'un template renommé, exercice perso, ligne d'échauffement modifiée, notes) restent dans ta langue de saisie
+- Nouveaux fichiers `i18n.js` (moteur + interface) et `i18n-desc.js` (descriptions d'exercices en anglais), mis en cache hors-ligne comme le reste
 
 ## Nouveautés v4
 
@@ -49,6 +56,8 @@ App perso de musculation. Single-file PWA, données 100% locales (localStorage),
 muscu/
 ├── index.html              # UI + CSS
 ├── app.js                  # Logique de l'app
+├── i18n.js                 # Traduction FR / EN (moteur + interface + noms d'exercices)
+├── i18n-desc.js            # Descriptions d'exercices en anglais
 ├── sw.js                   # Service worker (cache offline)
 ├── manifest.webmanifest    # Manifest PWA
 ├── icon-192.svg            # Icône 192×192

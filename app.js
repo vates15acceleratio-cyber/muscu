@@ -5,7 +5,7 @@
 
 // Bumpée à chaque commit + push (4.0, 4.1, 4.2...). Garder en phase avec
 // CACHE_VERSION dans sw.js (même valeur) et le titre du README.
-const APP_VERSION = '4.0';
+const APP_VERSION = '4.1';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -717,32 +717,42 @@ function escapeHtml(s) {
   }[c]));
 }
 
+function dateLocale() {
+  return getLang() === 'en' ? 'en-GB' : 'fr-FR';
+}
+
 function fmtDate(ts) {
   const d = new Date(ts);
-  const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-  const months = ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
+  const en = getLang() === 'en';
+  const days = en ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  const months = en
+    ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    : ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
   return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
 }
 
 function fmtDateShort(ts) {
   const d = new Date(ts);
-  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  return d.toLocaleDateString(dateLocale(), { day: '2-digit', month: '2-digit', year: '2-digit' });
 }
 
 function fmtDateLong(ts) {
   const d = new Date(ts);
-  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return d.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function relTime(ts) {
   const now = Date.now();
   const diff = now - ts;
   const day = 86400000;
-  if (diff < day) return 'Aujourd\'hui';
-  if (diff < 2 * day) return 'Hier';
-  if (diff < 7 * day) return `Il y a ${Math.floor(diff / day)} jours`;
+  if (diff < day) return tr('Aujourd\'hui');
+  if (diff < 2 * day) return tr('Hier');
+  if (diff < 7 * day) return tf('Il y a {n} jours', { n: Math.floor(diff / day) });
   return fmtDateShort(ts);
 }
+
+// Attributs dont le texte est visible / lu par l'utilisateur (traduits comme les enfants texte).
+const TR_ATTRS = new Set(['placeholder', 'aria-label', 'title', 'alt']);
 
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -751,11 +761,11 @@ function el(tag, attrs = {}, ...children) {
     else if (k === 'style') node.style.cssText = v;
     else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2).toLowerCase(), v);
     else if (k === 'html') node.innerHTML = v;
-    else if (v !== false && v != null) node.setAttribute(k, v);
+    else if (v !== false && v != null) node.setAttribute(k, TR_ATTRS.has(k) ? tr(v) : v);
   }
   for (const child of children.flat(Infinity)) {
     if (child == null || child === false) continue;
-    node.appendChild(typeof child === 'string' || typeof child === 'number' ? document.createTextNode(String(child)) : child);
+    node.appendChild(typeof child === 'string' ? document.createTextNode(tr(child)) : typeof child === 'number' ? document.createTextNode(String(child)) : child);
   }
   return node;
 }
@@ -966,6 +976,11 @@ function renderSessionsScreen() {
 
   const header = el('header', { class: 'screen-header' },
     el('h1', {}, 'Séances'),
+    el('button', {
+      class: 'h-action lang-flag',
+      onclick: toggleLang,
+      'aria-label': getLang() === 'en' ? 'Language: English — switch to French' : 'Langue : Français — passer en anglais',
+    }, getLang() === 'en' ? '🇬🇧' : '🇫🇷'),
     el('button', { class: 'h-action', onclick: () => showScreen('settings'), 'aria-label': 'Réglages' }, icon('settings'))
   );
   screen.appendChild(header);
@@ -983,7 +998,7 @@ function renderSessionsScreen() {
       el('div', { class: 'section-title', style: 'margin: 0 0 4px; color: var(--accent);' }, 'Séance en cours'),
       el('div', { style: 'font-weight: 600; font-size: 16px;' }, tpl ? tpl.name : 'Séance personnalisée'),
       el('div', { style: 'font-size: 13px; color: var(--text-dim); margin-top: 4px;' },
-        `Reprendre · démarrée ${relTime(State.activeSession.startedAt).toLowerCase()}`)
+        tf('Reprendre · démarrée {t}', { t: relTime(State.activeSession.startedAt).toLowerCase() }))
     );
     body.appendChild(resume);
   }
@@ -1015,8 +1030,8 @@ function renderSessionCard(tpl) {
     .sort((a, b) => b.startedAt - a.startedAt)[0];
 
   const meta = lastSession
-    ? `Dernière fois : ${relTime(lastSession.startedAt).toLowerCase()} · ${tpl.exercises.length} exos`
-    : `${tpl.exercises.length} exercices`;
+    ? tf('Dernière fois : {t} · {n} exos', { t: relTime(lastSession.startedAt).toLowerCase(), n: tpl.exercises.length })
+    : tf('{n} exercices', { n: tpl.exercises.length });
 
   const card = el('div', { class: 'session-card' },
     el('div', { class: 'session-letter' }, tpl.letter || tpl.name.charAt(0)),
@@ -1238,9 +1253,9 @@ function renderSessionTabs(session, currentStep) {
 function renderConditionsSummaryRow(session) {
   const c = session.conditions || {};
   const parts = [];
-  if (c.sleep) parts.push(`Sommeil ${c.sleep}h`);
-  if (c.energy) parts.push(`Énergie ${c.energy}/10`);
-  if (c.meal) parts.push(`Repas ${c.meal}`);
+  if (c.sleep) parts.push(tf('Sommeil {n}h', { n: c.sleep }));
+  if (c.energy) parts.push(tf('Énergie {n}/10', { n: c.energy }));
+  if (c.meal) parts.push(tf('Repas {v}', { v: tr(c.meal) }));
   const summary = parts.length ? parts.join(' · ') : 'Non renseigné';
 
   return el('div', {
@@ -1348,7 +1363,7 @@ function renderCooldownStep(session) {
   card.appendChild(el('div', { class: 'card-row', style: 'margin-bottom: 8px;' },
     el('div', { class: 'grow', style: 'font-weight: 600; font-size: 16px;' }, 'Étirements de fin'),
     el('div', { style: 'font-size: 12px; color: var(--text-dim); font-family: var(--font-mono);' },
-      items.length === 0 ? 'vide' : (done ? '✓ fait' : `${items.length} positions · ~${totalMin} min`))
+      items.length === 0 ? 'vide' : (done ? '✓ fait' : tf('{n} positions · ~{m} min', { n: items.length, m: totalMin })))
   ));
 
   if (items.length === 0) {
@@ -1360,7 +1375,7 @@ function renderCooldownStep(session) {
       list.appendChild(el('div', { class: 'cooldown-item' },
         el('span', { class: 'cd-item-num' }, i + 1),
         el('span', { class: 'cd-item-name' }, item.name),
-        el('span', { class: 'cd-item-dur' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
+        el('span', { class: 'cd-item-dur' }, item.durationSec + 's' + (item.perSide ? tr(' /côté') : ''))
       ));
     });
     card.appendChild(list);
@@ -1481,7 +1496,7 @@ function openCooldownEditor(tpl, session) {
         const row = el('div', { class: 'template-exo-row' },
           el('div', { class: 'grow' },
             el('div', { class: 'name', style: 'font-size: 14px;' }, item.name),
-            el('div', { class: 'target' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
+            el('div', { class: 'target' }, item.durationSec + 's' + (item.perSide ? tr(' /côté') : ''))
           ),
           el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openCooldownLineMenuInline(tpl, i, session) }, icon('more'))
         );
@@ -1616,8 +1631,8 @@ function renderActiveExerciseCard(exo, idx) {
   }
   const restSec = exo.restSec != null ? exo.restSec : defaultRestSec(exDef);
   const targetText = el('div', { class: 'exo-target' },
-    `Cible : ${exo.targetSets || '—'} × ${exo.targetReps || '—'}`,
-    el('span', { class: 'exo-rest' }, ' · repos ' + fmtTimerSec(restSec))
+    tf('Cible : {s} × {r}', { s: exo.targetSets || '—', r: exo.targetReps || '—' }),
+    el('span', { class: 'exo-rest' }, tr(' · repos ') + fmtTimerSec(restSec))
   );
 
   const titleBlock = el('div', { style: 'flex: 1; min-width: 0;' }, nameWrap, targetText);
@@ -1937,7 +1952,7 @@ function renderLibraryBody(opts = {}) {
   }, 'Callisthénie');
   const chipsRow = el('div', { class: 'filter-chips' }, allChip, calChip);
   MUSCLE_GROUPS.forEach(m => {
-    const c = el('button', { class: 'chip' + (filter.muscle === m ? ' active' : ''), onclick: () => { filter.muscle = filter.muscle === m ? null : m; updateLibList(); renderChips(); } }, m);
+    const c = el('button', { class: 'chip' + (filter.muscle === m ? ' active' : ''), 'data-muscle': m, onclick: () => { filter.muscle = filter.muscle === m ? null : m; updateLibList(); renderChips(); } }, m);
     chipsRow.appendChild(c);
   });
   body.appendChild(chipsRow);
@@ -1959,7 +1974,7 @@ function renderLibraryBody(opts = {}) {
     chipsRow.querySelectorAll('.chip').forEach(c => { if (c !== calChip) c.classList.remove('active'); });
     if (!filter.muscle) allChip.classList.add('active');
     else {
-      [...chipsRow.querySelectorAll('.chip')].find(c => c.textContent === filter.muscle)?.classList.add('active');
+      [...chipsRow.querySelectorAll('.chip')].find(c => c.dataset.muscle === filter.muscle)?.classList.add('active');
     }
   }
 
@@ -1973,7 +1988,7 @@ function renderLibraryBody(opts = {}) {
     const items = State.allExercises().filter(e => {
       if (filter.calisthenics && !CALISTHENICS_IDS.has(e.id) && e.discipline !== 'callisthenie') return false;
       if (filter.muscle && e.primary !== filter.muscle && !(e.secondary || []).includes(filter.muscle)) return false;
-      if (q && !e.name.toLowerCase().includes(q) && !e.primary.toLowerCase().includes(q)) return false;
+      if (q && !(e.name + ' ' + tr(e.name) + ' ' + e.primary + ' ' + tr(e.primary)).toLowerCase().includes(q)) return false;
       return true;
     });
     if (items.length === 0) {
@@ -1986,7 +2001,7 @@ function renderLibraryBody(opts = {}) {
           el('div', { class: 'name' }, ex.name,
             el('span', { class: 'exo-type-badge ' + ex.type }, typeBadgeShort(ex.type))
           ),
-          el('div', { class: 'meta' }, ex.primary + ' · ' + ex.equipment)
+          el('div', { class: 'meta' }, tr(ex.primary) + ' · ' + tr(ex.equipment))
         )
       );
       if (opts.pickerMode) {
@@ -2035,7 +2050,7 @@ function openExerciseDetail(id) {
   body.appendChild(main);
 
   // Bouton démo YouTube
-  const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ex.name + ' technique musculation');
+  const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(tr(ex.name) + tr(' technique musculation'));
   body.appendChild(el('a', {
     href: ytUrl,
     target: '_blank',
@@ -2052,7 +2067,7 @@ function openExerciseDetail(id) {
     el('div', {}, ex.primary),
     ex.secondary && ex.secondary.length ? el('div', {},
       el('div', { class: 'label-row' }, 'Muscles secondaires'),
-      el('div', {}, ex.secondary.join(', '))
+      el('div', {}, ex.secondary.map(tr).join(', '))
     ) : null,
     el('div', { class: 'label-row' }, 'Équipement'),
     el('div', {}, ex.equipment),
@@ -2171,7 +2186,7 @@ function renderHistoryScreen() {
       const item = el('div', { class: 'hist-item', onclick: () => showScreen('history-detail', { historyDetailId: s.id }) },
         el('div', { class: 'date' }, fmtDate(s.startedAt)),
         el('div', { class: 'session-name' }, s.templateName || 'Séance'),
-        el('div', { class: 'summary' }, `${s.exercises.length} exos · ${setCount} sets validés`)
+        el('div', { class: 'summary' }, tf('{n} exos · {m} sets validés', { n: s.exercises.length, m: setCount }))
       );
       body.appendChild(item);
     });
@@ -2221,7 +2236,7 @@ function renderHistoryDetailScreen() {
       exDef ? exDef.name : 'Exercice',
       exDef ? el('span', { class: 'exo-type-badge ' + exDef.type }, typeBadgeShort(exDef.type)) : null
     ));
-    card.appendChild(el('div', { class: 'exo-target', style: 'margin-bottom: 8px;' }, `Cible : ${exo.targetSets || '—'} × ${exo.targetReps || '—'}`));
+    card.appendChild(el('div', { class: 'exo-target', style: 'margin-bottom: 8px;' }, tf('Cible : {s} × {r}', { s: exo.targetSets || '—', r: exo.targetReps || '—' })));
 
     if (exo.sets.length === 0) {
       card.appendChild(el('div', { style: 'color: var(--text-muted); font-size: 13px;' }, 'Aucun set logué'));
@@ -2391,7 +2406,7 @@ function renderProgressionScreen() {
     body.appendChild(makeChartContainer('Assistance minimale (kg)', data.filter(d => d.minAssist != null).map(d => ({ x: d.date, y: d.minAssist })), 'kg', { invert: true }));
     body.appendChild(makeChartContainer('Reps totales', data.map(d => ({ x: d.date, y: d.totalReps })), ''));
   } else {
-    body.appendChild(makeChartContainer((type === 'weighted' ? 'Lest max' : 'Charge max') + ' (kg)', data.map(d => ({ x: d.date, y: d.maxWeight })), 'kg'));
+    body.appendChild(makeChartContainer(tr(type === 'weighted' ? 'Lest max' : 'Charge max') + ' (kg)', data.map(d => ({ x: d.date, y: d.maxWeight })), 'kg'));
     body.appendChild(makeChartContainer('Volume total (kg)', data.map(d => ({ x: d.date, y: Math.round(d.totalVolume) })), 'kg'));
   }
 
@@ -2591,7 +2606,7 @@ function renderTemplateEditScreen() {
       const row = el('div', { class: 'template-exo-row' },
         el('div', { class: 'grow' },
           el('div', { class: 'name' }, exDef ? exDef.name : 'Exercice'),
-          el('div', { class: 'target' }, `${e.sets} × ${e.reps} · repos ${fmtTimerSec(restSec)}`)
+          el('div', { class: 'target' }, `${e.sets} × ${e.reps}` + tr(' · repos ') + fmtTimerSec(restSec))
         ),
         el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openTplExoMenu(tpl, i) }, icon('more'))
       );
@@ -2638,7 +2653,7 @@ function renderTemplateEditScreen() {
       const row = el('div', { class: 'template-exo-row' },
         el('div', { class: 'grow' },
           el('div', { class: 'name', style: 'font-size: 14px;' }, item.name),
-          el('div', { class: 'target' }, item.durationSec + 's' + (item.perSide ? ' /côté' : ''))
+          el('div', { class: 'target' }, item.durationSec + 's' + (item.perSide ? tr(' /côté') : ''))
         ),
         el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openCooldownLineMenu(tpl, i) }, icon('more'))
       );
@@ -2854,7 +2869,7 @@ function renderSummaryScreen() {
     const suggestions = suggestNextTargets(session, tpl);
 
     if (suggestions.length > 0) {
-      body.appendChild(el('h2', { class: 'section-title' }, 'Pour la prochaine ' + tpl.name));
+      body.appendChild(el('h2', { class: 'section-title' }, tf('Pour la prochaine {name}', { name: tr(tpl.name) })));
 
       const cs = session.conditions || {};
       const cSleep = cs.sleep !== '' && cs.sleep != null ? Number(cs.sleep) : null;
@@ -2983,7 +2998,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'up',
           tag: '+' + incr + ' kg',
-          reco: `Tous les sets cibles atteints. Monte à ${w + incr} kg la prochaine fois (${exo.targetSets || ''}×${exo.targetReps || ''}).`,
+          reco: tf('Tous les sets cibles atteints. Monte à {w} kg la prochaine fois ({s}×{r}).', { w: w + incr, s: exo.targetSets || '', r: exo.targetReps || '' }),
         });
       } else if (bigDrop) {
         const newW = Math.round((w * 0.95) / 2.5) * 2.5;
@@ -2992,7 +3007,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'down',
           tag: '-5%',
-          reco: `Chute marquée entre les sets. Redescends à ${newW} kg pour stabiliser la technique.`,
+          reco: tf('Chute marquée entre les sets. Redescends à {w} kg pour stabiliser la technique.', { w: newW }),
         });
       } else {
         out.push({
@@ -3000,7 +3015,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'keep',
           tag: 'Maintenir',
-          reco: `Garde ${w} kg jusqu'à boucler proprement tous les sets de la cible.`,
+          reco: tf('Garde {w} kg jusqu\'à boucler proprement tous les sets de la cible.', { w }),
         });
       }
     } else if (setType === 'bodyweight') {
@@ -3011,7 +3026,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'up',
           tag: '+1 rep',
-          reco: `Tous les sets dans la cible. Vise +1 rep par set la prochaine fois.`,
+          reco: tf('Tous les sets dans la cible. Vise +1 rep par set la prochaine fois.'),
         });
       } else {
         out.push({
@@ -3019,7 +3034,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'keep',
           tag: 'Maintenir',
-          reco: `Moy. ${Math.round(avgReps)} reps. Continue avec cette cible jusqu'à boucler tous les sets.`,
+          reco: tf('Moy. {n} reps. Continue avec cette cible jusqu\'à boucler tous les sets.', { n: Math.round(avgReps) }),
         });
       }
     } else if (setType === 'weighted') {
@@ -3031,7 +3046,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'up',
           tag: '+' + incr + ' kg',
-          reco: `Cibles atteintes lesté. Monte à +${w + incr} kg.`,
+          reco: tf('Cibles atteintes lesté. Monte à +{w} kg.', { w: w + incr }),
         });
       } else {
         out.push({
@@ -3039,7 +3054,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'keep',
           tag: 'Maintenir',
-          reco: `Reste à +${w} kg jusqu'à boucler tous les sets.`,
+          reco: tf('Reste à +{w} kg jusqu\'à boucler tous les sets.', { w }),
         });
       }
     } else if (setType === 'assisted') {
@@ -3051,7 +3066,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'up',
           tag: 'Assistance ↓',
-          reco: `Tous les sets cibles atteints. Réduis l'assistance à -${newW} kg.`,
+          reco: tf('Tous les sets cibles atteints. Réduis l\'assistance à -{w} kg.', { w: newW }),
         });
       } else {
         out.push({
@@ -3059,7 +3074,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'keep',
           tag: 'Maintenir',
-          reco: `Garde -${w} kg d'assistance jusqu'à boucler tous les sets.`,
+          reco: tf('Garde -{w} kg d\'assistance jusqu\'à boucler tous les sets.', { w }),
         });
       }
     } else if (setType === 'time') {
@@ -3071,7 +3086,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'up',
           tag: '+10s',
-          reco: `Cibles tenues. Vise ${tgtTime + 10}s la prochaine fois.`,
+          reco: tf('Cibles tenues. Vise {n}s la prochaine fois.', { n: tgtTime + 10 }),
         });
       } else {
         out.push({
@@ -3079,7 +3094,7 @@ function suggestNextTargets(session, tpl) {
           name: exDef.name,
           severity: 'keep',
           tag: 'Maintenir',
-          reco: `Reste à ${tgtTime}s.`,
+          reco: tf('Reste à {n}s.', { n: tgtTime }),
         });
       }
     }
@@ -3239,7 +3254,7 @@ function makeOverrideRow() {
     el('div', { class: 'sr-title' }, 'Durée par défaut'),
     el('div', { class: 'sr-desc' },
       cur != null
-        ? `Override global : ${fmtTimerSec(cur)} pour tous les exos`
+        ? tf('Override global : {t} pour tous les exos', { t: fmtTimerSec(cur) })
         : 'Selon le type d\'exo (compound 2 min, isolation 90 s, poids du corps 3 min, gainage 1 min)'
     ),
   );
@@ -3339,7 +3354,7 @@ function importDataPrompt() {
           return;
         }
         openConfirm(
-          `Importer ${data.sessions.length} séances et ${data.templates.length} templates ? Les données actuelles seront remplacées.`,
+          tf('Importer {s} séances et {t} templates ? Les données actuelles seront remplacées.', { s: data.sessions.length, t: data.templates.length }),
           () => {
             State.templates = data.templates;
             State.sessions = data.sessions;
@@ -3363,35 +3378,35 @@ function importDataPrompt() {
 function exportForClaude() {
   // Format texte lisible pour analyse
   const lines = [];
-  lines.push('=== MUSCU — Export pour analyse ===');
-  lines.push(`Exporté le : ${fmtDateLong(Date.now())}`);
-  lines.push(`Nombre de séances : ${State.sessions.length}`);
+  lines.push(tr('=== MUSCU — Export pour analyse ==='));
+  lines.push(tf('Exporté le : {d}', { d: fmtDateLong(Date.now()) }));
+  lines.push(tf('Nombre de séances : {n}', { n: State.sessions.length }));
   lines.push('');
 
-  lines.push('--- TEMPLATES ---');
+  lines.push(tr('--- TEMPLATES ---'));
   State.templates.forEach(tpl => {
-    lines.push(`\n# ${tpl.name}`);
+    lines.push(`\n# ${tr(tpl.name)}`);
     tpl.exercises.forEach(e => {
       const exDef = State.exerciseById(e.exerciseId);
-      lines.push(`  - ${exDef ? exDef.name : '???'} : ${e.sets}×${e.reps}`);
+      lines.push(`  - ${exDef ? tr(exDef.name) : '???'} : ${e.sets}×${e.reps}`);
     });
   });
 
-  lines.push('\n--- HISTORIQUE (du plus récent au plus ancien) ---');
+  lines.push('\n' + tr('--- HISTORIQUE (du plus récent au plus ancien) ---'));
   const sorted = [...State.sessions].sort((a, b) => b.startedAt - a.startedAt);
   sorted.forEach(s => {
     const tpl = State.templateById(s.templateId);
-    lines.push(`\n## ${tpl ? tpl.name : s.templateName || 'Séance'} — ${fmtDateLong(s.startedAt)}`);
+    lines.push(`\n## ${tr(tpl ? tpl.name : s.templateName || 'Séance')} — ${fmtDateLong(s.startedAt)}`);
     if (s.conditions) {
       const c = s.conditions;
       const parts = [];
-      if (c.sleep) parts.push(`sommeil ${c.sleep}h`);
-      if (c.energy) parts.push(`énergie ${c.energy}/10`);
-      if (c.meal) parts.push(`repas ${c.meal}`);
-      if (parts.length) lines.push(`  Conditions : ${parts.join(', ')}`);
+      if (c.sleep) parts.push(tf('sommeil {n}h', { n: c.sleep }));
+      if (c.energy) parts.push(tf('énergie {n}/10', { n: c.energy }));
+      if (c.meal) parts.push(tf('repas {v}', { v: tr(c.meal) }));
+      if (parts.length) lines.push('  ' + tf('Conditions : {c}', { c: parts.join(', ') }));
     }
     const duration = s.endedAt ? Math.floor((s.endedAt - s.startedAt) / 60000) : null;
-    if (duration) lines.push(`  Durée : ${duration} min`);
+    if (duration) lines.push('  ' + tf('Durée : {n} min', { n: duration }));
     s.exercises.forEach(exo => {
       const exDef = State.exerciseById(exo.exerciseId);
       const defType = exDef ? exDef.type : 'loaded';
@@ -3405,9 +3420,9 @@ function exportForClaude() {
         if (t === 'assisted') return `${reps}@-${x.weight}kg`;
         return reps;
       }).join(', ');
-      lines.push(`  - ${exDef ? exDef.name : '???'} : ${setsTxt}`);
+      lines.push(`  - ${exDef ? tr(exDef.name) : '???'} : ${setsTxt}`);
     });
-    if (s.notes) lines.push(`  Notes : ${s.notes}`);
+    if (s.notes) lines.push('  ' + tf('Notes : {t}', { t: s.notes }));
   });
 
   const text = lines.join('\n');
@@ -3694,7 +3709,14 @@ function openCooldownModal(items, index, sidePass) {
 }
 
 /* === INIT === */
+function toggleLang() {
+  setLang(getLang() === 'en' ? 'fr' : 'en');
+  render({ keepScroll: false });
+}
+
 function init() {
+  document.documentElement.lang = getLang();
+  applyStaticTranslations();
   State.init();
   showScreen('sessions');
 
