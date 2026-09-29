@@ -31,6 +31,25 @@ Axe de rotation (ne pas y toucher sans recalculer) : l'illustration d'origine n'
 - Un changement de numéro est nécessaire pour qu'une modification de `app.js` atteigne les appareils déjà installés (le JS est servi en cache-first par version).
 - Une entrée « Nouveautés » dans le README à chaque version.
 
+## Données de l'utilisateur — ne jamais les perdre
+
+Historique, templates, exercices perso et réglages sont dans `localStorage` (clé `muscu.v1`). Ils doivent survivre à **toutes** les versions, et rester exportables / importables.
+
+Règles :
+- Tout changement de structure des données (séances, templates, exercices perso, réglages) s'accompagne de sa **migration** dans l'app (`State.migrate()`), **sans supprimer de champ existant**.
+- L'export JSON (Réglages → Exporter mes données) doit toujours contenir l'historique, les templates, les exercices perso et les réglages.
+- **Avant de pousser une version qui touche aux données, lancer le test du sandbox** (ci-dessous) et le corriger jusqu'à ce qu'il passe.
+- **Prévenir le propriétaire** dans le message qui annonce la version : « cette version touche aux données, exporte avant de mettre à jour ».
+- Le README dit, pour chaque version, si le format des données a changé.
+
+Sandbox de test (données 100 % fictives, séparées de l'app) : dossier `muscu-sandbox/` du dépôt privé `vates15acceleratio-cyber/general` (branche `claude/wizardly-carson-2bv49j`). Il contient 24 séances d'historique en trois formats de sauvegarde (v1, v3, actuel avec supersets) et le script de test. Commande :
+
+```bash
+node muscu-sandbox/run-migration-test.js /chemin/vers/muscu   # code 0 = tout passe
+```
+
+Si le dépôt `general` n'est pas attaché à la session, l'ajouter d'abord (`add_repo`). Le fonctionnement, les fixtures et la façon de les mettre à jour sont décrits dans `muscu-sandbox/README.md`. Ne pas modifier les fixtures v1 et v3 ; pour un nouveau champ de données, compléter `current()` dans `generate-fixtures.js`. Ces données ne doivent jamais être ajoutées au dépôt `muscu` (public, publié sur Pages).
+
 ## Déroulé habituel
 
 - Une fonctionnalité est proposée, confirmée par le propriétaire, puis codée, testée (Playwright/Chromium) et poussée sur `main`.
