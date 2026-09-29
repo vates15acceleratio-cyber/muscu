@@ -3,9 +3,10 @@
    Single-file vanilla JS app, localStorage persistence
    ========================================================================== */
 
-// Bumpée à chaque commit + push (4.0, 4.1, 4.2...). Garder en phase avec
-// CACHE_VERSION dans sw.js (même valeur) et le titre du README.
-const APP_VERSION = '4.4';
+// Bumpée à chaque commit + push : évolution notable = +0,1 (4.4 -> 4.5), correctif très
+// mineur = au centième (4.41, 4.42...). Garder en phase avec CACHE_VERSION dans sw.js
+// (même valeur) et le titre du README.
+const APP_VERSION = '4.41';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [

@@ -1,6 +1,11 @@
-# Muscu — v4.4
+# Muscu — v4.41
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.41
+
+- **Pastille A / B avant le nom de l'exercice** : quand le nom est long, la pastille ne passe plus à la ligne sous le nom (séance, template, détail de l'historique, bilan)
+- Convention de version : une évolution notable fait +0,1 (4.4 → 4.5), un correctif très mineur passe au centième (4.41, 4.42…)
 
 ## Nouveautés v4.4
 
