@@ -1859,11 +1859,12 @@ function renderActiveExerciseCard(exo, idx, ssRole) {
 
   const header = el('div', { class: 'exo-header' });
   const nameWrap = el('div', { class: 'exo-name' });
+  // Pastille A / B avant le nom : elle ne passe plus à la ligne quand le nom est long.
+  if (ssRole) nameWrap.appendChild(el('span', { class: 'ss-role' }, ssRole));
   nameWrap.appendChild(el('span', {}, exDef ? exDef.name : 'Exercice'));
   if (exDef) {
     nameWrap.appendChild(el('span', { class: 'exo-type-badge ' + exDef.type }, typeBadgeShort(exDef.type)));
   }
-  if (ssRole) nameWrap.appendChild(el('span', { class: 'ss-role' }, ssRole));
   const restSec = exo.restSec != null ? exo.restSec : defaultRestSec(exDef);
   const targetText = el('div', { class: 'exo-target' },
     tf('Cible : {s} × {r}', { s: exo.targetSets || '—', r: exo.targetReps || '—' }),
@@ -2491,9 +2492,9 @@ function renderHistoryDetailScreen() {
     const exDef = State.exerciseById(exo.exerciseId);
     const card = el('div', { class: 'card' });
     card.appendChild(el('div', { style: 'font-weight: 600; font-size: 16px; margin-bottom: 4px;' },
+      role ? el('span', { class: 'ss-role' }, role) : null,
       exDef ? exDef.name : 'Exercice',
-      exDef ? el('span', { class: 'exo-type-badge ' + exDef.type }, typeBadgeShort(exDef.type)) : null,
-      role ? el('span', { class: 'ss-role' }, role) : null
+      exDef ? el('span', { class: 'exo-type-badge ' + exDef.type }, typeBadgeShort(exDef.type)) : null
     ));
     card.appendChild(el('div', { class: 'exo-target', style: 'margin-bottom: 8px;' }, tf('Cible : {s} × {r}', { s: exo.targetSets || '—', r: exo.targetReps || '—' })));
 
@@ -2938,7 +2939,7 @@ function renderTplExoRow(tpl, i) {
   const role = supersetRole(tpl.exercises, i);
   return el('div', { class: 'template-exo-row' },
     el('div', { class: 'grow' },
-      el('div', { class: 'name' }, exDef ? exDef.name : 'Exercice', role ? el('span', { class: 'ss-role' }, role) : null),
+      el('div', { class: 'name' }, role ? el('span', { class: 'ss-role' }, role) : null, exDef ? exDef.name : 'Exercice'),
       el('div', { class: 'target' }, `${e.sets} × ${e.reps}` + tr(' · repos ') + fmtTimerSec(restSec))
     ),
     el('button', { class: 'exo-menu-btn', 'aria-label': 'Options', onclick: () => openTplExoMenu(tpl, i) }, icon('more'))
@@ -3183,8 +3184,8 @@ function renderSummaryScreen() {
     const exDef = State.exerciseById(exo.exerciseId);
     const defType = exDef ? exDef.type : 'loaded';
     const card = el('div', { class: 'history-exo-card' },
-      el('div', { class: 'history-exo-name' }, exDef ? exDef.name : 'Exercice',
-        role ? el('span', { class: 'ss-role' }, role) : null),
+      el('div', { class: 'history-exo-name' }, role ? el('span', { class: 'ss-role' }, role) : null,
+        exDef ? exDef.name : 'Exercice'),
     );
     exo.sets.forEach((s, i) => {
       if (!s.done) return;
