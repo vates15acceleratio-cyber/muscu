@@ -6,7 +6,7 @@
 // Bumpée à chaque commit + push : évolution notable = +0,1 (4.4 -> 4.5), correctif très
 // mineur = au centième (4.41, 4.42...). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '4.52';
+const APP_VERSION = '4.53';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [

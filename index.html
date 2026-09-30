@@ -11,9 +11,13 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0e14'/%3E%3Cg fill='%23f5d76e'%3E%3Crect x='12' y='40' width='10' height='20' rx='2'/%3E%3Crect x='78' y='40' width='10' height='20' rx='2'/%3E%3Crect x='22' y='44' width='6' height='12'/%3E%3Crect x='72' y='44' width='6' height='12'/%3E%3Crect x='28' y='47' width='44' height='6'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0e14'/%3E%3Cg fill='%23f5d76e'%3E%3Crect x='12' y='40' width='10' height='20' rx='2'/%3E%3Crect x='78' y='40' width='10' height='20' rx='2'/%3E%3Crect x='22' y='44' width='6' height='12'/%3E%3Crect x='72' y='44' width='6' height='12'/%3E%3Crect x='28' y='47' width='44' height='6'/%3E%3C/g%3E%3C/svg%3E">
-<link rel="preload" as="image" href="splash.webp">
-<link rel="preload" as="image" href="splash-gear.webp">
-<link rel="preload" as="image" href="splash-stars.webp">
+<link rel="preload" as="font" type="font/woff2" href="cinzel-700-latin.woff2" crossorigin>
+<link rel="preload" as="image" href="splash.webp" media="not all and (max-width: 600px) and (orientation: portrait)">
+<link rel="preload" as="image" href="splash-gear.webp" media="not all and (max-width: 600px) and (orientation: portrait)">
+<link rel="preload" as="image" href="splash-stars.webp" media="not all and (max-width: 600px) and (orientation: portrait)">
+<link rel="preload" as="image" href="splash-portrait.webp" media="(max-width: 600px) and (orientation: portrait)">
+<link rel="preload" as="image" href="splash-portrait-gear.webp" media="(max-width: 600px) and (orientation: portrait)">
+<link rel="preload" as="image" href="splash-portrait-stars.webp" media="(max-width: 600px) and (orientation: portrait)">
 <title>Muscu</title>
 <style>
 :root {
@@ -1630,7 +1634,7 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
 
 /* === ÉCRAN DE DÉMARRAGE (Logo d'accueil) ===
    Intégré à la page (visible avant le chargement de app.js). Retiré par le petit script inline
-   qui suit le balisage : 2 s ou un tap, puis glissement vers le haut.
+   qui suit le balisage : 2,5 s ou un tap, puis glissement vers le haut.
    Trois images : le fond (astronaute, engrenage effacé), l'engrenage seul (calque transparent
    centré sur son axe) et un atlas d'éclats d'étoiles. Aucune animation de la page entière :
    seul l'engrenage tourne (un tour + 5°, retour, étincelles) et quelques étoiles scintillent. */
@@ -1691,7 +1695,7 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
   animation: splashSpark .8s ease-out both;
 }
 @keyframes splashSpark {
-  0%   { opacity: 0; transform: rotate(var(--a)) translateX(calc(165 * var(--u))) scale(1); }
+  0%   { opacity: 0; transform: rotate(var(--a)) translateX(calc(var(--r0, 165) * var(--u))) scale(1); }
   12%  { opacity: 1; }
   100% { opacity: 0; transform: rotate(var(--a)) translateX(calc(var(--d) * var(--u))) scale(.15); }
 }
@@ -1713,16 +1717,60 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
   50%      { opacity: .95; transform: translate(-50%, -50%) scale(1.15); }
 }
 
+/* Cinzel (SIL Open Font License 1.1), gras, sous-ensemble latin (15 Ko) : même style (capitales romaines gravées) que la devise de l'illustration */
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;   /* pas de texte de secours qui clignote puis change : le texte attend la police (préchargée, 15 Ko) */
+  src: url(cinzel-700-latin.woff2) format('woff2');
+}
 .splash-text {
-  font-size: 12px;
-  font-weight: 500;
+  font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 700;
   letter-spacing: 0.22em;
   color: #c9973f;
-  animation: splashRise .6s cubic-bezier(.2,.8,.25,1) both;
 }
-@keyframes splashRise { from { transform: translateY(10px); } to { transform: translateY(0); } }
+/* Version portrait (téléphone : écran étroit et vertical) : l'illustration 853 x 1844 remplit l'écran
+   (comme « cover », centrée), et remplace la version paysage ci-dessus, qui reste utilisée ailleurs.
+   Même principe : l'engrenage tourne, les étincelles et 8 étoiles scintillent, rien d'autre ne bouge. */
+.splash-portrait { display: none; }
+@media (max-width: 600px) and (orientation: portrait) {
+  .splash-land { display: none; }
+  #splash { overflow: hidden; }
+  .splash-portrait {
+    display: block;
+    --fw: max(100vw, calc(100dvh * 853 / 1844));   /* « cover » : la figure couvre tout l'écran */
+    --u: calc(var(--fw) / 853 * .6);               /* 1u = 0,6 pixel de l'image : mêmes tailles d'étincelles que la version paysage */
+    --r0: 211;                                     /* rayon de l'engrenage, en u (étincelles) */
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--fw);
+    aspect-ratio: 853 / 1844;
+    -webkit-mask-image: none; mask-image: none;     /* pleine image : pas de bords à fondre */
+  }
+  .splash-portrait .splash-star {
+    width: 11.254%;
+    background-image: url(splash-portrait-stars.webp);
+  }
+  /* « Made by Vates Inc. » : accroché à l'illustration (sous la devise, à 72,7 % de sa hauteur), pas au bas de l'écran,
+     pour rester au même endroit quelle que soit la taille du téléphone */
+  #splash > .splash-text { display: none; }
+  .splash-portrait .splash-text {
+    position: absolute;
+    left: 0; right: 0;
+    top: 72.72%;
+    margin-top: -.75em;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .splash-gear, .splash-text { animation: none; }
+  .splash-gear { animation: none; }
   .splash-spark, .splash-star { display: none; }
   #splash.splash-out { transition: none; }
 }
@@ -1730,7 +1778,7 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
 </head>
 <body>
 <div id="splash" role="img" aria-label="Made by Vates Inc.">
-<div class="splash-figure">
+<div class="splash-figure splash-land">
     <img class="splash-base" src="splash.webp" alt="" width="1340" height="1030" decoding="sync">
     <span class="splash-star" style="left:2.463%;top:93.010%;background-position:0.000% 0;--d:2.3s;--dl:-0.4s"></span>
     <span class="splash-star" style="left:8.881%;top:49.806%;background-position:14.286% 0;--d:3.1s;--dl:-1.7s"></span>
@@ -1743,10 +1791,24 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
     <img class="splash-gear" src="splash-gear.webp" alt="" width="410" height="410" decoding="sync" style="left:34.835%;top:55.590%;width:30.597%">
     <span class="splash-sparks" style="left:50.133%;top:75.493%"><i class="splash-spark" style="--a:-150deg;--d:310;--s:12;animation-delay:1.034s"></i><i class="splash-spark" style="--a:-118deg;--d:340;--s:10;animation-delay:1.09s"></i><i class="splash-spark" style="--a:-86deg;--d:340;--s:8;animation-delay:1.032s"></i><i class="splash-spark" style="--a:-52deg;--d:280;--s:10;animation-delay:1.099s"></i><i class="splash-spark" style="--a:-20deg;--d:280;--s:10;animation-delay:1.098s"></i><i class="splash-spark" style="--a:18deg;--d:250;--s:10;animation-delay:1.032s"></i><i class="splash-spark" style="--a:52deg;--d:340;--s:8;animation-delay:1.031s"></i><i class="splash-spark" style="--a:84deg;--d:280;--s:8;animation-delay:1.042s"></i><i class="splash-spark" style="--a:122deg;--d:310;--s:10;animation-delay:1.064s"></i><i class="splash-spark" style="--a:156deg;--d:340;--s:8;animation-delay:1.039s"></i><i class="splash-spark" style="--a:-172deg;--d:340;--s:12;animation-delay:1.096s"></i><i class="splash-spark" style="--a:196deg;--d:340;--s:10;animation-delay:1.077s"></i></span>
   </div>
+  <div class="splash-figure splash-portrait">
+    <img class="splash-base" src="splash-portrait.webp" alt="" width="1170" height="2529" decoding="sync">
+    <span class="splash-star" style="left:22.157%;top:15.564%;background-position:0.000% 0;--d:2.3s;--dl:-0.4s"></span>
+    <span class="splash-star" style="left:76.671%;top:6.725%;background-position:14.286% 0;--d:3.1s;--dl:-1.7s"></span>
+    <span class="splash-star" style="left:83.705%;top:47.072%;background-position:28.571% 0;--d:2.7s;--dl:-0.9s"></span>
+    <span class="splash-star" style="left:19.930%;top:31.670%;background-position:42.857% 0;--d:3.4s;--dl:-2.4s"></span>
+    <span class="splash-star" style="left:7.034%;top:36.551%;background-position:57.143% 0;--d:2.5s;--dl:-0.2s"></span>
+    <span class="splash-star" style="left:22.978%;top:75.813%;background-position:71.429% 0;--d:2.9s;--dl:-1.3s"></span>
+    <span class="splash-star" style="left:27.784%;top:90.564%;background-position:85.714% 0;--d:3.2s;--dl:-2.0s"></span>
+    <span class="splash-star" style="left:84.877%;top:93.547%;background-position:100.000% 0;--d:2.1s;--dl:-0.7s"></span>
+    <img class="splash-gear" src="splash-portrait-gear.webp" alt="" width="348" height="348" decoding="sync" style="left:34.701%;top:54.172%;width:29.744%;transform-origin:49.845% 57.331%">
+    <span class="splash-sparks" style="left:49.527%;top:62.061%"><i class="splash-spark" style="--a:-150deg;--d:356;--s:12;animation-delay:1.034s"></i><i class="splash-spark" style="--a:-118deg;--d:386;--s:10;animation-delay:1.09s"></i><i class="splash-spark" style="--a:-86deg;--d:386;--s:8;animation-delay:1.032s"></i><i class="splash-spark" style="--a:-52deg;--d:326;--s:10;animation-delay:1.099s"></i><i class="splash-spark" style="--a:-20deg;--d:326;--s:10;animation-delay:1.098s"></i><i class="splash-spark" style="--a:18deg;--d:296;--s:10;animation-delay:1.032s"></i><i class="splash-spark" style="--a:52deg;--d:386;--s:8;animation-delay:1.031s"></i><i class="splash-spark" style="--a:84deg;--d:326;--s:8;animation-delay:1.042s"></i><i class="splash-spark" style="--a:122deg;--d:356;--s:10;animation-delay:1.064s"></i><i class="splash-spark" style="--a:156deg;--d:386;--s:8;animation-delay:1.039s"></i><i class="splash-spark" style="--a:-172deg;--d:386;--s:12;animation-delay:1.096s"></i><i class="splash-spark" style="--a:196deg;--d:386;--s:10;animation-delay:1.077s"></i></span>
+    <div class="splash-text">Made by Vates Inc.</div>
+  </div>
   <div class="splash-text">Made by Vates Inc.</div>
 </div>
 <script>
-/* Ferme l'écran de démarrage après 2 s (ou au tap). Indépendant de app.js : ne peut pas rester bloqué. */
+/* Ferme l'écran de démarrage après 2,5 s (ou au tap). Indépendant de app.js : ne peut pas rester bloqué. */
 (function () {
   var s = document.getElementById('splash');
   if (!s) return;
@@ -1759,7 +1821,7 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
     s.classList.add('splash-out');
     setTimeout(function () { if (s.parentNode) s.remove(); }, 500);
   }
-  setTimeout(hide, 2000);
+  setTimeout(hide, 2500);
   s.addEventListener('click', hide);
 })();
 </script>

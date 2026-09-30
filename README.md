@@ -1,6 +1,14 @@
-# Muscu — v4.52
+# Muscu — v4.53
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.53
+
+- **Logo d'accueil en version portrait sur téléphone** : sur un écran étroit et vertical (moins de 600 px de large), l'illustration verticale (astronaute, engrenage, devise « PER ASPERA AD ASTRA ») remplit tout l'écran. Même animation qu'avant : l'engrenage fait un tour, dépasse de 5°, revient en projetant des étincelles, et 8 étoiles scintillent. Sur tablette, ordinateur ou téléphone tenu à l'horizontale, l'ancienne version paysage reste affichée
+  - Trois nouveaux fichiers : `splash-portrait.webp`, `splash-portrait-gear.webp` et `splash-portrait-stars.webp`, mis en cache hors-ligne. L'engrenage est détouré à la main et tourne exactement autour de son centre (excentrage mesuré : moins de 0,4 px sur un écran de téléphone)
+  - Le logo reste affiché **2,5 secondes** (au lieu de 2) sur toutes les tailles d'écran : l'animation est finie à 2 s, puis l'écran reste fixe avant de glisser vers le haut. Sur téléphone, « MADE BY VATES INC. » est placé juste sous la devise. **Le texte passe en capitales Cinzel (gras)**, dans le même style que la devise de l'illustration, sur téléphone comme sur les autres écrans ; la police (Cinzel, licence SIL OFL, sous-ensemble latin de 15 Ko) est embarquée et mise en cache hors-ligne (`cinzel-700-latin.woff2`)
+  - Le texte « MADE BY VATES INC. » apparaît désormais directement à sa place, sans le petit glissement vers le haut qu'il avait
+  - Le format des données n'a pas changé : pas besoin d'exporter avant de mettre à jour
 
 ## Nouveautés v4.52
 
