@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0e14'/%3E%3Cg fill='%23f5d76e'%3E%3Crect x='12' y='40' width='10' height='20' rx='2'/%3E%3Crect x='78' y='40' width='10' height='20' rx='2'/%3E%3Crect x='22' y='44' width='6' height='12'/%3E%3Crect x='72' y='44' width='6' height='12'/%3E%3Crect x='28' y='47' width='44' height='6'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preload" as="image" href="splash.webp">
 <link rel="preload" as="image" href="splash-gear.webp">
+<link rel="preload" as="image" href="splash-stars.webp">
 <title>Muscu</title>
 <style>
 :root {
@@ -1627,22 +1628,23 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
   font-variant-numeric: tabular-nums;
 }
 
-/* === ÉCRAN DE DÉMARRAGE ===
-   Intégré à la page (visible avant le chargement de app.js). Mouvement seul, aucune variation
-   d'opacité : pas de clignotement. Retiré par le petit script inline juste après le balisage.
-   L'illustration est faite de deux images : le fond (astronaute, engrenage effacé) et l'engrenage
-   seul (calque transparent centré sur son axe), qui tourne par-dessus. */
+/* === ÉCRAN DE DÉMARRAGE (Logo d'accueil) ===
+   Intégré à la page (visible avant le chargement de app.js). Retiré par le petit script inline
+   qui suit le balisage : 2 s ou un tap, puis glissement vers le haut.
+   Trois images : le fond (astronaute, engrenage effacé), l'engrenage seul (calque transparent
+   centré sur son axe) et un atlas d'éclats d'étoiles. Aucune animation de la page entière :
+   seul l'engrenage tourne (un tour + 5°, retour, étincelles) et quelques étoiles scintillent. */
 #splash {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: #050505; /* même noir que l'image, pour qu'elle se fonde dans l'écran */
+  background: #000; /* le noir de l'image : elle se fond dans l'écran */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  padding: calc(var(--safe-top) + 24px) 16px calc(var(--safe-bottom) + 24px);
+  gap: 14px;
+  padding: calc(var(--safe-top) + 24px) 8px calc(var(--safe-bottom) + 24px);
   cursor: pointer;
 }
 #splash.splash-out {
@@ -1650,27 +1652,78 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
   transition: transform .45s cubic-bezier(.6, 0, .4, 1);
 }
 .splash-figure {
+  --fw: min(96vw, 480px);          /* largeur de la figure */
+  --u: calc(var(--fw) / 1340);     /* 1u = 1 pixel de l'image d'origine recadrée */
   position: relative;
-  width: min(94vw, 460px);
-  aspect-ratio: 1012 / 880;
-  animation: splashFloat 2.8s ease-in-out infinite;
+  width: var(--fw);
+  aspect-ratio: 1340 / 1030;
+  /* bords fondus vers le noir (masque fixe, sans animation) */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 96.5%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 96.5%, transparent);
+  mask-composite: intersect;
 }
 .splash-figure img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; }
 .splash-base { left: 0; top: 0; width: 100%; height: 100%; }
-.splash-gear { height: auto; aspect-ratio: 1 / 1; animation: splashSpin 3s linear infinite; will-change: transform; }
+
+/* Engrenage : un tour complet, dépasse de 5°, revient à sa position finale (360° = position d'origine) */
+.splash-gear {
+  height: auto; aspect-ratio: 1 / 1;
+  animation: splashGearTurn 1.5s .1s both;
+  will-change: transform;
+}
+@keyframes splashGearTurn {
+  0%   { transform: rotate(0deg);   animation-timing-function: cubic-bezier(.5, 0, .25, 1); }
+  62%  { transform: rotate(365deg); animation-timing-function: cubic-bezier(.3, 0, .3, 1); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Étincelles au retour de l'engrenage (petits points dorés qui partent du bord et s'éteignent) */
+.splash-sparks { position: absolute; width: 0; height: 0; }
+.splash-spark {
+  position: absolute;
+  left: calc(var(--s) * var(--u) / -2); top: calc(var(--s) * var(--u) / -2);
+  width: calc(var(--s) * var(--u)); height: calc(var(--s) * var(--u));
+  border-radius: 50%;
+  background: #ffe6a0;
+  box-shadow: 0 0 calc(10 * var(--u)) calc(3 * var(--u)) rgba(255, 196, 70, .85);
+  opacity: 0;
+  animation: splashSpark .8s ease-out both;
+}
+@keyframes splashSpark {
+  0%   { opacity: 0; transform: rotate(var(--a)) translateX(calc(165 * var(--u))) scale(1); }
+  12%  { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--a)) translateX(calc(var(--d) * var(--u))) scale(.15); }
+}
+
+/* Étoiles les plus brillantes : un éclat qui s'ajoute par-dessus l'étoile de l'image (mode « screen ») */
+.splash-star {
+  position: absolute;
+  width: 7.164%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background-image: url(splash-stars.webp);
+  background-size: 800% 100%;
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: splashTwinkle var(--d) ease-in-out var(--dl) infinite;
+}
+@keyframes splashTwinkle {
+  0%, 100% { opacity: 0;   transform: translate(-50%, -50%) scale(.8); }
+  50%      { opacity: .95; transform: translate(-50%, -50%) scale(1.15); }
+}
+
 .splash-text {
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: #e8aa3c;
-  text-shadow: 0 0 18px rgba(230,167,63,.3);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: #c9973f;
   animation: splashRise .6s cubic-bezier(.2,.8,.25,1) both;
 }
-@keyframes splashFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-@keyframes splashSpin { to { transform: rotate(360deg); } }
-@keyframes splashRise { from { transform: translateY(14px); } to { transform: translateY(0); } }
+@keyframes splashRise { from { transform: translateY(10px); } to { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
-  .splash-figure, .splash-gear, .splash-text { animation: none; }
+  .splash-gear, .splash-text { animation: none; }
+  .splash-spark, .splash-star { display: none; }
   #splash.splash-out { transition: none; }
 }
 </style>
@@ -1678,8 +1731,17 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
 <body>
 <div id="splash" role="img" aria-label="Made by Vates Inc.">
 <div class="splash-figure">
-    <img class="splash-base" src="splash.webp" alt="" width="1012" height="880" decoding="sync">
-    <img class="splash-gear" src="splash-gear.webp" alt="" width="410" height="410" decoding="sync" style="left:29.460%;top:59.637%;width:40.514%">
+    <img class="splash-base" src="splash.webp" alt="" width="1340" height="1030" decoding="sync">
+    <span class="splash-star" style="left:2.463%;top:93.010%;background-position:0.000% 0;--d:2.3s;--dl:-0.4s"></span>
+    <span class="splash-star" style="left:8.881%;top:49.806%;background-position:14.286% 0;--d:3.1s;--dl:-1.7s"></span>
+    <span class="splash-star" style="left:17.090%;top:29.709%;background-position:28.571% 0;--d:2.7s;--dl:-0.9s"></span>
+    <span class="splash-star" style="left:8.507%;top:15.340%;background-position:42.857% 0;--d:3.4s;--dl:-2.4s"></span>
+    <span class="splash-star" style="left:81.045%;top:21.165%;background-position:57.143% 0;--d:2.5s;--dl:-0.2s"></span>
+    <span class="splash-star" style="left:85.672%;top:14.951%;background-position:71.429% 0;--d:2.9s;--dl:-1.3s"></span>
+    <span class="splash-star" style="left:95.896%;top:49.320%;background-position:85.714% 0;--d:3.2s;--dl:-2.0s"></span>
+    <span class="splash-star" style="left:21.269%;top:3.107%;background-position:100.000% 0;--d:2.1s;--dl:-0.7s"></span>
+    <img class="splash-gear" src="splash-gear.webp" alt="" width="410" height="410" decoding="sync" style="left:34.835%;top:55.590%;width:30.597%">
+    <span class="splash-sparks" style="left:50.133%;top:75.493%"><i class="splash-spark" style="--a:-150deg;--d:310;--s:12;animation-delay:1.034s"></i><i class="splash-spark" style="--a:-118deg;--d:340;--s:10;animation-delay:1.09s"></i><i class="splash-spark" style="--a:-86deg;--d:340;--s:8;animation-delay:1.032s"></i><i class="splash-spark" style="--a:-52deg;--d:280;--s:10;animation-delay:1.099s"></i><i class="splash-spark" style="--a:-20deg;--d:280;--s:10;animation-delay:1.098s"></i><i class="splash-spark" style="--a:18deg;--d:250;--s:10;animation-delay:1.032s"></i><i class="splash-spark" style="--a:52deg;--d:340;--s:8;animation-delay:1.031s"></i><i class="splash-spark" style="--a:84deg;--d:280;--s:8;animation-delay:1.042s"></i><i class="splash-spark" style="--a:122deg;--d:310;--s:10;animation-delay:1.064s"></i><i class="splash-spark" style="--a:156deg;--d:340;--s:8;animation-delay:1.039s"></i><i class="splash-spark" style="--a:-172deg;--d:340;--s:12;animation-delay:1.096s"></i><i class="splash-spark" style="--a:196deg;--d:340;--s:10;animation-delay:1.077s"></i></span>
   </div>
   <div class="splash-text">Made by Vates Inc.</div>
 </div>

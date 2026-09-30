@@ -1,6 +1,15 @@
-# Muscu — v4.51
+# Muscu — v4.52
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.52
+
+- **Nouveau Logo d'accueil** : la nouvelle illustration (astronaute, engrenage doré, ciel étoilé et devise « PER ASPERA AD ASTRA ») remplace la précédente, avec « Made by Vates Inc. » en petit dessous
+  - **L'engrenage fait un tour complet**, dépasse de 5°, puis revient à sa position finale en projetant des **étincelles**
+  - **Les 8 étoiles les plus brillantes scintillent** (un éclat qui s'ajoute par-dessus l'étoile de l'image)
+  - Les bords de l'image se fondent dans le noir (masque fixe, sans animation)
+  - Toujours 2 secondes ou un tap, puis glissement vers le haut. L'écran d'ensemble ne varie pas de luminosité : seuls l'engrenage, les étincelles et les étoiles bougent. Avec « réduire les animations », l'image reste fixe, sans étincelles ni scintillement
+  - Trois fichiers : `splash.webp` (l'illustration sans l'engrenage), `splash-gear.webp` (l'engrenage seul) et `splash-stars.webp` (les éclats d'étoiles), tous mis en cache hors-ligne
 
 ## Nouveautés v4.51
 
@@ -95,6 +104,7 @@ muscu/
 ├── i18n-desc.js            # Descriptions d'exercices en anglais
 ├── splash.webp             # Écran de démarrage : astronaute (sans l'engrenage)
 ├── splash-gear.webp        # Écran de démarrage : engrenage seul (tourne)
+├── splash-stars.webp       # Écran de démarrage : éclats des étoiles qui scintillent
 ├── sw.js                   # Service worker (cache offline)
 ├── manifest.webmanifest    # Manifest PWA
 ├── icon-192.svg            # Icône 192×192

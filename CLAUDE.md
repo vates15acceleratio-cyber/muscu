@@ -5,24 +5,26 @@ Le français est la langue source ; l'anglais est un affichage traduit (voir `i1
 
 ## Logo d'accueil — À CONSERVER
 
-Le **Logo d'accueil** est l'écran affiché à chaque ouverture de l'app : une silhouette d'astronaute avec un engrenage doré qui tourne, et le texte **« Made by Vates Inc. »**. Il est voulu par le propriétaire pour la suite : **ne pas le retirer, le remplacer ni le modifier sans demande explicite.**
+Le **Logo d'accueil** est l'écran affiché à chaque ouverture de l'app : une silhouette d'astronaute portant un engrenage doré, sur un ciel étoilé avec la devise **« PER ASPERA AD ASTRA »** (intégrée à l'image), et le texte **« Made by Vates Inc. »** en petit dessous. Il est voulu par le propriétaire pour la suite : **ne pas le retirer, le remplacer ni le modifier sans demande explicite.** (Il a déjà été remplacé deux fois, à la demande du propriétaire : dessin SVG, puis silhouette sur fond noir, puis la version actuelle avec ciel étoilé, en 4.52.)
 
 Où il est :
-- `index.html` : le balisage `#splash` (juste après `<body>`), son CSS (section « ÉCRAN DE DÉMARRAGE ») et un petit script inline qui le ferme.
-- `splash.webp` : l'astronaute, engrenage effacé (1012 × 880).
-- `splash-gear.webp` : l'engrenage seul, fond transparent (410 × 410), qui tourne par-dessus.
-- `sw.js` : les deux images doivent rester dans `APP_SHELL` (cache hors-ligne). `index.html` les précharge aussi.
+- `index.html` : le balisage `#splash` (juste après `<body>`), son CSS (section « ÉCRAN DE DÉMARRAGE (Logo d'accueil) ») et un petit script inline qui le ferme.
+- `splash.webp` : l'illustration recadrée, **engrenage effacé** (1340 × 1030).
+- `splash-gear.webp` : l'engrenage seul, fond transparent (410 × 410), centré sur son axe de rotation.
+- `splash-stars.webp` : atlas horizontal de 8 éclats d'étoiles (tuiles de 96 × 96) qui scintillent.
+- `sw.js` : les trois images doivent rester dans `APP_SHELL` (cache hors-ligne). `index.html` les précharge aussi.
 
 Règles à respecter :
 - **2 secondes** d'affichage, ou un tap pour fermer, puis sortie par **glissement vers le haut**.
-- **Aucun fondu, aucune variation d'opacité** : le propriétaire est sensible au clignotement. Mouvement seul (translation, rotation).
-- L'engrenage fait un tour en 3 s ; l'astronaute flotte légèrement.
-- `prefers-reduced-motion` : image fixe, disparition sans transition.
-- Le fond du logo est `#050505`, le même noir que l'image, pour qu'elle s'y fonde sans bord visible.
-- Le texte « Made by Vates Inc. » reste identique en français et en anglais, sans autre logo ni mention.
+- **Aucun clignotement d'ensemble** : le propriétaire y est sensible. L'écran lui-même ne varie jamais en opacité ni en luminosité (pas de fondu d'entrée ni de sortie). Seuls de petits éléments locaux bougent : l'engrenage (rotation), les étincelles et 8 étoiles (scintillement doux, demandé par le propriétaire).
+- **Engrenage** : un tour complet, dépasse de 5° (365°), puis revient à 360° (= sa position d'origine) en projetant des étincelles. 1,5 s au total, démarrage à 0,1 s, retour vers 1,03 s, étincelles jusqu'à environ 1,8 s : tout est fini avant la sortie à 2 s.
+- **Étoiles** : un éclat additif (`mix-blend-mode: screen`) s'ajoute par-dessus l'étoile de l'image, l'étoile de l'image n'est pas effacée. Pas de flottement de la figure (le fond étoilé bougerait avec).
+- Bords de l'image fondus vers le noir par un **masque fixe** (`mask-image`), sans animation. Le fond de l'écran est `#000`, le noir de l'image.
+- `prefers-reduced-motion` : image fixe, sans étincelles ni scintillement, disparition sans transition.
+- Le texte « Made by Vates Inc. » reste identique en français et en anglais, en petit (12 px), sans autre logo ni mention.
 - Le script de fermeture est inline et indépendant de `app.js` : le logo ne peut pas rester bloqué si `app.js` échoue.
 
-Axe de rotation (ne pas y toucher sans recalculer) : l'illustration d'origine n'est pas parfaitement concentrique (le trou central et l'anneau extérieur sont décalés d'environ 3 px). L'axe est placé entre les deux, en (833,14 ; 739,81) dans l'image source de 1672 × 941. Le fond est recadré sur (330, 10) → (1342, 890), et le calque d'engrenage (centré sur l'axe) est positionné à `left: 29,460 %; top: 59,637 %; width: 40,514 %` de la figure. Si l'image change, refaire la découpe, recalculer l'axe et mesurer le balancement (objectif : moins de 1 px CSS).
+Réglages de la découpe (à recalculer si l'image change) : image source 2000 × 1126, recadrage (330, 20) → (1670, 1050). L'illustration d'origine n'est pas parfaitement concentrique (le trou central, l'anneau extérieur et le corps de l'engrenage ne partagent pas exactement le même centre). L'axe de rotation est la moyenne des trois, en (1001,79 ; 797,58) dans l'image source. Le calque d'engrenage est positionné à `left: 34,835 %; top: 55,590 %; width: 30,597 %` de la figure. La découpe n'a jamais touché à la devise (ne rien extraire sous y = 935 dans l'image source). Balancement mesuré : moins de 1,5 px CSS (objectif : moins de 1 px pour le trou et l'anneau). L'image source et le script de découpe ne sont pas dans le dépôt : pour changer l'image, il faut refaire la découpe (séparer l'engrenage par transparence, effacer l'engrenage du fond, recalculer l'axe par ajustement de cercles, mesurer le balancement sur 8 angles).
 
 ## Versions
 
