@@ -50,4 +50,4 @@ Idées proposées par Claude, toutes gardées pour l'instant. Le propriétaire f
 13. **Inclure la langue dans l'export JSON** : elle est aujourd'hui dans une clé séparée (`muscu.lang`) et n'est pas sauvegardée. Petit correctif de données : à passer par le test du sandbox.
 
 ### Apparence
-14. **Thème clair** : le réglage `theme` existe dans les données, mais seul le thème sombre est implémenté. Attention : le Logo d'accueil reste tel quel (fond noir).
+14. ~~**Thème clair**~~ — **REFUSÉ par le propriétaire (2026-10-05) : ne pas le reproposer.** Le réglage `theme` reste dans les données (ne pas le supprimer) mais seul le thème sombre existe.

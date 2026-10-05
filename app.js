@@ -6,7 +6,7 @@
 // Bumpée à chaque commit + push : évolution notable = +0,1 (4.4 -> 4.5), correctif très
 // mineur = au centième (4.41, 4.42...). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '4.55';
+const APP_VERSION = '4.56';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -1007,8 +1007,7 @@ function renderSessionsScreen() {
       class: 'h-action lang-flag',
       onclick: toggleLang,
       'aria-label': getLang() === 'en' ? 'Language: English — switch to French' : 'Langue : Français — passer en anglais',
-    }, getLang() === 'en' ? '🇬🇧' : '🇫🇷'),
-    el('button', { class: 'h-action', onclick: () => showScreen('settings'), 'aria-label': 'Réglages' }, icon('settings'))
+    }, getLang() === 'en' ? '🇬🇧' : '🇫🇷')
   );
   screen.appendChild(header);
 
@@ -2323,16 +2322,6 @@ function openExerciseDetail(id) {
     main.appendChild(el('div', { style: 'color: var(--text-muted); font-style: italic; font-size: 13px;' }, 'Pas de description.'));
   }
   body.appendChild(main);
-
-  // Bouton démo YouTube
-  const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(tr(ex.name) + tr(' technique musculation'));
-  body.appendChild(el('a', {
-    href: ytUrl,
-    target: '_blank',
-    rel: 'noopener noreferrer',
-    class: 'btn btn-secondary btn-block',
-    style: 'margin-bottom: 12px; text-decoration: none;',
-  }, '▶  Voir une démo (YouTube)'));
 
   // Métadonnées
   body.appendChild(el('div', { class: 'card' },

@@ -119,7 +119,7 @@ const I18N_UI = {
   '+ Custom': '+ Custom', 'Rechercher un exercice...': 'Search for an exercise...', 'Callisthénie': 'Calisthenics',
   'Créer un exercice personnalisé': 'Create a custom exercise', 'Aucun exercice trouvé.': 'No exercises found.',
   'Choisir un exercice': 'Choose an exercise', 'Pas de description.': 'No description.',
-  '▶  Voir une démo (YouTube)': '▶  Watch a demo (YouTube)', ' technique musculation': ' exercise form tutorial',
+  
   'Muscle principal': 'Primary muscle', 'Muscles secondaires': 'Secondary muscles',
   'Équipement': 'Equipment', 'Repos par défaut': 'Default rest',
   'Supprimer cet exercice custom ?': 'Delete this custom exercise?',

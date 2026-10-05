@@ -6,7 +6,7 @@
    Mise à jour : la nouvelle version s'installe en arrière-plan puis attend ;
    app.js (Updater) prévient l'utilisateur de relancer l'app. */
 
-const CACHE_VERSION = 'muscu-v4.55';
+const CACHE_VERSION = 'muscu-v4.56';
 const APP_SHELL = [
   './',
   './index.html',

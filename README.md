@@ -1,6 +1,12 @@
-# Muscu — v4.55
+# Muscu — v4.56
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.56
+
+- **Réglages dans la barre du bas** : le bouton est maintenant à droite de « Biblio ». Le drapeau de langue reste seul en haut à droite de l'écran Séances
+- **Liens YouTube retirés** : le bouton « Voir une démo » de la fiche exercice disparaît. L'app n'ouvre plus aucun lien externe
+- Le format des données n'a pas changé : pas besoin d'exporter avant de mettre à jour
 
 ## Nouveautés v4.55
 
