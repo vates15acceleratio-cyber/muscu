@@ -1,6 +1,14 @@
-# Muscu — v4.54
+# Muscu — v4.55
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.55
+
+- **Durcissement de la sécurité** (audit) :
+  - Politique de sécurité de contenu (CSP) dans `index.html` : seuls les scripts de l'app et le script du Logo d'accueil (par son hash) s'exécutent, aucune connexion vers l'extérieur, `no-referrer`. **Si le script inline du Logo d'accueil est modifié, recalculer son hash dans la CSP**, sinon le logo ne se ferme plus
+  - Le service worker ne garde plus en cache une page d'erreur à la place de l'app, et n'intercepte plus que sa propre origine
+  - Ajout d'un `.gitignore` (clés, `.env`, sauvegardes `muscu-backup-*.json`)
+  - Le format des données n'a pas changé : pas besoin d'exporter avant de mettre à jour
 
 ## Nouveautés v4.54
 

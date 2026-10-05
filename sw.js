@@ -6,7 +6,7 @@
    Mise à jour : la nouvelle version s'installe en arrière-plan puis attend ;
    app.js (Updater) prévient l'utilisateur de relancer l'app. */
 
-const CACHE_VERSION = 'muscu-v4.54';
+const CACHE_VERSION = 'muscu-v4.55';
 const APP_SHELL = [
   './',
   './index.html',
@@ -48,13 +48,18 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
+  // Ne jamais intercepter ni mettre en cache autre chose que sa propre origine.
+  if (new URL(req.url).origin !== self.location.origin) return;
 
   // Network-first pour le HTML (pour récupérer rapidement les MAJ)
   if (req.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
       fetch(req).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE_VERSION).then(c => c.put(req, copy));
+        // On ne garde en cache que les réponses 200 : une page d'erreur ne doit pas remplacer l'app hors-ligne.
+        if (res && res.status === 200 && res.type === 'basic') {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then(c => c.put(req, copy));
+        }
         return res;
       }).catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
     );
