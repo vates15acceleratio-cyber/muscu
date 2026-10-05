@@ -6,7 +6,7 @@
 // Bumpée à chaque commit + push : évolution notable = +0,1 (4.4 -> 4.5), correctif très
 // mineur = au centième (4.41, 4.42...). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '4.56';
+const APP_VERSION = '4.57';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -1105,22 +1105,14 @@ function doStartSession(tpl) {
     startedAt: Date.now(),
     conditions: { sleep: '', energy: '', meal: '' },
     exercises: tpl.exercises.map(e => {
-      const n = Number(e.sets) || 3;
-      const sets = [];
-      for (let i = 0; i < n; i++) {
-        sets.push({ reps: null, weight: null, done: false, setType: null });
-      }
       const exDef = State.exerciseById(e.exerciseId);
       const restSec = e.restSec != null ? e.restSec : defaultRestSec(exDef);
-      return {
-        exerciseId: e.exerciseId,
+      // Séries pré-remplies avec la suggestion du coach (ou la dernière fois) : voir buildSessionExo
+      return buildSessionExo(e.exerciseId, e.sets, e.reps, {
         ssId: e.ssId || null,
         ssColor: e.ssId && e.ssColor != null ? e.ssColor : null,
-        targetSets: n,
-        targetReps: e.reps,
         restSec,
-        sets,
-      };
+      });
     }),
     warmupChecks: {},
     cooldownDone: false,
@@ -1567,9 +1559,50 @@ function renderWarmupStep(session) {
 }
 
 /* === Onglet Exercices === */
+/* Tableau « Plan du jour » : dernière fois, conseil du coach et écart, pour chaque exercice. */
+function openCoachPlan(session) {
+  const rows = session.exercises.filter(e => e.coach);
+  if (!rows.length) return;
+  const table = el('table', { class: 'plan-table' });
+  table.appendChild(el('thead', {}, el('tr', {},
+    el('th', {}, 'Exercice'), el('th', {}, 'Dernière fois'), el('th', {}, 'Coach'))));
+  const tbody = el('tbody', {});
+  rows.forEach(exo => {
+    const exDef = State.exerciseById(exo.exerciseId);
+    const h = exDef ? exerciseHistory(exo.exerciseId, 1) : [];
+    const c = exo.coach;
+    let target = c.type === 'bodyweight' ? c.reps + ' reps' : c.type === 'time' ? c.reps + ' s'
+      : (c.weight != null ? fmtNum(c.weight) + ' kg × ' + c.reps : String(c.reps || ''));
+    let delta = '';
+    if (c.type === 'bodyweight') delta = c.delta ? '+' + c.delta + ' rep' : '';
+    else if (c.type === 'time') delta = c.delta ? '+' + c.delta + ' s' : '';
+    else if (Math.abs(c.delta) >= 0.01) delta = signedKg(c.delta);
+    tbody.appendChild(el('tr', {},
+      el('td', { class: 'pt-name' }, exDef ? exDef.name : 'Exercice'),
+      el('td', {}, h.length ? fmtLastPerf(h[0], h[0].sets[0].setType || (exDef && exDef.type)) : '—'),
+      el('td', { class: 'pt-coach ' + c.severity }, target, delta ? el('span', { class: 'pt-delta' }, ' ' + delta) : null)));
+  });
+  table.appendChild(tbody);
+  openModal({
+    title: 'Plan du jour',
+    body: el('div', {},
+      el('p', { class: 'plan-hint' }, 'Les valeurs conseillées sont déjà dans tes séries (en gris). Change-les librement : ton choix prime.'),
+      el('div', { class: 'plan-wrap' }, table)),
+    footer: [el('button', { class: 'btn btn-primary', onclick: closeModal }, 'C\'est parti')],
+  });
+}
+
 function renderExercisesStep(session) {
   const wrap = el('div', {});
   const list = session.exercises;
+  if (list.some(e => e.coach)) {
+    wrap.appendChild(el('button', { class: 'btn btn-secondary btn-block plan-btn', onclick: () => openCoachPlan(session) }, 'Plan du jour'));
+    if (!session.planShown) {
+      session.planShown = true;
+      State.save();
+      setTimeout(() => openCoachPlan(session), 0);
+    }
+  }
   let i = 0;
   while (i < list.length) {
     if (supersetPartnerIndex(list, i) === i + 1) {
@@ -1646,6 +1679,8 @@ function renderCooldownStep(session) {
   }
   wrap.appendChild(card);
 
+  wrap.appendChild(renderFeelCard(session));
+
   wrap.appendChild(el('label', { class: 'label-row' }, 'Notes / ressenti'));
   const notesInput = el('textarea', {
     placeholder: 'Sensations, observations, douleurs...',
@@ -1664,6 +1699,36 @@ function renderCooldownStep(session) {
   }, 'Terminer la séance'));
 
   return wrap;
+}
+
+/* === Ressenti par exercice (alimente le coach ; il prime sur ses règles) === */
+function renderFeelCard(session) {
+  const exos = session.exercises.filter(e => e.sets.some(s => s.done));
+  const card = el('div', { class: 'card feel-card' });
+  if (!exos.length) return card;
+  card.appendChild(el('div', { style: 'font-weight: 600; font-size: 16px; margin-bottom: 4px;' }, 'Ressenti par exercice'));
+  card.appendChild(el('div', { class: 'feel-hint' },
+    'Dis comment chaque exercice s\'est passé. Le coach s\'en sert pour calculer ta prochaine séance, et ton ressenti prime sur ses règles. Facultatif.'));
+  exos.forEach(exo => {
+    const exDef = State.exerciseById(exo.exerciseId);
+    const chips = el('div', { class: 'feel-chips' });
+    FEEL_OPTIONS.forEach(opt => {
+      const btn = el('button', {
+        class: 'feel-chip ' + opt.key + (exo.feel === opt.key ? ' active' : ''),
+        onclick: () => {
+          exo.feel = exo.feel === opt.key ? null : opt.key;
+          if (!exo.feel) delete exo.feel;
+          chips.querySelectorAll('.feel-chip').forEach(b => b.classList.toggle('active', b.dataset.k === exo.feel));
+          State.save();
+        },
+      }, opt.label);
+      btn.dataset.k = opt.key;
+      chips.appendChild(btn);
+    });
+    card.appendChild(el('div', { class: 'feel-row' },
+      el('div', { class: 'feel-name' }, exDef ? exDef.name : 'Exercice'), chips));
+  });
+  return card;
 }
 
 /* === Éditeurs warmup/cooldown depuis la séance === */
@@ -1890,6 +1955,18 @@ function renderActiveExerciseCard(exo, idx, ssRole) {
   );
 
   const titleBlock = el('div', { style: 'flex: 1; min-width: 0;' }, nameWrap, targetText);
+  const hist0 = exDef ? exerciseHistory(exo.exerciseId, 1) : [];
+  if (hist0.length) {
+    const h0 = hist0[0];
+    const e1 = best1RM(h0.sets);
+    const typ = h0.sets[0].setType || exDef.type;
+    titleBlock.appendChild(el('div', { class: 'exo-last' },
+      tf('Dernière fois : {v}', { v: fmtLastPerf(h0, typ) }) + ((typ === 'loaded' || typ === 'weighted') && e1 > 0 ? ' · ' + tf('1RM ≈ {n} kg', { n: fmtNum(e1) }) : '')));
+  }
+  if (exo.coach) {
+    titleBlock.appendChild(el('div', { class: 'exo-coach ' + exo.coach.severity },
+      tf('Coach : {t}', { t: coachText(exo.coach) })));
+  }
   header.appendChild(titleBlock);
   header.appendChild(el('button', {
     class: 'exo-menu-btn',
@@ -1907,6 +1984,7 @@ function renderActiveExerciseCard(exo, idx, ssRole) {
   }, '+ Ajouter un set'));
 
   card.appendChild(setList);
+  observeCoachBubble(card, exo);
   return card;
 }
 
@@ -1914,13 +1992,13 @@ function renderSetRow(exo, set, sidx, exDef) {
   // Determine effective type for this set (set.setType overrides exDef.type)
   const type = set.setType || (exDef ? exDef.type : 'loaded');
 
-  const row = el('div', { class: 'set-row' + (set.done ? ' done' : '') + (type === 'bodyweight' ? ' bodyweight' : '') });
+  const row = el('div', { class: 'set-row' + (set.done ? ' done' : '') + (set.pre && !set.done ? ' prefilled' : '') + (type === 'bodyweight' ? ' bodyweight' : '') });
   row.appendChild(el('div', { class: 'set-num' }, sidx + 1));
 
   const repsInput = el('input', {
     type: 'number', inputmode: 'numeric', min: '0',
     placeholder: type === 'time' ? 'sec' : 'reps',
-    onchange: e => { set.reps = e.target.value === '' ? null : Number(e.target.value); State.save(); },
+    onchange: e => { set.reps = e.target.value === '' ? null : Number(e.target.value); onSetEdited(exo, sidx, 'reps', row); },
   });
   repsInput.value = set.reps != null ? set.reps : '';
   const repsWrap = el('div', { class: 'set-input-wrap' }, repsInput,
@@ -1932,7 +2010,11 @@ function renderSetRow(exo, set, sidx, exDef) {
     const weightInput = el('input', {
       type: 'number', inputmode: 'decimal', step: '0.5', min: '0',
       placeholder: type === 'assisted' ? 'assist' : 'kg',
-      onchange: e => { set.weight = e.target.value === '' ? null : Number(e.target.value); State.save(); },
+      onchange: e => {
+        set.weight = e.target.value === '' ? null : Number(e.target.value);
+        onSetEdited(exo, sidx, 'weight', row);
+        userWeightBubble(exo, set, weightWrap);
+      },
     });
     weightInput.value = set.weight != null ? set.weight : '';
     const labelText = type === 'assisted' ? 'kg' : (type === 'weighted' ? '+kg' : 'kg');
@@ -1963,9 +2045,82 @@ function renderSetRow(exo, set, sidx, exDef) {
   return row;
 }
 
+/* Saisie manuelle d'une série : la valeur devient « à toi », et elle est recopiée sur les
+   séries suivantes encore vides ou pré-remplies (jamais sur une série validée ou saisie à la main). */
+function onSetEdited(exo, sidx, field, rowEl) {
+  const set = exo.sets[sidx];
+  delete set.pre;
+  rowEl.classList.remove('prefilled');
+  const rows = rowEl.parentElement ? [...rowEl.parentElement.querySelectorAll('.set-row')] : [];
+  if (set[field] != null) {
+    for (let j = sidx + 1; j < exo.sets.length; j++) {
+      const s = exo.sets[j];
+      if (s.done || !(s.pre || (s.reps == null && s.weight == null))) continue;
+      s[field] = set[field];
+      s.pre = true;
+      const r = rows[j];
+      if (r) {
+        const inputs = r.querySelectorAll('input');
+        const input = inputs[field === 'reps' ? 0 : 1];
+        if (input) input.value = set[field];
+        r.classList.add('prefilled');
+      }
+    }
+  }
+  State.save();
+}
+
+/* === BULLES (+x kg / -x kg) : petites étiquettes qui flottent puis disparaissent === */
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+function floatBubble(anchor, text, severity, source) {
+  if (!anchor || prefersReducedMotion()) return;
+  const b = el('span', { class: 'bubble ' + severity + ' ' + source, 'aria-hidden': 'true' }, text);
+  anchor.appendChild(b);
+  setTimeout(() => b.remove(), 2400);
+}
+
+function signedKg(delta) {
+  return (delta > 0 ? '+' : '-') + fmtNum(Math.abs(delta)) + ' kg';
+}
+
+/* Bulle « toi » : écart de la charge saisie par rapport à la dernière fois. */
+function userWeightBubble(exo, set, anchor) {
+  if (!exo.coach || set.weight == null) return;
+  const delta = set.weight - (Number(exo.coach.lastWeight) || 0);
+  if (Math.abs(delta) < 0.01) return;
+  floatBubble(anchor, tr('Toi') + ' ' + signedKg(delta), delta > 0 ? 'up' : 'down', 'user');
+}
+
+/* Bulle « coach » : une seule fois, quand la carte de l'exercice apparaît à l'écran. */
+function observeCoachBubble(card, exo) {
+  if (!exo.coach || exo.bubbleDone || prefersReducedMotion() || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(entries => {
+    if (!entries.some(e => e.isIntersecting)) return;
+    io.disconnect();
+    if (exo.bubbleDone) return;
+    exo.bubbleDone = true;
+    State.save();
+    const c = exo.coach;
+    let text = '';
+    if (c.type === 'bodyweight') text = c.delta ? '+' + c.delta + ' rep' : '';
+    else if (c.type === 'time') text = c.delta ? '+' + c.delta + ' s' : '';
+    else text = Math.abs(c.delta) >= 0.01 ? signedKg(c.delta) : '';
+    if (!text) return;
+    const firstRow = card.querySelector('.set-row');
+    const wraps = firstRow ? firstRow.querySelectorAll('.set-input-wrap') : [];
+    const anchor = wraps[1] || wraps[0] || card.querySelector('.exo-coach');
+    floatBubble(anchor, tr('Coach') + ' ' + text, c.severity, 'coach');
+  }, { threshold: 0.25 });
+  io.observe(card);
+}
+
 function toggleSetDone(exo, set, sidx) {
   const becomingDone = !set.done;
   set.done = !set.done;
+  if (set.done) delete set.pre;
   if (set.done && set.reps == null && State.activeSession) {
     // Try to autofill from previous set
     const prev = exo.sets[sidx - 1];
@@ -2021,9 +2176,10 @@ function addSetTo(exo) {
     setType: lastSet ? lastSet.setType : (exo.setTypeOverride || null),
   };
   if (lastSet) {
-    // pre-fill from last set as a guess
-    newSet.reps = null; // user fills
+    // pré-remplit avec la série précédente (en gris tant qu'elle n'est pas modifiée ou validée)
+    newSet.reps = lastSet.reps;
     newSet.weight = lastSet.weight;
+    if (newSet.reps != null || newSet.weight != null) newSet.pre = true;
   }
   exo.sets.push(newSet);
 }
@@ -2121,7 +2277,11 @@ function openSetTypeOverride(exoIdx) {
       onclick: () => {
         exo.setTypeOverride = type;
         // Apply to empty sets
-        exo.sets.forEach(s => { if (!s.done && (s.reps == null && s.weight == null)) s.setType = type; });
+        exo.sets.forEach(s => {
+          if (s.done) return;
+          if (s.pre) { s.reps = null; s.weight = null; delete s.pre; }
+          if (s.reps == null && s.weight == null) s.setType = type;
+        });
         State.save();
         closeModal();
         render();
@@ -2148,15 +2308,7 @@ function abandonSession() {
 function addExerciseToActive(exerciseId) {
   const exDef = State.exerciseById(exerciseId);
   if (!exDef) return;
-  const sets = [];
-  for (let i = 0; i < 3; i++) sets.push({ reps: null, weight: null, done: false, setType: null });
-  State.activeSession.exercises.push({
-    exerciseId,
-    targetSets: 3,
-    targetReps: '10',
-    restSec: defaultRestSec(exDef),
-    sets,
-  });
+  State.activeSession.exercises.push(buildSessionExo(exerciseId, 3, '10', { restSec: defaultRestSec(exDef) }));
   State.save();
   render();
 }
@@ -2182,6 +2334,12 @@ function finishSession() {
 function doFinishSession() {
   const session = State.activeSession;
   session.endedAt = Date.now();
+  // Les séries pré-remplies mais jamais validées redeviennent vides (historique inchangé)
+  session.exercises.forEach(e => {
+    delete e.bubbleDone;
+    e.sets.forEach(s => { if (s.pre && !s.done) { s.reps = null; s.weight = null; } delete s.pre; });
+  });
+  delete session.planShown;
   // Persist to sessions
   State.sessions.push(session);
   const finishedSessionId = session.id;
@@ -3220,7 +3378,231 @@ function renderSummaryScreen() {
   return screen;
 }
 
-/* === COACH LOGIC === */
+/* === COACH LOGIC ===
+   Le coach lit l'historique de CHAQUE exercice (pas seulement la dernière séance) :
+   - double progression : on monte les reps dans la fourchette cible, puis la charge ;
+   - 1RM estimé (Epley) et tendance sur les dernières séances ;
+   - ressenti de l'utilisateur (exo.feel : easy / good / hard) : il prime sur les règles ;
+   - la charge réellement utilisée prime sur la suggestion précédente du coach ;
+   - sommeil / énergie : récup limitée => on confirme avant de monter.
+   Tout est local : aucune donnée n'est envoyée. */
+
+const FEEL_OPTIONS = [
+  { key: 'easy', label: 'Facile' },
+  { key: 'good', label: 'Bien' },
+  { key: 'hard', label: 'À la limite' },
+];
+
+function epley1RM(weight, reps) {
+  const w = Number(weight) || 0;
+  const r = Number(reps) || 0;
+  if (w <= 0 || r <= 0) return 0;
+  return r === 1 ? w : w * (1 + r / 30);
+}
+
+function roundToStep(x, step) {
+  return Math.round(x / step) * step;
+}
+
+function fmtNum(n) {
+  return String(Math.round(n * 100) / 100);
+}
+
+/* Séances terminées contenant l'exercice (séries validées seulement), la plus récente d'abord. */
+function exerciseHistory(exerciseId, limit = 6) {
+  const out = [];
+  const sorted = [...State.sessions].sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+  for (const s of sorted) {
+    const exo = (s.exercises || []).find(e => e.exerciseId === exerciseId && (e.sets || []).some(x => x.done));
+    if (!exo) continue;
+    out.push({
+      sessionId: s.id,
+      date: s.startedAt,
+      exo,
+      sets: exo.sets.filter(x => x.done),
+      feel: exo.feel || null,
+      targetSets: exo.targetSets || null,
+      targetReps: exo.targetReps || null,
+    });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+function topSetOf(sets) {
+  return sets.reduce((best, s) => {
+    const w = Number(s.weight) || 0;
+    const r = Number(s.reps) || 0;
+    if (!best || w > best.w || (w === best.w && r > best.r)) return { w, r };
+    return best;
+  }, null) || { w: 0, r: 0 };
+}
+
+function best1RM(sets) {
+  return sets.reduce((m, s) => Math.max(m, epley1RM(s.weight, s.reps)), 0);
+}
+
+function weightIncrement(exDef, w, type) {
+  if (type === 'weighted') return 2.5;
+  if (isCompoundLift(exDef)) return w >= 60 ? 5 : 2.5;
+  return w >= 20 ? 2.5 : 1;
+}
+
+/* Résumé « 3 × 12 à 40 kg » de la dernière séance. */
+function fmtLastPerf(h0, type) {
+  const reps = h0.sets.map(s => Number(s.reps) || 0);
+  const same = reps.every(r => r === reps[0]);
+  const repsTxt = same ? `${reps.length} × ${reps[0]}` : reps.join('/');
+  const unit = type === 'time' ? 's' : '';
+  const top = topSetOf(h0.sets);
+  if (type === 'loaded') return `${repsTxt}${unit} ${tr('à')} ${fmtNum(top.w)} kg`;
+  if (type === 'weighted') return `${repsTxt} ${tr('à')} +${fmtNum(top.w)} kg`;
+  if (type === 'assisted') return `${repsTxt} ${tr('à')} -${fmtNum(top.w)} kg`;
+  return repsTxt + unit;
+}
+
+/* Suggestion pour la prochaine séance d'un exercice.
+   hist = exerciseHistory(...) (la plus récente d'abord). Retourne null sans historique. */
+function act(t, v) { return { t, v }; }
+
+function coachText(c) {
+  return (c.action ? tf(c.action.t, c.action.v) : '') + (c.why ? ' ' + tr(c.why) : '');
+}
+
+function coachSuggest(exDef, targetRepsStr, hist, opts = {}) {
+  if (!exDef || !hist || hist.length === 0) return null;
+  const h0 = hist[0];
+  const type = h0.sets[0].setType || exDef.type;
+  const range = parseTargetReps(targetRepsStr || h0.targetReps);
+  const repsOf = h => h.sets.map(s => Number(s.reps) || 0);
+  const reps0 = repsOf(h0);
+  const avgReps = Math.round(reps0.reduce((a, b) => a + b, 0) / reps0.length);
+  const minTarget = range.min || 0;
+  const maxTarget = range.max || 0;
+  const wantSets = h0.targetSets || h0.sets.length;
+  const allHit = h0.sets.length >= wantSets && reps0.every(r => r >= minTarget);
+  const atTop = maxTarget > 0 && minTarget !== maxTarget && reps0.every(r => r >= maxTarget);
+  const feel = h0.feel;
+  const poorRecov = !!opts.poorRecov;
+
+  // 1RM estimé et tendance (séances avec charge)
+  const loadBased = type === 'loaded' || type === 'weighted';
+  const e1rm = loadBased ? best1RM(h0.sets) : 0;
+  let trend = null;
+  if (loadBased && hist.length >= 2) {
+    const oldest = best1RM(hist[hist.length - 1].sets);
+    if (oldest > 0) trend = { pct: Math.round((e1rm / oldest - 1) * 100), n: hist.length };
+  }
+
+  const res = { type, e1rm: Math.round(e1rm * 10) / 10, trend, weight: null, reps: null, delta: 0, severity: 'keep', tag: 'Maintenir', action: null, why: '' };
+
+  if (type === 'loaded' || type === 'weighted' || type === 'assisted') {
+    const lastW = topSetOf(h0.sets).w;
+    let move = 0; // -1 baisse, 0 garde, +1 monte
+    const missedHere = h => !(h.sets.length >= (h.targetSets || h.sets.length) && repsOf(h).every(r => r >= minTarget));
+    const sameW = h => Math.abs(topSetOf(h.sets).w - lastW) < 0.01;
+    const stalled = hist.length >= 2 && missedHere(h0) && missedHere(hist[1]) && sameW(hist[1]);
+
+    if (feel === 'hard' && !allHit) { move = -1; res.why = 'Série ressentie à la limite et cibles manquées.'; }
+    else if (!allHit && stalled) { move = -1; res.why = 'Cibles manquées deux séances de suite à cette charge.'; }
+    else if (!allHit) { res.why = 'Cibles manquées : garde cette charge jusqu\'à boucler tous les sets.'; }
+    else if (feel === 'hard') { res.why = 'Tu as ressenti la série à la limite : on ne monte pas.'; }
+    else if (poorRecov) { res.why = 'Récup limitée : confirme à charge égale avant de monter.'; }
+    else if (feel === 'easy') { move = 1; res.why = 'Tu as trouvé la série facile.'; }
+    else if (atTop || (minTarget > 0 && minTarget === maxTarget)) { move = 1; res.why = 'Tous les sets au sommet de la fourchette.'; }
+    else { res.why = 'Cibles atteintes : vise +1 rep par set avant de monter.'; }
+
+    if (move === 1) {
+      const incr = type === 'assisted' ? 2.5 : weightIncrement(exDef, lastW, type);
+      const nw = type === 'assisted' ? Math.max(0, lastW - incr) : lastW + incr;
+      res.weight = nw; res.delta = nw - lastW; res.severity = 'up';
+      res.reps = minTarget || avgReps;
+      res.tag = type === 'assisted' ? 'Assistance ↓' : '+' + fmtNum(incr) + ' kg';
+      res.action = type === 'assisted' ? act('Réduis l\'assistance à -{w} kg.', { w: fmtNum(nw) })
+        : act(type === 'weighted' ? 'Monte à +{w} kg.' : 'Monte à {w} kg.', { w: fmtNum(nw) });
+    } else if (move === -1) {
+      const step = lastW >= 20 ? 2.5 : 1;
+      let nw = Math.max(step, roundToStep(lastW * 0.95, step));
+      if (type === 'assisted') nw = lastW + 2.5; // plus d'assistance
+      if (nw === lastW) nw = type === 'assisted' ? lastW + 2.5 : Math.max(0, lastW - step);
+      res.weight = nw; res.delta = nw - lastW; res.severity = 'down';
+      res.reps = Math.min(maxTarget || avgReps, Math.max(minTarget, avgReps));
+      res.tag = '-5%';
+      res.action = type === 'assisted' ? act('Passe à -{w} kg d\'assistance.', { w: fmtNum(nw) })
+        : act(type === 'weighted' ? 'Redescends à +{w} kg.' : 'Redescends à {w} kg.', { w: fmtNum(nw) });
+    } else {
+      res.weight = lastW;
+      res.reps = allHit ? Math.min(maxTarget || avgReps + 1, Math.max(minTarget, avgReps) + 1) : Math.max(minTarget, avgReps);
+      res.action = type === 'assisted' ? act('Garde -{w} kg d\'assistance.', { w: fmtNum(lastW) })
+        : act(type === 'weighted' ? 'Reste à +{w} kg.' : 'Garde {w} kg.', { w: fmtNum(lastW) });
+    }
+  } else if (type === 'bodyweight') {
+    if (allHit && feel !== 'hard' && !poorRecov) {
+      res.severity = 'up'; res.tag = '+1 rep';
+      res.reps = Math.max(minTarget, avgReps) + 1;
+      res.delta = 1;
+      res.action = act('Vise {n} reps par set.', { n: res.reps });
+      res.why = feel === 'easy' ? 'Tu as trouvé la série facile.' : 'Tous les sets dans la cible.';
+    } else {
+      res.reps = Math.max(minTarget, avgReps);
+      res.action = act('Moy. {n} reps. Continue avec cette cible.', { n: avgReps });
+      res.why = feel === 'hard' ? 'Tu as ressenti la série à la limite : on ne monte pas.' : 'Cibles manquées : garde cette charge jusqu\'à boucler tous les sets.';
+    }
+  } else { // time
+    const allOk = reps0.every(r => r >= minTarget);
+    if (allOk && feel !== 'hard' && !poorRecov) {
+      res.severity = 'up'; res.tag = '+10s';
+      res.reps = Math.max(minTarget, avgReps) + 10; res.delta = 10;
+      res.action = act('Vise {n} s par set.', { n: res.reps });
+      res.why = 'Tous les sets dans la cible.';
+    } else {
+      res.reps = Math.max(minTarget, avgReps);
+      res.action = act('Garde {n} s par set.', { n: res.reps });
+      res.why = feel === 'hard' ? 'Tu as ressenti la série à la limite : on ne monte pas.' : 'Cibles manquées : garde cette charge jusqu\'à boucler tous les sets.';
+    }
+  }
+  return res;
+}
+
+function coachSummaryOf(sug) {
+  return {
+    weight: sug.weight, reps: sug.reps, delta: sug.delta, severity: sug.severity,
+    tag: sug.tag, action: sug.action, why: sug.why, e1rm: sug.e1rm, type: sug.type,
+  };
+}
+
+/* Création d'un exercice de séance avec pré-remplissage : valeurs conseillées par le coach
+   (ou, à défaut, celles de la dernière fois). Les séries pré-remplies sont marquées pre:true
+   (affichées en gris tant qu'elles ne sont pas validées ou modifiées). */
+function buildSessionExo(exerciseId, targetSets, targetReps, extra = {}) {
+  const exDef = State.exerciseById(exerciseId);
+  const n = Number(targetSets) || 3;
+  const sets = [];
+  const hist = exDef ? exerciseHistory(exerciseId) : [];
+  const sug = hist.length ? coachSuggest(exDef, targetReps, hist) : null;
+  for (let i = 0; i < n; i++) {
+    const set = { reps: null, weight: null, done: false, setType: null };
+    if (sug) {
+      set.reps = sug.reps != null ? sug.reps : null;
+      set.weight = sug.weight != null ? sug.weight : null;
+      if (set.reps != null || set.weight != null) set.pre = true;
+    }
+    sets.push(set);
+  }
+  const exo = {
+    exerciseId,
+    targetSets: n,
+    targetReps,
+    ...extra,
+    sets,
+  };
+  if (sug) {
+    const top = topSetOf(hist[0].sets);
+    exo.coach = { ...coachSummaryOf(sug), lastWeight: top.w, lastReps: Number(hist[0].sets[0].reps) || 0 };
+  }
+  return exo;
+}
+
 function suggestNextTargets(session, tpl) {
   const out = [];
   const conditions = session.conditions || {};
@@ -3233,8 +3615,7 @@ function suggestNextTargets(session, tpl) {
     const exDef = State.exerciseById(exo.exerciseId);
     if (!exDef) return;
 
-    const doneSets = exo.sets.filter(s => s.done);
-    if (doneSets.length === 0) {
+    if (!exo.sets.some(s => s.done)) {
       out.push({
         exerciseId: exo.exerciseId,
         name: exDef.name,
@@ -3245,149 +3626,26 @@ function suggestNextTargets(session, tpl) {
       return;
     }
 
-    const targetSets = exo.targetSets || exo.sets.length;
-    const targetReps = parseTargetReps(exo.targetReps);
-    const setType = doneSets[0].setType || exDef.type;
-    const isCompound = isCompoundLift(exDef);
+    // L'historique contient déjà cette séance si elle est terminée (écran de bilan).
+    const hist = exerciseHistory(exo.exerciseId);
+    const sug = coachSuggest(exDef, exo.targetReps, hist.length ? hist : [{
+      sets: exo.sets.filter(s => s.done), feel: exo.feel || null,
+      targetSets: exo.targetSets, targetReps: exo.targetReps,
+    }], { poorRecov });
+    if (!sug) return;
 
-    // Pour chaque type, on évalue : tous les sets cibles atteints ?
-    const allHit = doneSets.length >= targetSets && doneSets.every(s => {
-      const r = Number(s.reps) || 0;
-      return r >= targetReps.min;
-    });
-
-    const partialMiss = doneSets.length < targetSets || doneSets.some(s => {
-      const r = Number(s.reps) || 0;
-      return r < targetReps.min;
-    });
-
-    const bigDrop = doneSets.some((s, i) => {
-      if (i === 0) return false;
-      const r = Number(s.reps) || 0;
-      const r0 = Number(doneSets[0].reps) || 0;
-      return r0 > 0 && r / r0 < 0.65;
-    });
-
-    if (poorRecov && allHit) {
-      out.push({
-        exerciseId: exo.exerciseId,
-        name: exDef.name,
-        severity: 'keep',
-        tag: 'Maintenir',
-        reco: 'Cibles atteintes mais récup limitée — confirme à charge égale avant de monter.',
-      });
-      return;
+    let reco = coachText(sug);
+    if (sug.e1rm > 0) reco += ' ' + tf('1RM estimé : {n} kg.', { n: fmtNum(sug.e1rm) });
+    if (sug.trend && sug.trend.n >= 2) {
+      reco += ' ' + tf('Tendance 1RM : {p} % sur {n} séances.', { p: (sug.trend.pct > 0 ? '+' : '') + sug.trend.pct, n: sug.trend.n });
     }
-
-    if (setType === 'loaded') {
-      const w = Number(doneSets[doneSets.length - 1].weight) || 0;
-      if (allHit) {
-        const incr = isCompound ? 5 : 2.5;
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'up',
-          tag: '+' + incr + ' kg',
-          reco: tf('Tous les sets cibles atteints. Monte à {w} kg la prochaine fois ({s}×{r}).', { w: w + incr, s: exo.targetSets || '', r: exo.targetReps || '' }),
-        });
-      } else if (bigDrop) {
-        const newW = Math.round((w * 0.95) / 2.5) * 2.5;
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'down',
-          tag: '-5%',
-          reco: tf('Chute marquée entre les sets. Redescends à {w} kg pour stabiliser la technique.', { w: newW }),
-        });
-      } else {
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'keep',
-          tag: 'Maintenir',
-          reco: tf('Garde {w} kg jusqu\'à boucler proprement tous les sets de la cible.', { w }),
-        });
-      }
-    } else if (setType === 'bodyweight') {
-      const avgReps = doneSets.reduce((s, x) => s + (Number(x.reps) || 0), 0) / doneSets.length;
-      if (allHit) {
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'up',
-          tag: '+1 rep',
-          reco: tf('Tous les sets dans la cible. Vise +1 rep par set la prochaine fois.'),
-        });
-      } else {
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'keep',
-          tag: 'Maintenir',
-          reco: tf('Moy. {n} reps. Continue avec cette cible jusqu\'à boucler tous les sets.', { n: Math.round(avgReps) }),
-        });
-      }
-    } else if (setType === 'weighted') {
-      const w = Number(doneSets[doneSets.length - 1].weight) || 0;
-      if (allHit) {
-        const incr = 2.5;
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'up',
-          tag: '+' + incr + ' kg',
-          reco: tf('Cibles atteintes lesté. Monte à +{w} kg.', { w: w + incr }),
-        });
-      } else {
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'keep',
-          tag: 'Maintenir',
-          reco: tf('Reste à +{w} kg jusqu\'à boucler tous les sets.', { w }),
-        });
-      }
-    } else if (setType === 'assisted') {
-      const w = Number(doneSets[doneSets.length - 1].weight) || 0;
-      if (allHit) {
-        const newW = Math.max(0, w - 2.5);
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'up',
-          tag: 'Assistance ↓',
-          reco: tf('Tous les sets cibles atteints. Réduis l\'assistance à -{w} kg.', { w: newW }),
-        });
-      } else {
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'keep',
-          tag: 'Maintenir',
-          reco: tf('Garde -{w} kg d\'assistance jusqu\'à boucler tous les sets.', { w }),
-        });
-      }
-    } else if (setType === 'time') {
-      const tgtTime = targetReps.min;
-      const allOk = doneSets.every(s => (Number(s.reps) || 0) >= tgtTime);
-      if (allOk) {
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'up',
-          tag: '+10s',
-          reco: tf('Cibles tenues. Vise {n}s la prochaine fois.', { n: tgtTime + 10 }),
-        });
-      } else {
-        out.push({
-          exerciseId: exo.exerciseId,
-          name: exDef.name,
-          severity: 'keep',
-          tag: 'Maintenir',
-          reco: tf('Reste à {n}s.', { n: tgtTime }),
-        });
-      }
-    }
+    out.push({
+      exerciseId: exo.exerciseId,
+      name: exDef.name,
+      severity: sug.severity,
+      tag: sug.tag,
+      reco,
+    });
   });
 
   return out;

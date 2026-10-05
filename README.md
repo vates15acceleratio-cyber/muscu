@@ -1,6 +1,18 @@
-# Muscu — v4.56
+# Muscu — v4.57
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.57
+
+- **Coach intelligent** : il lit l'historique de chaque exercice (jusqu'à 6 séances) et plus seulement la dernière séance
+  - **Progression double** : les reps montent dans la fourchette cible, puis la charge monte quand tous les sets sont au sommet. Incréments adaptés (+5 / +2,5 / +1 kg), -5 % après deux séances ratées à la même charge, récup limitée (sommeil / énergie) = on confirme avant de monter
+  - **1RM estimé** (formule d'Epley) et **tendance** sur les dernières séances, affichés dans la fiche de l'exercice et dans le bilan
+  - **Ressenti par exercice** (Facile / Bien / À la limite), demandé après les étirements, facultatif. Il prime sur les règles du coach, et la charge réellement utilisée prime sur sa suggestion précédente
+- **Pré-remplissage** : au démarrage d'une séance, chaque série reprend la valeur conseillée (en gris tant qu'elle n'est pas validée ou modifiée). Quand tu modifies une série à la main, la valeur est recopiée sur les séries suivantes encore vides ou en gris (jamais sur une série validée ou saisie à la main). Un set ajouté reprend le précédent
+- **Dernière fois** et **Coach** affichés sous la cible de chaque exercice
+- **Bulles** : « Coach +2.5 kg » apparaît une fois quand l'exercice s'affiche, « Toi -5 kg » quand tu changes la charge (écart avec la dernière fois). Aucune bulle avec `prefers-reduced-motion`
+- **Plan du jour** : tableau opaque (dernière fois / conseil du coach), ouvert une fois en entrant dans les exercices et rouvrable avec le bouton du même nom
+- **Données** : champs optionnels ajoutés aux séances (`feel`, `coach` sur un exercice), sans migration et sans rien supprimer ; les séries pré-remplies jamais validées redeviennent vides à la fin de la séance. **Cette version touche aux données : exporte avant de mettre à jour**
 
 ## Nouveautés v4.56
 
