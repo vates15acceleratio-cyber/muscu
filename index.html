@@ -916,6 +916,23 @@ textarea { resize: vertical; min-height: 60px; font-family: inherit; }
   animation: fadeIn 0.2s;
 }
 
+.update-banner {
+  position: fixed;
+  left: 12px; right: 12px;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  background: var(--surface-3);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  z-index: 310;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-strong);
+}
+.update-banner .ub-text { flex: 1 1 100%; }
+.update-banner .btn { flex: 1; }
+
 .fab {
   position: fixed;
   right: 16px;

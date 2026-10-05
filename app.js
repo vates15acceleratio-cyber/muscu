@@ -6,7 +6,7 @@
 // Bumpée à chaque commit + push : évolution notable = +0,1 (4.4 -> 4.5), correctif très
 // mineur = au centième (4.41, 4.42...). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '4.53';
+const APP_VERSION = '4.54';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -543,13 +543,21 @@ function defaultRestSec(exDef) {
 const STORAGE_KEY = 'muscu.v1';
 const BACKUP_KEY = 'muscu.v1.bak';
 
+function isPlainObject(v) {
+  return v !== null && typeof v === 'object' && !Array.isArray(v);
+}
+
 const Storage = {
   restoredFromBackup: false,
   load() {
     this.restoredFromBackup = false;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const data = JSON.parse(raw);
+        if (isPlainObject(data)) return data;
+        console.error('Clé principale invalide (pas un objet) — tentative sur la sauvegarde');
+      }
     } catch (e) {
       console.error('Storage load error, clé principale corrompue — tentative sur la sauvegarde', e);
     }
@@ -557,9 +565,11 @@ const Storage = {
       const backup = localStorage.getItem(BACKUP_KEY);
       if (backup) {
         const data = JSON.parse(backup);
-        this.restoredFromBackup = true;
-        console.warn('Données restaurées depuis la sauvegarde de secours');
-        return data;
+        if (isPlainObject(data)) {
+          this.restoredFromBackup = true;
+          console.warn('Données restaurées depuis la sauvegarde de secours');
+          return data;
+        }
       }
     } catch (e) {
       console.error('Backup load error', e);
@@ -567,13 +577,20 @@ const Storage = {
     return null;
   },
   save(data) {
+    let prev = null;
     try {
-      const prev = localStorage.getItem(STORAGE_KEY);
-      if (prev) localStorage.setItem(BACKUP_KEY, prev);
+      prev = localStorage.getItem(STORAGE_KEY);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
       console.error('Storage save error', e);
       toast('Erreur de sauvegarde');
+      return;
+    }
+    // Sauvegarde de secours = état précédent. Écrite après la clé principale :
+    // si elle échoue (quota), les données courantes sont quand même enregistrées.
+    if (prev) {
+      try { localStorage.setItem(BACKUP_KEY, prev); }
+      catch (e) { console.warn('Backup save error', e); }
     }
   },
 };
@@ -586,6 +603,7 @@ const DEFAULT_SETTINGS = {
   timerVibrate: true,
   timerDefaultOverride: null, // null = utilise la valeur par type
   cooldownStartSide: 'left', // côté par lequel commencer les étirements "par côté"
+  autoUpdateCheck: true, // vérifie les mises à jour de l'app et prévient quand il faut relancer
 };
 
 const State = {
@@ -608,11 +626,11 @@ const State = {
   init() {
     const data = Storage.load();
     if (data) {
-      this.templates = data.templates || JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
-      this.sessions = data.sessions || [];
-      this.customExercises = data.customExercises || [];
-      this.activeSession = data.activeSession || null;
-      this.settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
+      this.templates = Array.isArray(data.templates) ? data.templates : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+      this.sessions = Array.isArray(data.sessions) ? data.sessions : [];
+      this.customExercises = Array.isArray(data.customExercises) ? data.customExercises : [];
+      this.activeSession = isPlainObject(data.activeSession) && Array.isArray(data.activeSession.exercises) ? data.activeSession : null;
+      this.settings = { ...DEFAULT_SETTINGS, ...(isPlainObject(data.settings) ? data.settings : {}) };
     } else {
       this.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
       this.sessions = [];
@@ -3456,6 +3474,15 @@ function renderSettingsScreen() {
   body.appendChild(el('h2', { class: 'section-title' }, 'Étirements'));
   body.appendChild(makeCooldownSideRow());
 
+  // === Mises à jour ===
+  body.appendChild(el('h2', { class: 'section-title' }, 'Mises à jour'));
+  body.appendChild(makeToggleRow(
+    'Vérifier les mises à jour',
+    'Prévient quand une nouvelle version est prête et qu\'il faut relancer l\'app.',
+    'autoUpdateCheck'
+  ));
+  body.appendChild(Updater.makeRow());
+
   // === Données ===
   body.appendChild(el('h2', { class: 'section-title' }, 'Données'));
   body.appendChild(makeSettingsRow('Exporter mes données', 'Sauvegarde JSON complète (templates, séances, exos custom).', 'Exporter', exportAllData));
@@ -3632,7 +3659,10 @@ function importDataPrompt() {
     reader.onload = ev => {
       try {
         const data = JSON.parse(ev.target.result);
-        if (!data.templates || !Array.isArray(data.sessions)) {
+        const isList = (a, key) => Array.isArray(a) && a.every(x => isPlainObject(x) && (!key || Array.isArray(x[key])));
+        if (!isPlainObject(data) || !isList(data.templates, 'exercises') || !isList(data.sessions, 'exercises')
+            || (data.customExercises != null && !isList(data.customExercises))
+            || (data.settings != null && !isPlainObject(data.settings))) {
           toast('Fichier invalide');
           return;
         }
@@ -3643,7 +3673,11 @@ function importDataPrompt() {
             State.templates.forEach(t => normalizeSupersets(t.exercises));
             State.sessions = data.sessions;
             State.customExercises = data.customExercises || [];
-            if (data.settings) State.settings = data.settings;
+            State.settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
+            // La séance en cours référence les anciennes données : on l'abandonne.
+            State.activeSession = null;
+            stopRestTimer();
+            State.migrate();
             State.save();
             render();
             toast('Import OK');
@@ -3751,7 +3785,7 @@ function confirmWipe() {
       openConfirm(
         'Vraiment sûr ? Toutes tes séances, templates et exos custom seront perdus.',
         () => {
-          localStorage.removeItem(STORAGE_KEY);
+          try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(BACKUP_KEY); } catch (e) { /* ignore */ }
           State.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
           State.sessions = [];
           State.customExercises = [];
@@ -4002,6 +4036,113 @@ function toggleLang() {
   render({ keepScroll: false });
 }
 
+/* === MISES À JOUR DE L'APP ===
+   Le service worker installe la nouvelle version en arrière-plan puis la laisse
+   « en attente » (sw.js n'appelle plus skipWaiting tout seul). On prévient alors
+   l'utilisateur de relancer l'app ; « Relancer » envoie SKIP_WAITING puis recharge. */
+const Updater = {
+  reg: null,
+  available: false,
+  applying: false,
+  dismissed: false,
+  lastCheck: 0,
+  AUTO_MIN_GAP_MS: 30 * 60 * 1000,
+
+  setup(reg) {
+    this.reg = reg;
+    if (reg.waiting && navigator.serviceWorker.controller) this.found();
+    reg.addEventListener('updatefound', () => {
+      const w = reg.installing;
+      if (!w) return;
+      w.addEventListener('statechange', () => {
+        if (w.state === 'installed' && navigator.serviceWorker.controller) this.found();
+      });
+    });
+    this.autoCheck();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') this.autoCheck();
+    });
+    setInterval(() => this.autoCheck(), 60 * 60 * 1000);
+  },
+
+  autoCheck() {
+    if (!this.reg || State.settings.autoUpdateCheck === false) return;
+    if (Date.now() - this.lastCheck < this.AUTO_MIN_GAP_MS) return;
+    this.check();
+  },
+
+  /* Cherche une nouvelle version ; résout true si une mise à jour est prête. */
+  check() {
+    if (!this.reg) return Promise.resolve(false);
+    this.lastCheck = Date.now();
+    return this.reg.update().then(() => {
+      const w = this.reg.installing;
+      if (!w) return !!this.reg.waiting;
+      return new Promise(resolve => {
+        w.addEventListener('statechange', () => {
+          if (w.state === 'installed') resolve(true);
+          else if (w.state === 'redundant') resolve(false);
+        });
+      });
+    }).catch(() => false);
+  },
+
+  found() {
+    this.available = true;
+    this.refreshRow();
+    if (State.settings.autoUpdateCheck !== false && !this.dismissed) this.showBanner();
+  },
+
+  showBanner() {
+    if (document.getElementById('update-banner')) return;
+    const banner = el('div', { class: 'update-banner', id: 'update-banner', role: 'status' },
+      el('div', { class: 'ub-text' }, 'Mise à jour disponible. Relance l\'app pour l\'installer.'),
+      el('button', { class: 'btn btn-primary', onclick: () => this.apply() }, 'Relancer'),
+      el('button', { class: 'btn btn-secondary', onclick: () => { this.dismissed = true; banner.remove(); } }, 'Plus tard'),
+    );
+    document.body.appendChild(banner);
+  },
+
+  apply() {
+    State.save();
+    this.applying = true;
+    const w = this.reg && this.reg.waiting;
+    if (w) w.postMessage({ type: 'SKIP_WAITING' }); // controllerchange recharge la page
+    else window.location.reload();
+  },
+
+  statusText() {
+    if (!this.reg) return 'Mises à jour indisponibles dans ce navigateur.';
+    return this.available ? 'Une nouvelle version est prête : relance l\'app.' : 'Version ' + APP_VERSION;
+  },
+
+  makeRow() {
+    const desc = el('div', { class: 'sr-desc', id: 'update-status' }, this.statusText());
+    const btn = el('button', { class: 'btn btn-secondary', id: 'update-btn', onclick: () => this.onButton() },
+      this.available ? 'Relancer' : 'Vérifier');
+    return el('div', { class: 'settings-row' },
+      el('div', { class: 'grow' }, el('div', { class: 'sr-title' }, 'Version de l\'app'), desc),
+      btn);
+  },
+
+  refreshRow() {
+    const desc = document.getElementById('update-status');
+    const btn = document.getElementById('update-btn');
+    if (desc) desc.textContent = tr(this.statusText());
+    if (btn) btn.textContent = tr(this.available ? 'Relancer' : 'Vérifier');
+  },
+
+  onButton() {
+    if (this.available) return this.apply();
+    if (!this.reg) return toast('Mises à jour indisponibles dans ce navigateur.');
+    toast('Recherche en cours…');
+    this.check().then(ready => {
+      if (ready) { this.dismissed = false; this.found(); }
+      else toast('Tu as la dernière version.');
+    });
+  },
+};
+
 function init() {
   document.documentElement.lang = getLang();
   applyStaticTranslations();
@@ -4012,20 +4153,19 @@ function init() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').then(reg => {
-        reg.update().catch(() => {});
+        Updater.setup(reg);
       }).catch(err => {
         // Silently fail — l'app marche sans
         console.warn('SW registration failed:', err);
       });
     });
 
-    // Dès qu'un nouveau service worker prend le contrôle (MAJ déployée + skipWaiting +
-    // clients.claim), on recharge la page une fois pour exécuter le nouveau code tout de
-    // suite, au lieu de laisser l'utilisateur coincé sur l'ancienne version en mémoire
-    // jusqu'à ce qu'il ferme et rouvre l'app manuellement.
+    // Quand l'utilisateur a touché « Relancer » (Updater.apply), le nouveau service worker
+    // prend le contrôle : on recharge la page une fois pour exécuter le nouveau code.
+    // Sans demande de sa part, on ne recharge jamais (une séance peut être en cours).
     let swRefreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (swRefreshing) return;
+      if (swRefreshing || !Updater.applying) return;
       swRefreshing = true;
       window.location.reload();
     });

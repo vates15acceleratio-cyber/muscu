@@ -195,6 +195,13 @@ const I18N_UI = {
   'Override global : applique la même durée de repos à tous les nouveaux exos, peu importe le type. Ne change pas les exos déjà ajoutés à un template.':
     'Global override: applies the same rest duration to all new exercises, whatever the type. Does not change exercises already added to a template.',
   'Durée invalide': 'Invalid duration', 'Override appliqué': 'Override applied',
+  'Mises à jour': 'Updates', 'Vérifier les mises à jour': 'Check for updates',
+  'Prévient quand une nouvelle version est prête et qu\'il faut relancer l\'app.': 'Tells you when a new version is ready and the app needs to be relaunched.',
+  'Version de l\'app': 'App version', 'Vérifier': 'Check', 'Relancer': 'Relaunch', 'Plus tard': 'Later',
+  'Mise à jour disponible. Relance l\'app pour l\'installer.': 'Update available. Relaunch the app to install it.',
+  'Une nouvelle version est prête : relance l\'app.': 'A new version is ready: relaunch the app.',
+  'Mises à jour indisponibles dans ce navigateur.': 'Updates are not available in this browser.',
+  'Recherche en cours…': 'Checking…', 'Tu as la dernière version.': 'You have the latest version.',
   'Export téléchargé': 'Export downloaded', 'Fichier invalide': 'Invalid file', 'JSON invalide': 'Invalid JSON',
   'Import OK': 'Import OK', 'Copier tout': 'Copy all',
   'Copié dans le presse-papiers': 'Copied to clipboard', 'Copié': 'Copied',

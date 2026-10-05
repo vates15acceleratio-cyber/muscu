@@ -2,9 +2,11 @@
    Stratégie : cache-first pour l'app shell, network-first pour le reste.
    CACHE_VERSION suit APP_VERSION dans app.js (bumpée à chaque commit + push :
    évolution notable = +0,1 -> 4.5 ; correctif très mineur -> 4.41, 4.42...)
-   — garder les deux synchronisées. */
+   — garder les deux synchronisées.
+   Mise à jour : la nouvelle version s'installe en arrière-plan puis attend ;
+   app.js (Updater) prévient l'utilisateur de relancer l'app. */
 
-const CACHE_VERSION = 'muscu-v4.53';
+const CACHE_VERSION = 'muscu-v4.54';
 const APP_SHELL = [
   './',
   './index.html',
@@ -26,8 +28,13 @@ const APP_SHELL = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+    // Pas de skipWaiting automatique : la nouvelle version attend (« waiting »)
+    // que l'utilisateur relance l'app, ou touche « Relancer » (message SKIP_WAITING).
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {

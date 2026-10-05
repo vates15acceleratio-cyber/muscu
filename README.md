@@ -1,6 +1,18 @@
-# Muscu — v4.53
+# Muscu — v4.54
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.54
+
+- **Alerte de mise à jour** : l'app cherche une nouvelle version au lancement, au retour au premier plan et toutes les heures (au plus une fois par 30 min). Quand elle est prête, une bannière dit de **relancer l'app** (boutons « Relancer » / « Plus tard »). Plus de rechargement forcé en pleine séance : la page ne se recharge que si tu touches « Relancer »
+  - Réglages → **Mises à jour** : interrupteur « Vérifier les mises à jour » (activé par défaut, nouveau réglage `autoUpdateCheck`, ajouté sans migration car les réglages sont complétés par défaut) et bouton « Vérifier » pour chercher à la main
+  - `sw.js` n'appelle plus `skipWaiting` tout seul : la nouvelle version attend ta relance. **Passage 4.53 → 4.54 :** la 4.53 ne connaît pas la bannière, ferme complètement l'app puis rouvre-la pour obtenir la 4.54
+- **Fiabilité des données** (audit) :
+  - « Effacer toutes les données » supprime aussi la sauvegarde de secours : les données effacées ne peuvent plus réapparaître
+  - L'import vérifie le fichier (templates, séances, exercices perso, réglages), complète les réglages manquants, applique les migrations et abandonne la séance en cours
+  - L'enregistrement écrit d'abord les données courantes, puis la sauvegarde de secours : un manque de place ne bloque plus l'enregistrement
+  - Une sauvegarde illisible ou qui n'est pas un objet JSON bascule sur la sauvegarde de secours
+  - **Cette version touche aux données** (code uniquement, le format ne change pas) : exporte avant de mettre à jour
 
 ## Nouveautés v4.53
 
