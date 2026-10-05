@@ -3,10 +3,10 @@
    Single-file vanilla JS app, localStorage persistence
    ========================================================================== */
 
-// Bumpée à chaque commit + push : évolution notable = +0,1 (4.4 -> 4.5), correctif très
-// mineur = au centième (4.41, 4.42...). Garder en phase avec CACHE_VERSION dans sw.js
+// Bumpée à chaque commit + push. Depuis la 5.0.0 : majeur.mineur.correctif (5.1.0 pour une
+// évolution notable, 5.0.1 pour un correctif). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '4.59';
+const APP_VERSION = '5.0.0';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -1978,6 +1978,7 @@ function renderActiveExerciseCard(exo, idx, ssRole) {
   );
 
   const titleBlock = el('div', { style: 'flex: 1; min-width: 0;' }, nameWrap, targetText);
+  if (exDef) header.appendChild(schemaThumb(exDef.id, { tap: true }));
   header.appendChild(titleBlock);
   header.appendChild(el('button', {
     class: 'exo-menu-btn',
@@ -2381,6 +2382,34 @@ function doFinishSession() {
   showScreen('summary', { historyDetailId: finishedSessionId });
 }
 
+/* === SCHÉMAS D'EXERCICES (schemas.js : rendu SVG à la volée, hors ligne) ===
+   Icône de profil dans les listes ; le détail isométrique, pose par pose, est dans la fiche de l'exercice.
+   Les exercices personnalisés n'ont pas de schéma : on n'affiche simplement rien. */
+function hasSchema(id) { return typeof MuscuSchemas !== 'undefined' && MuscuSchemas.has(id); }
+
+// Icône de profil. Avec { tap: true } c'est un bouton qui ouvre la fiche (détail isométrique).
+function schemaThumb(exId, opts = {}) {
+  if (!hasSchema(exId)) return null;
+  const node = opts.tap
+    ? el('button', { class: 'schema-thumb', type: 'button', 'aria-label': 'Voir le schéma', onclick: e => { e.stopPropagation(); openExerciseDetail(exId); } })
+    : el('div', { class: 'schema-thumb', 'aria-hidden': 'true' });
+  node.innerHTML = MuscuSchemas.icon(exId);
+  return node;
+}
+
+// Bloc « Schéma du mouvement » : toutes les poses en vue isométrique, numérotées, avec légende traduite.
+function schemaSection(ex) {
+  if (!hasSchema(ex.id)) return null;
+  const poses = MuscuSchemas.poses(ex.id, (i, label) => tr(ex.name) + ' — ' + (i + 1) + '. ' + tr(label));
+  const grid = el('div', { class: 'schema-poses' });
+  poses.forEach((p, i) => {
+    const box = el('div', {});
+    box.innerHTML = p.svg;
+    grid.appendChild(el('figure', { class: 'schema-pose' }, box, el('figcaption', {}, el('b', {}, (i + 1) + ' ·'), ' ', p.label)));
+  });
+  return el('div', { class: 'schema-block' }, el('div', { class: 'label-row' }, 'Schéma du mouvement'), grid);
+}
+
 /* === LIBRARY SCREEN === */
 function renderLibraryScreen() {
   const screen = el('section', { class: 'screen' });
@@ -2462,6 +2491,7 @@ function renderLibraryBody(opts = {}) {
     }
     items.forEach(ex => {
       const item = el('div', { class: 'lib-item', onclick: () => opts.pickerMode ? opts.onPick(ex.id) : openExerciseDetail(ex.id) },
+        schemaThumb(ex.id),
         el('div', { class: 'grow' },
           el('div', { class: 'name' }, ex.name,
             el('span', { class: 'exo-type-badge ' + ex.type }, typeBadgeShort(ex.type))
@@ -2507,6 +2537,8 @@ function openExerciseDetail(id) {
       typeLabel(ex.type)
     ),
   );
+  const schema = schemaSection(ex);
+  if (schema) main.appendChild(schema);
   if (desc) {
     main.appendChild(el('div', { class: 'exo-desc' }, desc));
   } else {

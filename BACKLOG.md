@@ -15,7 +15,11 @@ Points à traiter :
 - Ne pas modifier les valeurs d'équipement stockées (elles sont dans les données existantes) : ajouter une correspondance à l'affichage, comme pour la traduction.
 - Prévoir la traduction anglaise des libellés du filtre (`i18n.js`).
 
-### 2. Un schéma ou une image pour chaque exercice
+### 2. ~~Un schéma ou une image pour chaque exercice~~ — **FAIT en 5.0.0**
+
+Réalisé avec des schémas **générés par l'app** (moteur SVG `schemas.js`, poses dans `schemas-src/`) plutôt qu'une base d'images externe : aucune question de licence, ~124 Ko pour les 164 exercices, hors ligne, style sombre et or, ids d'exercices inchangés. Icône de profil dans les listes, détail isométrique pose par pose dans la fiche. Voir `CLAUDE.md` (section « Schémas d'exercices »).
+
+Notes de départ (conservées) :
 
 Illustrer les exercices (aujourd'hui : texte de description et lien de démo YouTube).
 

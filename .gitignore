@@ -7,3 +7,8 @@ node_modules/
 *.log
 muscu-backup-*.json
 .claude/worktrees/
+
+# générés par schemas-src/build.js (aperçu local, non versionnés)
+schemas-src/out/
+schemas-src/apercu.html
+schemas-src/sheet*.html

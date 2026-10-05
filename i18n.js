@@ -119,6 +119,7 @@ const I18N_UI = {
   '+ Custom': '+ Custom', 'Rechercher un exercice...': 'Search for an exercise...', 'Callisthénie': 'Calisthenics',
   'Créer un exercice personnalisé': 'Create a custom exercise', 'Aucun exercice trouvé.': 'No exercises found.',
   'Choisir un exercice': 'Choose an exercise', 'Pas de description.': 'No description.',
+  'Schéma du mouvement': 'Movement diagram', 'Voir le schéma': 'View the diagram',
   
   'Muscle principal': 'Primary muscle', 'Muscles secondaires': 'Secondary muscles',
   'Équipement': 'Equipment', 'Repos par défaut': 'Default rest',
@@ -421,6 +422,8 @@ function buildEnIndex() {
       if (I18N_EX_NAMES[ex.id]) idx[ex.name] = I18N_EX_NAMES[ex.id];
     });
   }
+  // Légendes des schémas d'exercices (i18n-poses.js)
+  if (typeof I18N_POSES !== 'undefined') Object.assign(idx, I18N_POSES);
   if (typeof EXERCISE_DESCRIPTIONS !== 'undefined' && typeof I18N_EX_DESC !== 'undefined') {
     Object.keys(EXERCISE_DESCRIPTIONS).forEach(id => {
       if (I18N_EX_DESC[id]) idx[EXERCISE_DESCRIPTIONS[id]] = I18N_EX_DESC[id];

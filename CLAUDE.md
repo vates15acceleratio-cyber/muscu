@@ -40,7 +40,7 @@ Sur un écran **étroit et vertical** (`@media (max-width: 600px) and (orientati
 
 ## Versions
 
-- Évolution notable : +0,1 (4.5 → 4.6). Correctif très mineur : au centième (4.51, 4.52…).
+- Depuis la **5.0.0** : trois nombres `majeur.mineur.correctif` (5.1.0 = évolution notable, 5.0.1 = correctif très mineur). Avant : deux nombres (4.59).
 - Trois endroits toujours identiques : `APP_VERSION` (`app.js`), `CACHE_VERSION` (`sw.js`, préfixe `muscu-v`) et le titre du README.
 - Un changement de numéro est nécessaire pour qu'une modification de `app.js` atteigne les appareils déjà installés (le JS est servi en cache-first par version).
 - Une entrée « Nouveautés » dans le README à chaque version.
@@ -63,6 +63,17 @@ node muscu-sandbox/run-migration-test.js /chemin/vers/muscu   # code 0 = tout pa
 ```
 
 Si le dépôt `general` n'est pas attaché à la session, l'ajouter d'abord (`add_repo`). Le fonctionnement, les fixtures et la façon de les mettre à jour sont décrits dans `muscu-sandbox/README.md`. Ne pas modifier les fixtures v1 et v3 ; pour un nouveau champ de données, compléter `current()` dans `generate-fixtures.js`. Ces données ne doivent jamais être ajoutées au dépôt `muscu` (public, publié sur Pages).
+
+## Schémas d'exercices (depuis la 5.0.0)
+
+Chaque exercice de `EXERCISE_LIBRARY` a un schéma : **icône de profil** dans les listes (Bibliothèque, sélecteur, carte d'exercice en séance) et **détail isométrique pose par pose** dans la fiche (`openExerciseDetail`). Pas d'images : un moteur trace des SVG à la volée.
+
+- `schemas.js` est **GÉNÉRÉ** : ne pas le modifier à la main. Il est chargé par `index.html` (avant `app.js`) et listé dans `APP_SHELL` (`sw.js`), ainsi que `i18n-poses.js`.
+- Sources : `schemas-src/schemas-core.js` (moteur : squelette 3D → SVG, caméras `profile` / `iso` / `front` / `three`) et `schemas-src/data/*.js` (poses et matériel, par famille). Le format des poses est décrit dans `schemas-src/LISEZ-MOI.md`.
+- Après toute modification des sources : `node schemas-src/build-bundle.js` (régénère `schemas.js`), puis `node schemas-src/check.js` (doit afficher « 164/164 … alertes : 0 » : ids présents dans la bibliothèque, aucun NaN, aucun corps sous le sol, **chaque légende de pose traduite**). `node schemas-src/build.js` produit un aperçu local (`schemas-src/apercu.html`, non versionné) ; `node schemas-src/sheet.js '^pec-' feuille.html` une planche de contrôle par groupe d'ids.
+- **Nouvel exercice dans la bibliothèque** : ajouter ses poses dans `schemas-src/data/` (même `id`), sinon il n'aura pas de schéma (l'app l'affiche sans, sans erreur). Ne jamais changer les ids existants. Les exercices personnalisés n'ont pas de schéma.
+- **Légendes** : le français est dans `schemas-src/data/*.js` ; l'anglais dans `i18n-poses.js` (FR exact → EN), vérifié par `check.js`.
+- Ne touche pas aux données de l'utilisateur : une version qui ne change que les schémas n'a pas besoin du test du sandbox.
 
 ## Idées à faire
 

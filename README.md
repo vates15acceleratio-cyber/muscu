@@ -1,6 +1,19 @@
-# Muscu — v4.59
+# Muscu — v5.0.0
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v5.0.0
+
+Première version à trois nombres. Chaque exercice de la bibliothèque a maintenant **son schéma**.
+
+- **Icône de profil** pour les 164 exercices : dans la **Bibliothèque**, dans le **sélecteur d'exercices** (choisir un exercice pour une séance ou un template) et sur la **carte de chaque exercice en séance**. Sur la carte, toucher l'icône ouvre la fiche.
+- **Détail isométrique pose par pose** dans la fiche de l'exercice (toucher un exercice de la Bibliothèque, ou ⋯ → « Voir la description »), juste avant la description : une vue plongeante par pose, numérotée, avec sa légende et une flèche pour le sens du mouvement.
+- **Dessinés par l'app, hors ligne** : pas d'images à télécharger. Un petit moteur (`schemas.js`, 124 Ko) trace chaque schéma en SVG à partir des poses (angles du squelette + matériel : barre, haltères, banc, poulies, machines…). Style sombre et or de l'app, mis en cache par `sw.js`.
+- **Légendes en français et en anglais** (`i18n-poses.js`, 211 légendes).
+- Les **exercices personnalisés** n'ont pas de schéma : rien ne change pour eux.
+- Le schéma montre le **mouvement**, pas la position exacte des mains : les variantes de prise (pronation, supination, neutre) ne se distinguent pas. Le corps est rigide (pas de flexion de colonne). Les poses les plus complexes (Turkish get-up, skin the cat, planches, drapeau) sont des approximations lisibles.
+- Pour les développeurs : sources dans `schemas-src/` (moteur, poses par famille d'exercices), `node schemas-src/build-bundle.js` génère `schemas.js`, `node schemas-src/check.js` vérifie les ids et les traductions, `node schemas-src/build.js` produit un aperçu (`schemas-src/apercu.html`, non versionné).
+- **Données** : le format n'a pas changé (rien n'est lu ni écrit dans `localStorage`). Pas besoin d'exporter avant de mettre à jour (comme toujours, une sauvegarde reste une bonne idée)
 
 ## Nouveautés v4.59
 

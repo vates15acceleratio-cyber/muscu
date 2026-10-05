@@ -1,18 +1,19 @@
 /* Muscu — Service Worker
    Stratégie : cache-first pour l'app shell, network-first pour le reste.
-   CACHE_VERSION suit APP_VERSION dans app.js (bumpée à chaque commit + push :
-   évolution notable = +0,1 -> 4.5 ; correctif très mineur -> 4.41, 4.42...)
-   — garder les deux synchronisées.
+   CACHE_VERSION suit APP_VERSION dans app.js (bumpée à chaque commit + push ;
+   depuis la 5.0.0 : majeur.mineur.correctif, ex. 5.1.0 ou 5.0.1) — garder les deux synchronisées.
    Mise à jour : la nouvelle version s'installe en arrière-plan puis attend ;
    app.js (Updater) prévient l'utilisateur de relancer l'app. */
 
-const CACHE_VERSION = 'muscu-v4.59';
+const CACHE_VERSION = 'muscu-v5.0.0';
 const APP_SHELL = [
   './',
   './index.html',
   './app.js',
   './i18n.js',
   './i18n-desc.js',
+  './i18n-poses.js',
+  './schemas.js',
   './splash.webp',
   './splash-gear.webp',
   './splash-stars.webp',
