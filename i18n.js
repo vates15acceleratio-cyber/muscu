@@ -205,6 +205,7 @@ const I18N_UI = {
   'Difficulté 1 sur 5 : très facile': 'Difficulty 1 of 5: very easy', 'Difficulté 5 sur 5 : très difficile': 'Difficulty 5 of 5: very hard',
   'Poids soulevés (kg)': 'Weights lifted (kg)', '1RM (estimation)': '1RM (estimate)',
   'Import/Export': 'Import/Export', 'Mise à jour': 'Update', 'Effacer données': 'Erase data',
+  'Fichier invalide ({d})': 'Invalid file ({d})', 'fichier': 'file', 'templates': 'templates', 'séances': 'workouts', 'exercices perso': 'custom exercises', 'réglages': 'settings',
   'à': 'at', 'Toi': 'You', 'Coach': 'Coach', 'Dernière fois': 'Last time',
   'Dernière fois : {v}': 'Last time: {v}', '1RM (estimation) : {n} kg': '1RM (estimate): {n} kg', 'Coach : {t}': 'Coach: {t}',
   'Plan du jour': 'Today\'s plan', 'C\'est parti': 'Let\'s go',

@@ -6,7 +6,7 @@
 // Bumpée à chaque commit + push : évolution notable = +0,1 (4.4 -> 4.5), correctif très
 // mineur = au centième (4.41, 4.42...). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '4.58';
+const APP_VERSION = '4.59';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -947,6 +947,11 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && State.ui.currentScreen === 'active-session') {
     acquireWakeLock();
   }
+  // Repos terminé pendant l'absence (minuteurs JS bridés) : on le clôt tout de suite au retour.
+  if (document.visibilityState === 'visible' && State.restTimer && !State.restTimer.paused
+      && State.restTimer.endsAt <= Date.now()) {
+    onRestTimerEnd({ silent: Date.now() - State.restTimer.endsAt > 3000 });
+  }
 });
 
 document.addEventListener('click', e => {
@@ -1434,7 +1439,7 @@ function renderConditionsStep(session) {
   wrap.appendChild(el('button', {
     class: 'btn btn-primary btn-block',
     style: 'padding: 16px; margin-top: 8px;',
-    onclick: () => goToStep('warmup'),
+    onclick: () => { refreshPrefill(session); goToStep('warmup'); },
   }, 'Continuer'));
   return wrap;
 }
@@ -1915,7 +1920,7 @@ function renderConditionsBlock(session, opts = {}) {
   const sleepInput = el('input', {
     type: 'number', inputmode: 'decimal', step: '0.5', min: '0', max: '24',
     placeholder: '7',
-    onchange: e => { session.conditions.sleep = e.target.value; State.save(); },
+    onchange: e => { session.conditions.sleep = e.target.value; State.save(); refreshPrefill(session); },
   });
   sleepInput.value = session.conditions.sleep || '';
   sleepWrap.appendChild(sleepInput);
@@ -1925,7 +1930,7 @@ function renderConditionsBlock(session, opts = {}) {
   const energyInput = el('input', {
     type: 'number', inputmode: 'numeric', min: '1', max: '10',
     placeholder: '7',
-    onchange: e => { session.conditions.energy = e.target.value; State.save(); },
+    onchange: e => { session.conditions.energy = e.target.value; State.save(); refreshPrefill(session); },
   });
   energyInput.value = session.conditions.energy || '';
   energyWrap.appendChild(energyInput);
@@ -3673,13 +3678,42 @@ function buildSessionExo(exerciseId, targetSets, targetReps, extra = {}) {
   return exo;
 }
 
+/* Récup limitée : moins de 6 h de sommeil ou énergie sous 5/10. */
+function isPoorRecovery(conditions) {
+  const c = conditions || {};
+  const sleepNum = c.sleep !== '' && c.sleep != null ? Number(c.sleep) : null;
+  const energyNum = c.energy !== '' && c.energy != null ? Number(c.energy) : null;
+  return (sleepNum != null && !isNaN(sleepNum) && sleepNum < 6)
+      || (energyNum != null && !isNaN(energyNum) && energyNum < 5);
+}
+
+/* Recalcule le pré-remplissage une fois sommeil / énergie connus. Seuls les exercices dont
+   toutes les séries sont encore intactes (vides ou pré-remplies, aucune validée) sont touchés :
+   ce que tu as saisi ou validé n'est jamais modifié. */
+function refreshPrefill(session) {
+  const poorRecov = isPoorRecovery(session.conditions);
+  let changed = false;
+  session.exercises.forEach(exo => {
+    if (!exo.coach) return;
+    if (!exo.sets.every(s => !s.done && (s.pre || (s.reps == null && s.weight == null)))) return;
+    const exDef = State.exerciseById(exo.exerciseId);
+    const hist = exDef ? exerciseHistory(exo.exerciseId) : [];
+    const sug = hist.length ? coachSuggest(exDef, exo.targetReps, hist, { poorRecov }) : null;
+    if (!sug) return;
+    exo.sets.forEach(s => {
+      s.reps = sug.reps != null ? sug.reps : null;
+      s.weight = sug.weight != null ? sug.weight : null;
+      if (s.reps != null || s.weight != null) s.pre = true; else delete s.pre;
+    });
+    exo.coach = { ...coachSummaryOf(sug), lastWeight: topSetOf(hist[0].sets).w, lastReps: Number(hist[0].sets[0].reps) || 0 };
+    changed = true;
+  });
+  if (changed) State.save();
+}
+
 function suggestNextTargets(session, tpl) {
   const out = [];
-  const conditions = session.conditions || {};
-  const sleepNum = conditions.sleep !== '' && conditions.sleep != null ? Number(conditions.sleep) : null;
-  const energyNum = conditions.energy !== '' && conditions.energy != null ? Number(conditions.energy) : null;
-  const poorRecov = (sleepNum != null && !isNaN(sleepNum) && sleepNum < 6)
-                 || (energyNum != null && !isNaN(energyNum) && energyNum < 5);
+  const poorRecov = isPoorRecovery(session.conditions);
 
   session.exercises.forEach(exo => {
     const exDef = State.exerciseById(exo.exerciseId);
@@ -3973,6 +4007,39 @@ function exportAllData() {
   toast('Export téléchargé');
 }
 
+/* Vérifie la structure interne d'une sauvegarde AVANT de remplacer quoi que ce soit.
+   Retourne null si tout va bien, sinon le nom de la partie fautive. */
+function validateImportData(data) {
+  const isStr = v => typeof v === 'string' && v !== '';
+  const optStr = v => v == null || typeof v === 'string';
+  const okExo = e => isPlainObject(e) && isStr(e.exerciseId);
+  if (!isPlainObject(data)) return 'fichier';
+  if (!Array.isArray(data.templates) || !data.templates.every(t =>
+    isPlainObject(t) && isStr(t.id) && typeof t.name === 'string' && optStr(t.letter) && Array.isArray(t.exercises) && t.exercises.every(okExo))) return 'templates';
+  if (!Array.isArray(data.sessions) || !data.sessions.every(s =>
+    isPlainObject(s) && isStr(s.id) && optStr(s.templateName) && optStr(s.templateId) && Number.isFinite(Number(s.startedAt)) && Array.isArray(s.exercises)
+    && s.exercises.every(e => okExo(e) && Array.isArray(e.sets) && e.sets.every(isPlainObject)))) return 'séances';
+  if (data.customExercises != null && !(Array.isArray(data.customExercises) && data.customExercises.every(c =>
+    isPlainObject(c) && isStr(c.id) && isStr(c.name)))) return 'exercices perso';
+  if (data.settings != null && !isPlainObject(data.settings)) return 'réglages';
+  return null;
+}
+
+/* Valeurs numériques / booléennes des séries ramenées à des types sûrs (aucun champ supprimé). */
+function normalizeImportedSessions(data) {
+  const num = v => (typeof v === 'number' && Number.isFinite(v)) ? v
+    : (v === null || v === undefined || v === '' || !Number.isFinite(Number(v))) ? null : Number(v);
+  data.sessions.forEach(s => {
+    if (typeof s.startedAt !== 'number') s.startedAt = Number(s.startedAt);
+    if (s.endedAt != null && typeof s.endedAt !== 'number') s.endedAt = num(s.endedAt);
+    s.exercises.forEach(e => e.sets.forEach(x => {
+      if (x.reps !== undefined && typeof x.reps !== 'number') x.reps = num(x.reps);
+      if (x.weight !== undefined && typeof x.weight !== 'number') x.weight = num(x.weight);
+      if (typeof x.done !== 'boolean') x.done = !!x.done;
+    }));
+  });
+}
+
 function importDataPrompt() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -3984,16 +4051,15 @@ function importDataPrompt() {
     reader.onload = ev => {
       try {
         const data = JSON.parse(ev.target.result);
-        const isList = (a, key) => Array.isArray(a) && a.every(x => isPlainObject(x) && (!key || Array.isArray(x[key])));
-        if (!isPlainObject(data) || !isList(data.templates, 'exercises') || !isList(data.sessions, 'exercises')
-            || (data.customExercises != null && !isList(data.customExercises))
-            || (data.settings != null && !isPlainObject(data.settings))) {
-          toast('Fichier invalide');
+        const problem = validateImportData(data);
+        if (problem) {
+          toast(tf('Fichier invalide ({d})', { d: tr(problem) }));
           return;
         }
         openConfirm(
           tf('Importer {s} séances et {t} templates ? Les données actuelles seront remplacées.', { s: data.sessions.length, t: data.templates.length }),
           () => {
+            normalizeImportedSessions(data);
             State.templates = data.templates;
             State.templates.forEach(t => normalizeSupersets(t.exercises));
             State.sessions = data.sessions;
@@ -4132,6 +4198,33 @@ function confirmWipe() {
 let _restTickId = null;
 let _audioCtx = null;
 
+/* Le bip de fin est PROGRAMMÉ à l'avance dans l'horloge audio (au démarrage du repos, donc après
+   un geste de l'utilisateur) : les minuteurs JS sont bridés quand l'écran se verrouille ou que
+   l'onglet passe en arrière-plan, l'horloge audio non. Le minuteur JS reste le secours. */
+let _beepNodes = null; // { osc, atMs }
+
+function unlockAudio() {
+  try {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  } catch (e) { /* ignore */ }
+}
+
+function cancelScheduledBeep() {
+  if (_beepNodes) {
+    try { _beepNodes.osc.stop(); } catch (e) { /* ignore */ }
+    _beepNodes = null;
+  }
+}
+
+function scheduleBeepIn(ms) {
+  cancelScheduledBeep();
+  if (!State.settings.timerSound) return;
+  unlockAudio();
+  const osc = playBeep(Math.max(0, ms) / 1000);
+  if (osc) _beepNodes = { osc, atMs: Date.now() + Math.max(0, ms) };
+}
+
 function startRestTimer(seconds, exerciseId, exerciseName) {
   State.restTimer = {
     exerciseId,
@@ -4139,6 +4232,7 @@ function startRestTimer(seconds, exerciseId, exerciseName) {
     totalSec: seconds,
     endsAt: Date.now() + seconds * 1000,
   };
+  scheduleBeepIn(seconds * 1000);
   scheduleTimerTick();
   renderTimerBar();
 }
@@ -4148,6 +4242,7 @@ function pauseRestTimer() {
   State.restTimer.paused = true;
   State.restTimer.remainingMs = State.restTimer.endsAt - Date.now();
   if (_restTickId) { clearInterval(_restTickId); _restTickId = null; }
+  cancelScheduledBeep();
   renderTimerBar();
 }
 
@@ -4155,6 +4250,7 @@ function resumeRestTimer() {
   if (!State.restTimer || !State.restTimer.paused) return;
   State.restTimer.endsAt = Date.now() + (State.restTimer.remainingMs || 0);
   State.restTimer.paused = false;
+  scheduleBeepIn(State.restTimer.remainingMs || 0);
   delete State.restTimer.remainingMs;
   scheduleTimerTick();
   renderTimerBar();
@@ -4166,6 +4262,7 @@ function adjustRestTimer(deltaSec) {
     State.restTimer.remainingMs = Math.max(1000, (State.restTimer.remainingMs || 0) + deltaSec * 1000);
   } else {
     State.restTimer.endsAt = Math.max(Date.now() + 1000, State.restTimer.endsAt + deltaSec * 1000);
+    scheduleBeepIn(State.restTimer.endsAt - Date.now());
   }
   State.restTimer.totalSec = Math.max(1, State.restTimer.totalSec + deltaSec);
   renderTimerBar();
@@ -4173,6 +4270,7 @@ function adjustRestTimer(deltaSec) {
 
 function stopRestTimer() {
   State.restTimer = null;
+  cancelScheduledBeep();
   if (_restTickId) { clearInterval(_restTickId); _restTickId = null; }
   renderTimerBar();
 }
@@ -4190,29 +4288,38 @@ function scheduleTimerTick() {
   }, 250);
 }
 
-function onRestTimerEnd() {
-  // Bip + vibration
-  if (State.settings.timerSound) playBeep();
+function onRestTimerEnd(opts = {}) {
+  // Bip : déjà programmé dans l'horloge audio (voir scheduleBeepIn) ; sinon on le joue ici.
+  // Au retour d'un long passage en arrière-plan (opts.silent), le bip n'a plus d'intérêt.
+  // Contexte audio suspendu (iOS) : l'horloge est gelée, le bip programmé ne sonnerait pas à l'heure.
+  const alreadyScheduled = !!_beepNodes && !!_audioCtx && _audioCtx.state === 'running';
+  if (!alreadyScheduled) cancelScheduledBeep();
+  else _beepNodes = null; // ne pas l'annuler : il est peut-être en train de sonner
+  if (State.settings.timerSound && !alreadyScheduled && !opts.silent) playBeep();
   if (State.settings.timerVibrate && navigator.vibrate) navigator.vibrate([200, 100, 200]);
   stopRestTimer();
   toast('Repos terminé');
 }
 
-function playBeep() {
+/* Joue un bip dans `delaySec` secondes ; retourne l'oscillateur (pour pouvoir l'annuler). */
+function playBeep(delaySec = 0) {
   try {
-    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    unlockAudio();
     const ctx = _audioCtx;
+    if (!ctx) return null;
+    const t0 = ctx.currentTime + delaySec;
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
     o.frequency.value = 880;
     o.type = 'sine';
-    g.gain.setValueAtTime(0, ctx.currentTime);
-    g.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.02);
-    g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
-    o.start(ctx.currentTime);
-    o.stop(ctx.currentTime + 0.3);
-  } catch (e) { /* ignore */ }
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(0.2, t0 + 0.02);
+    g.gain.linearRampToValueAtTime(0, t0 + 0.3);
+    o.start(t0);
+    o.stop(t0 + 0.3);
+    return o;
+  } catch (e) { return null; }
 }
 
 function fmtTimerSec(sec) {

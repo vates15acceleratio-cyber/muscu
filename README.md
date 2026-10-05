@@ -1,6 +1,16 @@
-# Muscu — v4.58
+# Muscu — v4.59
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.59
+
+Corrections issues de l'audit, sans nouvelle fonctionnalité.
+
+- **Pré-remplissage selon la récupération** : une fois le sommeil et l'énergie saisis (écran « Avant de commencer »), les valeurs conseillées sont recalculées : récup limitée (moins de 6 h de sommeil ou énergie sous 5/10) = on ne monte pas la charge. Les séries déjà saisies ou validées ne sont jamais modifiées
+- **Bip de fin de repos plus fiable** : le bip est programmé à l'avance dans l'horloge audio (au démarrage du repos), donc moins sensible au verrouillage de l'écran ou au passage en arrière-plan. Le minuteur normal reste le secours, et un repos terminé pendant ton absence est clos au retour dans l'app. Il est annulé si tu mets en pause, arrêtes ou ajustes le repos. *Non testé sur iPhone verrouillé.*
+- **Zoom autorisé** : le blocage du zoom (accessibilité) est retiré. Les champs de saisie passent à 16 px pour éviter que l'écran zoome tout seul au toucher sur iPhone
+- **Import plus strict** : la structure interne de la sauvegarde est vérifiée **avant** de remplacer quoi que ce soit (séances, séries, ids, dates, templates, exercices perso, réglages). Un fichier invalide affiche « Fichier invalide (séances) » au lieu de risquer un écran cassé. Les valeurs numériques sont normalisées sans supprimer aucun champ
+- Le format des données n'a pas changé : pas besoin d'exporter avant de mettre à jour (comme toujours, une sauvegarde reste une bonne idée)
 
 ## Nouveautés v4.58
 
