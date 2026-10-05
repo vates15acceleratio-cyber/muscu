@@ -1,6 +1,22 @@
-# Muscu — v4.57
+# Muscu — v4.58
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v4.58
+
+Affine la 4.57 (coach, pré-remplissage) et refait Réglages et Progression.
+
+- **Difficulté ressentie** (remplace « Facile / Bien / À la limite ») : après les étirements, une échelle de **1 (très facile) à 5 (très difficile)** pour chaque exercice, facultative. Elle prime sur les règles du coach (1-2 : on monte plus vite, 5 : on ne monte pas, et on baisse si les cibles sont manquées). Les anciennes valeurs de la 4.57 sont converties (facile = 2, bien = 3, à la limite = 5)
+  - Une carte **« Difficulté ressentie »** liste tous les exercices d'une séance avec leur note, dans le bilan de fin de séance et dans le détail de l'historique
+- **Bilan du coach plus court** : l'action seule (« Garde 70 kg. »), et sur sa propre ligne le **1RM (estimation)** avec sa tendance. Les lignes « Dernière fois » et « Coach » de la carte d'exercice disparaissent
+- **Menu « Dernière séance »** dans le menu ⋯ de chaque exercice : date, séries (reps × charge) et difficulté ressentie de la dernière fois
+- **Bulles** : uniquement l'écart de **charge** par rapport à la dernière séance (« -2.5 kg »), vert pour un gain, orange pour une perte. Rien quand seules les reps changent
+- **Plan du jour** : tableau sur fond clair
+- **Progression** (exercices avec charge) : **1RM (estimation)** en avant (meilleur 1RM estimé, formule d'Epley) à la place de « PR charge », puis Volume max ; courbes « Poids soulevés » et « Volume total » dont les points sont **colorés selon la difficulté ressentie** (légende sous la courbe)
+- **Réglages en onglets** : Séance, Import/Export, Mise à jour, Effacer données. La barre d'onglets reste fixe au défilement, la carte est collée dessous, et l'app rouvre toujours sur « Séance »
+- Menu d'un exercice : « Voir la description » (le mot « démo » n'a plus de sens depuis le retrait de YouTube)
+- Textes anglais ajoutés pour tout ce qui précède
+- **Données** : nouveau champ optionnel `effort` (1 à 5) sur les exercices d'une séance, sans migration et sans rien supprimer (l'ancien `feel` reste lu). **Cette version touche aux données : exporte avant de mettre à jour**
 
 ## Nouveautés v4.57
 

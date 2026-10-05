@@ -6,7 +6,7 @@
 // Bumpée à chaque commit + push : évolution notable = +0,1 (4.4 -> 4.5), correctif très
 // mineur = au centième (4.41, 4.42...). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '4.57';
+const APP_VERSION = '4.58';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -620,6 +620,7 @@ const State = {
     templateEditId: null,
     progressionExerciseId: null,
     libraryFilter: { search: '', muscle: null, equipment: null, calisthenics: false },
+    settingsTab: 'seance', // 'seance' | 'data' | 'update' | 'wipe'
     activeSessionStep: 'warmup', // 'conditions' | 'warmup' | 'exercises' | 'cooldown'
   },
 
@@ -1701,32 +1702,49 @@ function renderCooldownStep(session) {
   return wrap;
 }
 
+/* Carte de lecture : la difficulté ressentie de tous les exercices d'une séance (bilan et historique). */
+function renderDifficultyCard(session) {
+  const rows = session.exercises.map(exo => ({ exo, n: effortOf(exo) })).filter(r => r.n != null);
+  if (!rows.length) return null;
+  const card = el('div', { class: 'card diff-card' },
+    el('h3', { class: 'diff-title' }, 'Difficulté ressentie'));
+  rows.forEach(({ exo, n }) => {
+    const exDef = State.exerciseById(exo.exerciseId);
+    const dots = el('span', { class: 'diff-dots', 'aria-hidden': 'true' });
+    for (let k = 1; k <= 5; k++) dots.appendChild(el('i', { class: k <= n ? 'on' : '' }));
+    card.appendChild(el('div', { class: 'diff-row' },
+      el('div', { class: 'diff-name' }, exDef ? exDef.name : 'Exercice'),
+      dots,
+      el('div', { class: 'diff-score' }, n + '/5')));
+  });
+  return card;
+}
+
 /* === Ressenti par exercice (alimente le coach ; il prime sur ses règles) === */
 function renderFeelCard(session) {
   const exos = session.exercises.filter(e => e.sets.some(s => s.done));
   const card = el('div', { class: 'card feel-card' });
   if (!exos.length) return card;
-  card.appendChild(el('div', { style: 'font-weight: 600; font-size: 16px; margin-bottom: 4px;' }, 'Ressenti par exercice'));
-  card.appendChild(el('div', { class: 'feel-hint' },
-    'Dis comment chaque exercice s\'est passé. Le coach s\'en sert pour calculer ta prochaine séance, et ton ressenti prime sur ses règles. Facultatif.'));
+  card.appendChild(el('div', { style: 'font-weight: 600; font-size: 16px; margin-bottom: 4px;' }, 'Difficulté ressentie'));
   exos.forEach(exo => {
     const exDef = State.exerciseById(exo.exerciseId);
     const chips = el('div', { class: 'feel-chips' });
-    FEEL_OPTIONS.forEach(opt => {
+    for (let n = 1; n <= 5; n++) {
       const btn = el('button', {
-        class: 'feel-chip ' + opt.key + (exo.feel === opt.key ? ' active' : ''),
+        class: 'feel-chip e' + n + (effortOf(exo) === n ? ' active' : ''),
+        'aria-label': n === 1 ? 'Difficulté 1 sur 5 : très facile' : n === 5 ? 'Difficulté 5 sur 5 : très difficile' : 'Difficulté ' + n + ' sur 5',
         onclick: () => {
-          exo.feel = exo.feel === opt.key ? null : opt.key;
-          if (!exo.feel) delete exo.feel;
-          chips.querySelectorAll('.feel-chip').forEach(b => b.classList.toggle('active', b.dataset.k === exo.feel));
+          if (effortOf(exo) === n) { delete exo.effort; delete exo.feel; } else { exo.effort = n; delete exo.feel; }
+          chips.querySelectorAll('.feel-chip').forEach(b => b.classList.toggle('active', Number(b.dataset.n) === effortOf(exo)));
           State.save();
         },
-      }, opt.label);
-      btn.dataset.k = opt.key;
+      }, String(n));
+      btn.dataset.n = String(n);
       chips.appendChild(btn);
-    });
+    }
     card.appendChild(el('div', { class: 'feel-row' },
-      el('div', { class: 'feel-name' }, exDef ? exDef.name : 'Exercice'), chips));
+      el('div', { class: 'feel-name' }, exDef ? exDef.name : 'Exercice'), chips,
+      el('div', { class: 'feel-ends' }, el('span', {}, 'Très facile'), el('span', {}, 'Très difficile'))));
   });
   return card;
 }
@@ -1955,18 +1973,6 @@ function renderActiveExerciseCard(exo, idx, ssRole) {
   );
 
   const titleBlock = el('div', { style: 'flex: 1; min-width: 0;' }, nameWrap, targetText);
-  const hist0 = exDef ? exerciseHistory(exo.exerciseId, 1) : [];
-  if (hist0.length) {
-    const h0 = hist0[0];
-    const e1 = best1RM(h0.sets);
-    const typ = h0.sets[0].setType || exDef.type;
-    titleBlock.appendChild(el('div', { class: 'exo-last' },
-      tf('Dernière fois : {v}', { v: fmtLastPerf(h0, typ) }) + ((typ === 'loaded' || typ === 'weighted') && e1 > 0 ? ' · ' + tf('1RM ≈ {n} kg', { n: fmtNum(e1) }) : '')));
-  }
-  if (exo.coach) {
-    titleBlock.appendChild(el('div', { class: 'exo-coach ' + exo.coach.severity },
-      tf('Coach : {t}', { t: coachText(exo.coach) })));
-  }
   header.appendChild(titleBlock);
   header.appendChild(el('button', {
     class: 'exo-menu-btn',
@@ -2091,7 +2097,7 @@ function userWeightBubble(exo, set, anchor) {
   if (!exo.coach || set.weight == null) return;
   const delta = set.weight - (Number(exo.coach.lastWeight) || 0);
   if (Math.abs(delta) < 0.01) return;
-  floatBubble(anchor, tr('Toi') + ' ' + signedKg(delta), delta > 0 ? 'up' : 'down', 'user');
+  floatBubble(anchor, signedKg(delta), delta > 0 ? 'up' : 'down', 'user');
 }
 
 /* Bulle « coach » : une seule fois, quand la carte de l'exercice apparaît à l'écran. */
@@ -2104,15 +2110,13 @@ function observeCoachBubble(card, exo) {
     exo.bubbleDone = true;
     State.save();
     const c = exo.coach;
-    let text = '';
-    if (c.type === 'bodyweight') text = c.delta ? '+' + c.delta + ' rep' : '';
-    else if (c.type === 'time') text = c.delta ? '+' + c.delta + ' s' : '';
-    else text = Math.abs(c.delta) >= 0.01 ? signedKg(c.delta) : '';
-    if (!text) return;
+    // Seulement l'écart de charge par rapport à la dernière séance : rien si seules les reps changent
+    if (c.type === 'bodyweight' || c.type === 'time' || Math.abs(c.delta) < 0.01) return;
+    const text = signedKg(c.delta);
     const firstRow = card.querySelector('.set-row');
     const wraps = firstRow ? firstRow.querySelectorAll('.set-input-wrap') : [];
-    const anchor = wraps[1] || wraps[0] || card.querySelector('.exo-coach');
-    floatBubble(anchor, tr('Coach') + ' ' + text, c.severity, 'coach');
+    const anchor = wraps[1] || wraps[0];
+    floatBubble(anchor, text, c.severity, 'coach');
   }, { threshold: 0.25 });
   io.observe(card);
 }
@@ -2190,7 +2194,8 @@ function openActiveExoMenu(idx) {
   const exDef = State.exerciseById(exo.exerciseId);
 
   const actions = [
-    { label: 'Voir la description / démo', handler: () => openExerciseDetail(exo.exerciseId) },
+    { label: 'Voir la description', handler: () => openExerciseDetail(exo.exerciseId) },
+    { label: 'Dernière séance', handler: () => openLastSession(exo.exerciseId) },
     { label: 'Changer la cible', handler: () => editExoTarget(idx) },
     { label: 'Changer le repos', handler: () => editExoRest(idx) },
     { label: 'Remplacer l\'exercice', handler: () => openExercisePicker(id => { clearSuperset(session.exercises, idx); exo.exerciseId = id; State.save(); render(); }) },
@@ -2214,6 +2219,29 @@ function openActiveExoMenu(idx) {
   }});
 
   openActionMenu(exDef ? exDef.name : 'Exercice', actions);
+}
+
+/* Menu « Dernière séance » : ce qui a été fait la dernière fois pour cet exercice. */
+function openLastSession(exerciseId) {
+  const exDef = State.exerciseById(exerciseId);
+  const hist = exerciseHistory(exerciseId, 1);
+  if (!hist.length) { toast('Aucune séance précédente pour cet exercice.'); return; }
+  const h = hist[0];
+  const defType = exDef ? exDef.type : 'loaded';
+  const body = el('div', {}, el('div', { class: 'ls-date' }, fmtDateLong(h.date)));
+  h.sets.forEach((s, i) => {
+    const t = s.setType || defType;
+    const reps = t === 'time' ? `${s.reps}s` : `${s.reps} reps`;
+    let w = '';
+    if (t === 'loaded') w = ` × ${s.weight} kg`;
+    else if (t === 'weighted') w = ` × +${s.weight} kg`;
+    else if (t === 'assisted') w = ` × -${s.weight} kg`;
+    body.appendChild(el('div', { class: 'history-set' },
+      el('span', { class: 'h-set-idx' }, `S${i + 1}`),
+      el('span', { class: 'h-set-val' }, reps + w)));
+  });
+  if (h.effort) body.appendChild(el('div', { class: 'ls-feel' }, tf('Difficulté ressentie : {n}/5', { n: h.effort })));
+  openModal({ title: exDef ? exDef.name : 'Exercice', body, footer: [el('button', { class: 'btn btn-secondary', onclick: closeModal }, 'Fermer')] });
 }
 
 function editExoRest(idx) {
@@ -2653,6 +2681,9 @@ function renderHistoryDetailScreen() {
     ));
   }
 
+  const diffCard = renderDifficultyCard(session);
+  if (diffCard) body.appendChild(diffCard);
+
   // Exercises (les paires en superset sont regroupées, comme pendant la séance)
   renderExerciseBlocks(session.exercises, (exo, role) => {
     const exDef = State.exerciseById(exo.exerciseId);
@@ -2790,6 +2821,8 @@ function renderProgressionScreen() {
       totalVolume,
       totalReps,
       sets: validSets.length,
+      effort: effortOf(exo),
+      setList: validSets,
     });
   });
 
@@ -2813,8 +2846,13 @@ function renderProgressionScreen() {
     const maxReps = Math.max(...data.map(d => d.totalReps));
     prGrid.appendChild(el('div', { class: 'pr-cell' }, el('div', { class: 'label' }, 'Reps max (séance)'), el('div', { class: 'value' }, maxReps)));
   } else {
-    const maxWeight = Math.max(...data.map(d => d.maxWeight));
-    prGrid.appendChild(el('div', { class: 'pr-cell' }, el('div', { class: 'label' }, type === 'weighted' ? 'PR Lest' : 'PR Charge'), el('div', { class: 'value' }, (type === 'weighted' ? '+' : '') + maxWeight + ' kg')));
+    // 1RM (estimation) en avant : meilleur 1RM estimé (Epley) sur toutes les séances
+    let best = { v: 0, date: null };
+    data.forEach(d => { const v = best1RM(d.setList); if (v > best.v) best = { v, date: d.date }; });
+    prGrid.appendChild(el('div', { class: 'pr-cell featured' },
+      el('div', { class: 'label' }, '1RM (estimation)'),
+      el('div', { class: 'value' }, best.v > 0 ? fmtNum(Math.round(best.v * 10) / 10) + ' kg' : '—'),
+      best.date ? el('div', { class: 'sub' }, fmtDateShort(best.date)) : null));
     const maxVol = Math.max(...data.map(d => d.totalVolume));
     prGrid.appendChild(el('div', { class: 'pr-cell' }, el('div', { class: 'label' }, 'Volume max'), el('div', { class: 'value' }, Math.round(maxVol) + ' kg')));
   }
@@ -2825,15 +2863,16 @@ function renderProgressionScreen() {
   if (type === 'bodyweight' || type === 'time') {
     body.appendChild(makeChartContainer(type === 'time' ? 'Temps max par séance' : 'Reps max par séance', data.map(d => ({
       x: d.date,
+      effort: d.effort,
       y: Math.max(...State.sessions.find(s => s.startedAt === d.date).exercises.find(e => e.exerciseId === exId).sets.filter(x => x.done && x.reps != null).map(x => Number(x.reps)))
     })), type === 'time' ? 's' : ''));
-    body.appendChild(makeChartContainer('Reps totales', data.map(d => ({ x: d.date, y: d.totalReps })), ''));
+    body.appendChild(makeChartContainer('Reps totales', data.map(d => ({ x: d.date, effort: d.effort, y: d.totalReps })), ''));
   } else if (type === 'assisted') {
-    body.appendChild(makeChartContainer('Assistance minimale (kg)', data.filter(d => d.minAssist != null).map(d => ({ x: d.date, y: d.minAssist })), 'kg', { invert: true }));
-    body.appendChild(makeChartContainer('Reps totales', data.map(d => ({ x: d.date, y: d.totalReps })), ''));
+    body.appendChild(makeChartContainer('Assistance minimale (kg)', data.filter(d => d.minAssist != null).map(d => ({ x: d.date, effort: d.effort, y: d.minAssist })), 'kg', { invert: true }));
+    body.appendChild(makeChartContainer('Reps totales', data.map(d => ({ x: d.date, effort: d.effort, y: d.totalReps })), ''));
   } else {
-    body.appendChild(makeChartContainer(tr(type === 'weighted' ? 'Lest max' : 'Charge max') + ' (kg)', data.map(d => ({ x: d.date, y: d.maxWeight })), 'kg'));
-    body.appendChild(makeChartContainer('Volume total (kg)', data.map(d => ({ x: d.date, y: Math.round(d.totalVolume) })), 'kg'));
+    body.appendChild(makeChartContainer('Poids soulevés (kg)', data.map(d => ({ x: d.date, effort: d.effort, y: d.maxWeight })), 'kg'));
+    body.appendChild(makeChartContainer('Volume total (kg)', data.map(d => ({ x: d.date, effort: d.effort, y: Math.round(d.totalVolume) })), 'kg'));
   }
 
   screen.appendChild(body);
@@ -2844,7 +2883,20 @@ function makeChartContainer(title, points, unit, opts = {}) {
   const container = el('div', { class: 'chart-container' });
   container.appendChild(el('h3', {}, title));
   container.appendChild(renderLineChart(points, unit, opts));
+  if (points.some(p => p.effort)) container.appendChild(renderEffortLegend());
   return container;
+}
+
+/* Couleur d'un point selon la difficulté ressentie de la séance (1 très facile → 5 très difficile). */
+const EFFORT_COLORS = { 1: '#5ec9a0', 2: '#a8d672', 3: '#f5d76e', 4: '#ffa95e', 5: '#ff6b6b' };
+
+function renderEffortLegend() {
+  const legend = el('div', { class: 'effort-legend' }, el('span', { class: 'el-label' }, 'Difficulté ressentie'));
+  for (let n = 1; n <= 5; n++) {
+    legend.appendChild(el('span', { class: 'el-item' },
+      el('i', { style: 'background:' + EFFORT_COLORS[n] }), String(n)));
+  }
+  return legend;
 }
 
 function renderLineChart(points, unit = '', opts = {}) {
@@ -2934,14 +2986,18 @@ function renderLineChart(points, unit = '', opts = {}) {
   }
 
   // Points
+  const anyEffort = points.some(p => p.effort);
   points.forEach((p, i) => {
     const isLast = i === points.length - 1;
     const c = document.createElementNS(svgNS, 'circle');
     c.setAttribute('cx', xScale(p.x));
     c.setAttribute('cy', yScale(p.y));
     c.setAttribute('r', isLast ? '5' : '3.5');
-    c.setAttribute('fill', isLast ? '#f5d76e' : '#0a0e14');
-    c.setAttribute('stroke', '#f5d76e');
+    // Sans aucune difficulté saisie sur ce graphique : style doré d'origine. Sinon, un point par
+    // séance coloré selon sa difficulté ressentie (gris si la séance n'a pas été notée).
+    const col = anyEffort ? (EFFORT_COLORS[p.effort] || '#6a7480') : '#f5d76e';
+    c.setAttribute('fill', anyEffort || isLast ? col : '#0a0e14');
+    c.setAttribute('stroke', col);
     c.setAttribute('stroke-width', isLast ? '2' : '2');
     svg.appendChild(c);
     // Value above last point
@@ -3337,11 +3393,15 @@ function renderSummaryScreen() {
             el('div', { class: 'coach-tag ' + s.severity }, s.tag)
           ),
           el('div', { class: 'coach-row-reco' }, s.reco),
+          s.stats ? el('div', { class: 'coach-row-stats' }, s.stats) : null,
         );
         body.appendChild(row);
       });
     }
   }
+
+  const diffCard = renderDifficultyCard(session);
+  if (diffCard) body.appendChild(diffCard);
 
   // Détail séance
   body.appendChild(el('h2', { class: 'section-title' }, 'Détail'));
@@ -3382,16 +3442,25 @@ function renderSummaryScreen() {
    Le coach lit l'historique de CHAQUE exercice (pas seulement la dernière séance) :
    - double progression : on monte les reps dans la fourchette cible, puis la charge ;
    - 1RM estimé (Epley) et tendance sur les dernières séances ;
-   - ressenti de l'utilisateur (exo.feel : easy / good / hard) : il prime sur les règles ;
+   - effort ressenti de l'utilisateur (exo.effort, 1 à 5) : il prime sur les règles ;
    - la charge réellement utilisée prime sur la suggestion précédente du coach ;
    - sommeil / énergie : récup limitée => on confirme avant de monter.
    Tout est local : aucune donnée n'est envoyée. */
 
-const FEEL_OPTIONS = [
-  { key: 'easy', label: 'Facile' },
-  { key: 'good', label: 'Bien' },
-  { key: 'hard', label: 'À la limite' },
-];
+/* Difficulté ressentie par exercice (champ exo.effort) : 1 (très facile) à 5 (très difficile), saisi après les étirements.
+   Champ exo.effort. Les anciens exo.feel (easy / good / hard, v4.57) restent lus. */
+const LEGACY_FEEL_EFFORT = { easy: 2, good: 3, hard: 5 };
+
+function effortOf(exo) {
+  const e = Number(exo.effort);
+  if (e >= 1 && e <= 5) return e;
+  return LEGACY_FEEL_EFFORT[exo.feel] || null;
+}
+
+/* Pour les règles du coach : 1-2 facile, 3-4 correct, 5 à la limite. */
+function feelFromEffort(e) {
+  return e == null ? null : e <= 2 ? 'easy' : e >= 5 ? 'hard' : 'good';
+}
 
 function epley1RM(weight, reps) {
   const w = Number(weight) || 0;
@@ -3420,7 +3489,8 @@ function exerciseHistory(exerciseId, limit = 6) {
       date: s.startedAt,
       exo,
       sets: exo.sets.filter(x => x.done),
-      feel: exo.feel || null,
+      feel: feelFromEffort(effortOf(exo)),
+      effort: effortOf(exo),
       targetSets: exo.targetSets || null,
       targetReps: exo.targetReps || null,
     });
@@ -3629,22 +3699,24 @@ function suggestNextTargets(session, tpl) {
     // L'historique contient déjà cette séance si elle est terminée (écran de bilan).
     const hist = exerciseHistory(exo.exerciseId);
     const sug = coachSuggest(exDef, exo.targetReps, hist.length ? hist : [{
-      sets: exo.sets.filter(s => s.done), feel: exo.feel || null,
+      sets: exo.sets.filter(s => s.done), feel: feelFromEffort(effortOf(exo)),
       targetSets: exo.targetSets, targetReps: exo.targetReps,
     }], { poorRecov });
     if (!sug) return;
 
-    let reco = coachText(sug);
-    if (sug.e1rm > 0) reco += ' ' + tf('1RM estimé : {n} kg.', { n: fmtNum(sug.e1rm) });
-    if (sug.trend && sug.trend.n >= 2) {
-      reco += ' ' + tf('Tendance 1RM : {p} % sur {n} séances.', { p: (sug.trend.pct > 0 ? '+' : '') + sug.trend.pct, n: sug.trend.n });
+    // Texte court : seulement l'action. Le 1RM estimé (et sa tendance) vient dans sa propre ligne.
+    let stats = '';
+    if (sug.e1rm > 0) {
+      stats = tf('1RM (estimation) : {n} kg', { n: fmtNum(sug.e1rm) });
+      if (sug.trend && sug.trend.n >= 2) stats += ' · ' + (sug.trend.pct > 0 ? '+' : '') + sug.trend.pct + ' %';
     }
     out.push({
       exerciseId: exo.exerciseId,
       name: exDef.name,
       severity: sug.severity,
       tag: sug.tag,
-      reco,
+      reco: sug.action ? tf(sug.action.t, sug.action.v) : '',
+      stats,
     });
   });
 
@@ -3693,67 +3765,73 @@ function renderSettingsScreen() {
   );
   screen.appendChild(header);
 
-  const body = el('div', { class: 'screen-body' });
+  const body = el('div', { class: 'screen-body settings-body' });
 
-  // === Timer de repos ===
-  body.appendChild(el('h2', { class: 'section-title' }, 'Timer de repos'));
+  // === Onglets : une carte à la fois, collée à la barre d'onglets ===
+  const tabs = [
+    { key: 'seance', label: 'Séance' },
+    { key: 'data', label: 'Import/Export' },
+    { key: 'update', label: 'Mise à jour' },
+    { key: 'wipe', label: 'Effacer données', danger: true },
+  ];
+  if (!tabs.some(t => t.key === State.ui.settingsTab)) State.ui.settingsTab = 'seance';
+  const tabKey = State.ui.settingsTab;
+  const tabBar = el('div', { class: 'set-tabs', role: 'tablist' });
+  tabs.forEach(t => tabBar.appendChild(el('button', {
+    class: 'set-tab' + (t.danger ? ' danger' : '') + (t.key === tabKey ? ' active' : ''),
+    role: 'tab',
+    'aria-selected': t.key === tabKey ? 'true' : 'false',
+    onclick: () => { State.ui.settingsTab = t.key; render({ keepScroll: false }); },
+  }, t.label)));
+  screen.appendChild(tabBar);
 
-  body.appendChild(makeToggleRow(
-    'Démarrage auto',
-    'Lance le timer dès qu\'un set est validé.',
-    'timerAutoStart'
-  ));
-  body.appendChild(makeToggleRow(
-    'Bip de fin',
-    'Signal sonore quand le repos est terminé.',
-    'timerSound'
-  ));
-  body.appendChild(makeToggleRow(
-    'Vibration',
-    'Vibrations à la fin du repos (si supporté).',
-    'timerVibrate'
-  ));
+  const card = el('div', { class: 'set-card' + (tabKey === 'wipe' ? ' danger' : '') });
 
-  // Override global
-  body.appendChild(makeOverrideRow());
-
-  // === Étirements ===
-  body.appendChild(el('h2', { class: 'section-title' }, 'Étirements'));
-  body.appendChild(makeCooldownSideRow());
-
-  // === Mises à jour ===
-  body.appendChild(el('h2', { class: 'section-title' }, 'Mises à jour'));
-  body.appendChild(makeToggleRow(
-    'Vérifier les mises à jour',
-    'Prévient quand une nouvelle version est prête et qu\'il faut relancer l\'app.',
-    'autoUpdateCheck'
-  ));
-  body.appendChild(Updater.makeRow());
-
-  // === Données ===
-  body.appendChild(el('h2', { class: 'section-title' }, 'Données'));
-  body.appendChild(makeSettingsRow('Exporter mes données', 'Sauvegarde JSON complète (templates, séances, exos custom).', 'Exporter', exportAllData));
-  body.appendChild(makeSettingsRow('Importer un JSON', 'Remplace les données actuelles. Fais un export d\'abord.', 'Importer', importDataPrompt));
-  body.appendChild(makeSettingsRow('Export pour analyse Claude', 'Format texte lisible à coller dans une conversation avec Claude.', 'Copier', exportForClaude));
-
-  // === Stats ===
-  body.appendChild(el('h2', { class: 'section-title' }, 'Stats'));
-  const stats = el('div', { class: 'settings-stats' },
-    el('div', { class: 'sst' }, el('div', { class: 'v' }, State.sessions.length), el('div', { class: 'l' }, 'Séances')),
-    el('div', { class: 'sst' }, el('div', { class: 'v' }, State.templates.length), el('div', { class: 'l' }, 'Templates')),
-    el('div', { class: 'sst' }, el('div', { class: 'v' }, State.customExercises.length), el('div', { class: 'l' }, 'Exos custom')),
-  );
-  body.appendChild(stats);
-
-  // === Danger ===
-  body.appendChild(el('h2', { class: 'section-title' }, 'Zone dangereuse'));
-  body.appendChild(makeSettingsRow('Tout effacer', 'Supprime toutes les données locales. Irréversible.', 'Effacer', confirmWipe, true));
-
-  body.appendChild(el('div', { class: 'about-block' },
-    el('div', { class: 'about-title' }, 'Muscu — v' + APP_VERSION),
-    el('div', { class: 'about-line' }, 'App locale, aucune donnée envoyée à un serveur.'),
-    el('div', { class: 'about-line' }, 'Toutes tes données sont dans le localStorage de ce navigateur.'),
-  ));
+  if (tabKey === 'seance') {
+    card.appendChild(el('div', { class: 'set-sub' }, 'Timer de repos'));
+    card.appendChild(makeToggleRow(
+      'Démarrage auto',
+      'Lance le timer dès qu\'un set est validé.',
+      'timerAutoStart'
+    ));
+    card.appendChild(makeToggleRow(
+      'Bip de fin',
+      'Signal sonore quand le repos est terminé.',
+      'timerSound'
+    ));
+    card.appendChild(makeToggleRow(
+      'Vibration',
+      'Vibrations à la fin du repos (si supporté).',
+      'timerVibrate'
+    ));
+    card.appendChild(makeOverrideRow());
+    card.appendChild(el('div', { class: 'set-sub' }, 'Étirements'));
+    card.appendChild(makeCooldownSideRow());
+  } else if (tabKey === 'data') {
+    card.appendChild(makeSettingsRow('Exporter mes données', 'Sauvegarde JSON complète (templates, séances, exos custom).', 'Exporter', exportAllData));
+    card.appendChild(makeSettingsRow('Importer un JSON', 'Remplace les données actuelles. Fais un export d\'abord.', 'Importer', importDataPrompt));
+    card.appendChild(makeSettingsRow('Export pour analyse Claude', 'Format texte lisible à coller dans une conversation avec Claude.', 'Copier', exportForClaude));
+    card.appendChild(el('div', { class: 'settings-stats' },
+      el('div', { class: 'sst' }, el('div', { class: 'v' }, State.sessions.length), el('div', { class: 'l' }, 'Séances')),
+      el('div', { class: 'sst' }, el('div', { class: 'v' }, State.templates.length), el('div', { class: 'l' }, 'Templates')),
+      el('div', { class: 'sst' }, el('div', { class: 'v' }, State.customExercises.length), el('div', { class: 'l' }, 'Exos custom')),
+    ));
+  } else if (tabKey === 'update') {
+    card.appendChild(makeToggleRow(
+      'Vérifier les mises à jour',
+      'Prévient quand une nouvelle version est prête et qu\'il faut relancer l\'app.',
+      'autoUpdateCheck'
+    ));
+    card.appendChild(Updater.makeRow());
+    card.appendChild(el('div', { class: 'about-block' },
+      el('div', { class: 'about-title' }, 'Muscu — v' + APP_VERSION),
+      el('div', { class: 'about-line' }, 'App locale, aucune donnée envoyée à un serveur.'),
+      el('div', { class: 'about-line' }, 'Toutes tes données sont dans le localStorage de ce navigateur.'),
+    ));
+  } else {
+    card.appendChild(makeSettingsRow('Tout effacer', 'Supprime toutes les données locales. Irréversible.', 'Effacer', confirmWipe, true));
+  }
+  body.appendChild(card);
 
   screen.appendChild(body);
   return screen;
@@ -3988,6 +4066,8 @@ function exportForClaude() {
         return reps;
       }).join(', ');
       lines.push(`  - ${role ? '[Superset ' + role + '] ' : ''}${exDef ? tr(exDef.name) : '???'} : ${setsTxt}`);
+      const eff = effortOf(exo);
+      if (eff) lines.push('    ' + tf('Difficulté ressentie : {n}/5', { n: eff }));
     });
     if (s.notes) lines.push('  ' + tf('Notes : {t}', { t: s.notes }));
   });

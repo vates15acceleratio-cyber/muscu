@@ -96,7 +96,7 @@ const I18N_UI = {
   'Non': 'No', 'Léger': 'Light', 'Oui': 'Yes', 'non': 'no', 'léger': 'light', 'oui': 'yes',
   '+ Ajouter un set': '+ Add a set', 'Marquer non fait': 'Mark as not done', 'Marquer fait': 'Mark as done',
   'Set supprimé': 'Set deleted',
-  'Voir la description / démo': 'View description / demo', 'Changer la cible': 'Change target',
+  'Voir la description': 'View description', 'Changer la cible': 'Change target',
   'Changer le repos': 'Change rest', 'Remplacer l\'exercice': 'Replace exercise',
   'Mode de saisie des sets...': 'Set entry mode...', 'Supprimer l\'exercice': 'Delete exercise',
   'Supprimer cet exercice de la séance ?': 'Delete this exercise from the workout?',
@@ -196,8 +196,17 @@ const I18N_UI = {
     'Global override: applies the same rest duration to all new exercises, whatever the type. Does not change exercises already added to a template.',
   'Durée invalide': 'Invalid duration', 'Override appliqué': 'Override applied',
   // Coach, pré-remplissage, bulles, ressenti
+  'Dernière séance': 'Last workout', 'Aucune séance précédente pour cet exercice.': 'No previous workout for this exercise.', 'Ressenti': 'Feel',
+  'Difficulté ressentie': 'Perceived difficulty', 'Très facile': 'Very easy', 'Très difficile': 'Very hard',
+  'Note l\'effort de chaque exercice, de 1 (très facile) à 5 (très difficile). Le coach s\'en sert pour calculer ta prochaine séance, et ton ressenti prime sur ses règles. Facultatif.':
+    'Rate the effort of each exercise, from 1 (very easy) to 5 (very hard). The coach uses it to work out your next workout, and your feel overrides its rules. Optional.',
+  'Difficulté ressentie : {n}/5': 'Perceived difficulty: {n}/5',
+  'Difficulté 2 sur 5': 'Difficulty 2 of 5', 'Difficulté 3 sur 5': 'Difficulty 3 of 5', 'Difficulté 4 sur 5': 'Difficulty 4 of 5',
+  'Difficulté 1 sur 5 : très facile': 'Difficulty 1 of 5: very easy', 'Difficulté 5 sur 5 : très difficile': 'Difficulty 5 of 5: very hard',
+  'Poids soulevés (kg)': 'Weights lifted (kg)', '1RM (estimation)': '1RM (estimate)',
+  'Import/Export': 'Import/Export', 'Mise à jour': 'Update', 'Effacer données': 'Erase data',
   'à': 'at', 'Toi': 'You', 'Coach': 'Coach', 'Dernière fois': 'Last time',
-  'Dernière fois : {v}': 'Last time: {v}', '1RM ≈ {n} kg': 'e1RM ≈ {n} kg', 'Coach : {t}': 'Coach: {t}',
+  'Dernière fois : {v}': 'Last time: {v}', '1RM (estimation) : {n} kg': '1RM (estimate): {n} kg', 'Coach : {t}': 'Coach: {t}',
   'Plan du jour': 'Today\'s plan', 'C\'est parti': 'Let\'s go',
   'Les valeurs conseillées sont déjà dans tes séries (en gris). Change-les librement : ton choix prime.':
     'The suggested values are already in your sets (greyed). Change them freely: your choice always wins.',
