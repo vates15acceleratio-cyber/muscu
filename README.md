@@ -1,6 +1,14 @@
-# Muscu — v5.0.0
+# Muscu — v5.0.1
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v5.0.1
+
+Version de diagnostic (un utilisateur sur iPhone voyait un écran vide après avoir ouvert une séance, bug non reproduit).
+
+- **Plus d'écran vide** : si un écran plante à l'affichage, l'app montre un écran « Erreur d'affichage » avec le message, un bouton **Copier** et un retour aux séances.
+- **Erreurs hors affichage** (toucher, minuterie) : un petit bandeau avec le message, au lieu d'un échec silencieux.
+- **Données** : le format n'a pas changé et rien n'est lu ni écrit en plus. Pas besoin d'exporter avant de mettre à jour.
 
 ## Nouveautés v5.0.0
 

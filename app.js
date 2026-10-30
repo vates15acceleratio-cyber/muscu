@@ -6,7 +6,7 @@
 // Bumpée à chaque commit + push. Depuis la 5.0.0 : majeur.mineur.correctif (5.1.0 pour une
 // évolution notable, 5.0.1 pour un correctif). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '5.0.0';
+const APP_VERSION = '5.0.1';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -962,6 +962,55 @@ document.addEventListener('click', e => {
   }
 });
 
+/* === ÉCRAN D'ERREUR ===
+   Si l'affichage d'un écran plante, on montre l'erreur (avec un bouton Copier) au lieu d'un écran vide.
+   Les données ne sont ni lues ni modifiées ici. Les messages restent en français (c'est du diagnostic). */
+function errorReport(err, where) {
+  const e = err && err.stack ? err : { message: String(err), stack: '' };
+  return 'Muscu v' + APP_VERSION + ' · écran : ' + where + '\n' + (e.message || '') + '\n' + String(e.stack || '').split('\n').slice(0, 6).join('\n')
+    + '\n' + (navigator.userAgent || '');
+}
+
+function renderErrorScreen(err, screenName) {
+  const report = errorReport(err, screenName);
+  const screen = el('section', { class: 'screen' });
+  screen.appendChild(el('header', { class: 'screen-header' }, el('h1', {}, 'Erreur d\'affichage')));
+  const body = el('div', { class: 'screen-body' });
+  body.appendChild(el('p', { style: 'margin-bottom: 12px; line-height: 1.5;' },
+    'Cet écran n\'a pas pu s\'afficher. Tes données ne sont pas touchées. Touche « Copier » et envoie-moi le texte (ou une capture d\'écran).'));
+  body.appendChild(el('pre', { style: 'white-space: pre-wrap; word-break: break-word; font-size: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; user-select: text; -webkit-user-select: text;' }, report));
+  body.appendChild(el('button', {
+    class: 'btn btn-primary btn-block',
+    onclick: () => {
+      const done = () => toast('Copié');
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(report).then(done, () => {});
+    },
+  }, 'Copier'));
+  body.appendChild(el('button', {
+    class: 'btn btn-secondary btn-block',
+    style: 'margin-top: 8px;',
+    onclick: () => showScreen('sessions'),
+  }, 'Retour aux séances'));
+  screen.appendChild(body);
+  return screen;
+}
+
+// Erreurs hors affichage (clic, minuterie) : un bandeau discret, au lieu d'un échec silencieux.
+function showErrorBanner(err) {
+  try {
+    const root = document.getElementById('toast-root');
+    if (!root || root.querySelector('.err-banner')) return;
+    const msg = (err && err.message) ? err.message : String(err);
+    const b = el('div', { class: 'toast err-banner', style: 'pointer-events: auto; max-width: 92vw; word-break: break-word;' },
+      'Erreur : ' + msg + ' (v' + APP_VERSION + ')');
+    b.addEventListener('click', () => b.remove());
+    root.appendChild(b);
+    setTimeout(() => b.remove(), 15000);
+  } catch (_) { /* jamais d'erreur dans le gestionnaire d'erreurs */ }
+}
+window.addEventListener('error', e => showErrorBanner(e.error || e.message));
+window.addEventListener('unhandledrejection', e => showErrorBanner(e.reason));
+
 /* === MAIN RENDER === */
 function render(opts = {}) {
   const root = document.getElementById('screens');
@@ -973,17 +1022,21 @@ function render(opts = {}) {
 
   const screenName = State.ui.currentScreen;
   let screen;
-  switch (screenName) {
-    case 'sessions': screen = renderSessionsScreen(); break;
-    case 'active-session': screen = renderActiveSessionScreen(); break;
-    case 'history': screen = renderHistoryScreen(); break;
-    case 'history-detail': screen = renderHistoryDetailScreen(); break;
-    case 'progression': screen = renderProgressionScreen(); break;
-    case 'library': screen = renderLibraryScreen(); break;
-    case 'template-edit': screen = renderTemplateEditScreen(); break;
-    case 'summary': screen = renderSummaryScreen(); break;
-    case 'settings': screen = renderSettingsScreen(); break;
-    default: screen = renderSessionsScreen();
+  try {
+    switch (screenName) {
+      case 'sessions': screen = renderSessionsScreen(); break;
+      case 'active-session': screen = renderActiveSessionScreen(); break;
+      case 'history': screen = renderHistoryScreen(); break;
+      case 'history-detail': screen = renderHistoryDetailScreen(); break;
+      case 'progression': screen = renderProgressionScreen(); break;
+      case 'library': screen = renderLibraryScreen(); break;
+      case 'template-edit': screen = renderTemplateEditScreen(); break;
+      case 'summary': screen = renderSummaryScreen(); break;
+      case 'settings': screen = renderSettingsScreen(); break;
+      default: screen = renderSessionsScreen();
+    }
+  } catch (err) {
+    screen = renderErrorScreen(err, screenName);
   }
   screen.classList.add('active');
   // Fondu d'entrée seulement quand on change réellement d'écran (pas à chaque re-rendu).
