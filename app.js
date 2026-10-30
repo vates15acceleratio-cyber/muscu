@@ -6,7 +6,7 @@
 // Bumpée à chaque commit + push. Depuis la 5.0.0 : majeur.mineur.correctif (5.1.0 pour une
 // évolution notable, 5.0.1 pour un correctif). Garder en phase avec CACHE_VERSION dans sw.js
 // (même valeur) et le titre du README.
-const APP_VERSION = '5.0.1';
+const APP_VERSION = '5.0.2';
 
 /* === EXERCISE LIBRARY === */
 const EXERCISE_LIBRARY = [
@@ -2031,7 +2031,9 @@ function renderActiveExerciseCard(exo, idx, ssRole) {
   );
 
   const titleBlock = el('div', { style: 'flex: 1; min-width: 0;' }, nameWrap, targetText);
-  if (exDef) header.appendChild(schemaThumb(exDef.id, { tap: true }));
+  // Les exercices personnalisés n'ont pas de schéma : schemaThumb renvoie null (appendChild(null) plante).
+  const thumb = exDef ? schemaThumb(exDef.id, { tap: true }) : null;
+  if (thumb) header.appendChild(thumb);
   header.appendChild(titleBlock);
   header.appendChild(el('button', {
     class: 'exo-menu-btn',

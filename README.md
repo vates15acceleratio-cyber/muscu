@@ -1,6 +1,14 @@
-# Muscu — v5.0.1
+# Muscu — v5.0.2
 
 App perso de musculation. Single-file PWA, données 100% locales (localStorage), pas de serveur, pas de tracker.
+
+## Nouveautés v5.0.2
+
+Correctif : écran vide à l'ouverture de l'onglet Exercices d'une séance contenant un **exercice personnalisé**.
+
+- **Cause** : depuis la 5.0.0, la carte d'exercice en séance ajoutait l'icône de schéma sans vérifier qu'elle existe. Les exercices personnalisés n'ont pas de schéma, donc l'affichage plantait (trouvé grâce à l'écran d'erreur de la 5.0.1).
+- **Correctif** : l'icône n'est ajoutée que si le schéma existe. Les exercices personnalisés s'affichent sans icône, comme prévu.
+- **Données** : le format n'a pas changé et rien n'est lu ni écrit en plus. Pas besoin d'exporter avant de mettre à jour.
 
 ## Nouveautés v5.0.1
 
